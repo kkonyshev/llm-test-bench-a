@@ -1,0 +1,2 @@
+NAME                                ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+qwen3-coder-30b-a3b-bench:latest    029f40262f8d    19 GB    21%/79% CPU/GPU    4096       4 minutes from now    

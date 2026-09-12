@@ -1,0 +1,335 @@
+# Results
+
+Two machines' results are recorded here — see `HARDWARE.md` for exact specs
+and `MODELS.md` for exact model files. Single run per model per benchmark
+on both machines (no repeated trials) — treat scores within 1-2 tests of
+each other as noise, not a real gap. Where the same model was tested on
+both machines, note where the score itself changed run-to-run (sampling
+variance) vs. stayed stable.
+
+---
+
+# Results — MacBook Pro M3 16, late 2023 (baseline)
+
+## Coding benchmark (task tracker REST API, 23 tests)
+
+| Model | Tests passed | Time | Tokens generated | Speed |
+|---|---|---|---|---|
+| **Gemma4-26B (A4B)** | **23/23** | 320s | 9,152 | 29.6 tok/s |
+| GLM-4.7-Flash | 22/23 | 243s | 6,982 | 30.3 tok/s |
+| Qwen3-Coder-30B-A3B | 21/23 | 44s | 1,688 | **47.5 tok/s** |
+| Qwen3.8-27B | 18/23 | 5,096s (85 min) | 31,872 | 6.3 tok/s |
+| Qwen2.5-Coder-7B | 9/23 | 40s | 1,104 | 27.8 tok/s |
+| DeepSeek-Coder-V2-Lite | 0/23 | 28s | 1,058 | **52-54 tok/s** |
+
+### Bugs found per model (coding)
+
+- **Gemma4-26B**: none — correctly kept the SQLAlchemy ORM model and the
+  Pydantic response schema (`TaskResponse`) as separate classes.
+- **GLM-4.7-Flash**: doesn't validate the `priority` query param on the
+  list-filter endpoint (accepts invalid values instead of 422). Uses a
+  `<think>...</think>` reasoning block before the final answer — that's
+  most of its extra token cost vs. Qwen3-Coder.
+- **Qwen3-Coder-30B-A3B**: missing title-length validation (accepts >200
+  char titles); `DELETE` returns `200` instead of `204`.
+- **Qwen3.8-27B**: `ResponseValidationError` on the filter and partial-update
+  endpoints (its response doesn't match its own declared response model);
+  `DELETE` returns `405 Method Not Allowed` — the route likely wasn't
+  registered correctly. Also: never used markdown code fences in its answer
+  (unlike every other model), needed unbounded generation to finish, and
+  is dense (27B active, not MoE) — by far the slowest model tested.
+- **Qwen2.5-Coder-7B**: multiple `KeyError: 'id'` (response shape doesn't
+  match what the tests expect); `update` on a missing task returns `422`
+  instead of `404`.
+- **DeepSeek-Coder-V2-Lite**: defined `Task` as a SQLAlchemy ORM model
+  (`class Task(Base)`) and then reused that same class as the FastAPI
+  `response_model` — FastAPI requires a Pydantic model there, so every
+  single endpoint crashes identically with `FastAPIError: Invalid args for
+  response field`. Fastest generator tested, but the output doesn't run.
+
+## Reasoning benchmark (12 self-authored puzzles — math, logic, trick questions)
+
+| Model | Correct | Time | Tokens generated | Speed |
+|---|---|---|---|---|
+| **Qwen3.8-27B** | **12/12** | 293s | 1,997 | 7.3 tok/s |
+| **Gemma4-26B (A4B)** | **12/12** | 216s | 6,338 | 29.6 tok/s |
+| Qwen3-Coder-30B-A3B | 11/12 | 34s | 1,107 | 47.5 tok/s |
+| GLM-4.7-Flash | 11/12 | 391s | 10,695 | 28.1 tok/s |
+| Qwen2.5-Coder-7B | 10/12 | 78s | 1,934 | 26.4 tok/s |
+| DeepSeek-Coder-V2-Lite | 8/12 | 30s | 1,162 | 52.3 tok/s |
+
+### Which puzzles tripped up which models
+
+- **Q5 (sheep trick — "all but 9 die")**: GLM-4.7-Flash and DeepSeek both
+  answered 8 (misread as "9 die" instead of "9 survive").
+- **Q7 (kg of feathers vs. lb of steel)**: Qwen3-Coder-30B-A3B and
+  Qwen2.5-Coder-7B both got this wrong (said "the same" / "the pound",
+  respectively — a kilogram is heavier).
+- **Q3 (pet/drink logic grid)**: Qwen2.5-Coder-7B and DeepSeek both got the
+  deduction wrong.
+- **Q12 (height comparison)**: DeepSeek misread the transitive chain.
+- Every other puzzle was answered correctly by every model.
+
+## Combined picture (Mac)
+
+| Model | Coding | Reasoning | Practical read |
+|---|---|---|---|
+| Gemma4-26B (A4B) | 23/23 | 12/12 | Best correctness on both, at moderate MoE speed. Best all-rounder found. |
+| Qwen3-Coder-30B-A3B | 21/23 | 11/12 | Best speed/correctness tradeoff — the practical daily-driver pick for coding. |
+| GLM-4.7-Flash | 22/23 | 11/12 | Comparable correctness to the top models, but always burns tokens on visible `<think>` reasoning — 4-6x slower wall-clock than Qwen3-Coder for similar results. |
+| Qwen3.8-27B | 18/23 | 12/12 | Genuinely the best reasoner, but dense (not MoE) — 85 minutes for the coding task is impractical for interactive use. Reasoning-only, low-latency-tolerant use cases only. |
+| Qwen2.5-Coder-7B | 9/23 | 10/12 | Reasoning held up reasonably at this size; coding correctness drops hard. Useful as a cheap/fast floor, not a daily driver. |
+| DeepSeek-Coder-V2-Lite | 0/23 | 8/12 | Fastest raw generator tested, undermined by one real architectural bug that fails every coding test. Speed doesn't matter if the output doesn't run. |
+
+---
+
+# Results — workstation1 (RTX 5070 Ti)
+
+The original 6-model set was re-run here unchanged, plus 5 more models
+added afterward (70B-class dense + one 236B MoE) specifically to explore
+the CPU/GPU-offload cliff on a discrete-GPU machine — see `HARDWARE.md`.
+
+## Coding benchmark (23 tests)
+
+| Model | Category | Tests passed | Time | Tokens | Speed | GPU/CPU split |
+|---|---|---|---|---|---|---|
+| **Gemma4-26B (A4B)** | MoE | **23/23** | 2m 0s | 8,126 | 85.9 tok/s | ~100% GPU |
+| **Qwen3.8-27B** | Dense | **23/23** | 39m 30s | 25,541 | 10.9 tok/s | 79% GPU / 21% CPU |
+| Qwen3-Coder-30B-A3B | MoE | 21/23 | 22s | 1,532 | 107.3 tok/s | ~100% GPU |
+| DeepSeek-Coder-V2-full | MoE, 236B/21B active | 18/23 | 61m 21s | 1,613 | 0.46 tok/s | 8% GPU / 92% CPU |
+| Qwen2.5-72B | Dense | 10/23 | 15m 23s | 1,142 | 1.27 tok/s | ~27% GPU / 73% CPU |
+| GLM-4.7-Flash | MoE | 10/23 | 1m 2s | 4,400 | 77.3 tok/s | ~100% GPU |
+| llama3.1:70b | Dense | 8/23 | 12m 45s | 1,078 | 1.44 tok/s | ~27% GPU / 73% CPU |
+| Qwen2.5-Coder-7B | Dense | 6/23 | 17s | 1,122 | 142.5 tok/s | ~100% GPU |
+| llama3.3:70b | Dense | 0/23 | 35m 34s\* | 1,523 | 1.4 tok/s | ~27% GPU / 73% CPU |
+| Nemotron-70B | Dense | 0/23 | 15m 1s | 1,166 | 1.39 tok/s | ~27% GPU / 73% CPU |
+| DeepSeek-Coder-V2-Lite | MoE | 0/23 (arch bug) | 34s | 1,255 | 56.2 tok/s | ~100% GPU |
+
+\* llama3.3:70b's coding run overlapped with concurrent Qwen2.5-72B/
+Nemotron-70B downloads competing for CPU — timing is inflated, not clean.
+The score (0/23) and eval_tokens_per_s (which reflects only pure generation
+time) are unaffected.
+
+### Bugs found per model (coding, workstation1-specific / new models)
+
+- **Qwen3.8-27B, Gemma4-26B, Qwen3-Coder-30B-A3B, GLM-4.7-Flash,
+  Qwen2.5-Coder-7B, DeepSeek-Coder-V2-Lite**: same underlying model files
+  as the Mac run — see bugs above. Scores differ slightly on a few
+  (GLM 22→10, Qwen3.8-27B 18→23, Qwen2.5-Coder-7B 9→6) purely from sampling
+  variance between runs, not a hardware effect — worth re-running either
+  machine again before trusting any single-test delta this size.
+- **llama3.1:70b**: reused the create-only `TaskModel` (which requires
+  `title`, no default) as the request body type for `PUT` partial updates —
+  any update omitting `title` gets auto-rejected `422` by FastAPI before
+  the handler even runs. The update handler itself only ever updates the
+  `completed` field, silently ignoring `title`/`description`/`priority`
+  even when validation passes.
+- **llama3.3:70b**: left a stray debug call, `print(sqlite3.version)`, in
+  the shipped code — `sqlite3.version` doesn't exist on this Python's
+  `sqlite3` module (removed as part of the module's deprecation cleanup),
+  so every request that touches the DB connection crashes with
+  `AttributeError: module 'sqlite3' has no attribute 'version'`.
+- **Qwen2.5-72B**: same "wrong model reused for update" pattern as
+  llama3.1:70b — `AttributeError: 'TaskCreate' object has no attribute
+  'completed'` (the create-only Pydantic model has no `completed` field,
+  but the update path tries to read/set it directly on that type).
+- **Nemotron-70B**: first attempt scored a false 0/23 due to a *harness*
+  bug, not a model bug — see "Extraction regex vs. doubled code fences"
+  below. After the fix: real bug is `NameError: name 'Depends' is not
+  defined` — used FastAPI's `Depends()` throughout without importing it.
+- **DeepSeek-Coder-V2-full**: missing title-length validation (`assert 201
+  == 422`, same class of bug as Qwen3-Coder-30B-A3B on the Mac run);
+  filter-by-`completed`/filter-by-`priority` endpoints return the wrong
+  `total` count (`assert 2 == 1`); same "wrong model reused for partial
+  update" 422 pattern as llama3.1:70b and Qwen2.5-72B. Notably: this fixed
+  the *fatal* architectural bug that made DeepSeek-Coder-V2-**Lite** score
+  0/23 (reusing an ORM class as a Pydantic response model) — the full model
+  doesn't make that mistake.
+
+## Reasoning benchmark (12 puzzles)
+
+| Model | Correct | Time | Tokens | Speed |
+|---|---|---|---|---|
+| **Qwen3.8-27B** | **12/12** | 3m 56s | 2,803 | 12.0 tok/s |
+| **Gemma4-26B (A4B)** | **12/12** | 1m 13s | 6,266 | 87.0 tok/s |
+| Qwen3-Coder-30B-A3B | **12/12** | 10s | 1,026 | 109.9 tok/s |
+| GLM-4.7-Flash | **12/12** | 2m 30s | 11,001 | 73.9 tok/s |
+| llama3.1:70b | **12/12** | 13m 53s | 1,183 | 1.43 tok/s |
+| llama3.3:70b | **12/12** | 52m 3s\* | 1,542 | 1.45 tok/s |
+| Qwen2.5-72B | **12/12** | 15m 52s | 1,202 | 1.27 tok/s |
+| Nemotron-70B | 11/12 | 18m 30s | — | ~1.4 tok/s |
+| DeepSeek-Coder-V2-full | 9/12 | 4m 18s | — | 0.79 tok/s |
+| DeepSeek-Coder-V2-Lite | 9/12 | 21s | 1,250 | 61.9 tok/s |
+| Qwen2.5-Coder-7B | 6/12 | 8s | 1,226 | 157.9 tok/s |
+
+\* Same contamination caveat as its coding run.
+
+### Which puzzles tripped up which models (new models)
+
+- **Nemotron-70B**: Q3 (pet/drink logic grid) — same puzzle that tripped
+  Qwen2.5-Coder-7B and DeepSeek-Coder-V2-Lite on the Mac run.
+- **DeepSeek-Coder-V2-full**: Q1 (discount arithmetic), Q2 (age word
+  problem), Q3 (pet/drink logic grid) — all three answered with a
+  plausible-looking but wrong final value, everything from Q4 onward
+  correct.
+- **Qwen2.5-Coder-7B, llama3.1/3.3:70b, Qwen2.5-72B**: all 12/12 or same
+  puzzle-set pattern as the Mac baseline for the shared models — see above.
+
+## Combined picture (workstation1)
+
+| Model | Coding | Reasoning | Practical read |
+|---|---|---|---|
+| Qwen3.8-27B | 23/23 | 12/12 | Best all-rounder on this hardware — perfect on both, and 79% GPU-resident keeps it merely slow (not crawling) at 10.9 tok/s. |
+| Gemma4-26B (A4B) | 23/23 | 12/12 | Matches Qwen3.8-27B on correctness, ~8x faster (85.9 tok/s) — the clear daily-driver pick here. |
+| Qwen3-Coder-30B-A3B | 21/23 | 12/12 | Fastest of the strong performers (107-110 tok/s); best speed/correctness tradeoff for snappy interactive use. |
+| DeepSeek-Coder-V2-full | 18/23 | 9/12 | Genuinely decent coding correctness for a model that's 92% CPU-resident — but 0.46 tok/s and a 61-minute single coding run make it impractical regardless of quality. |
+| Qwen2.5-72B | 10/23 | 12/12 | Reasoning is fine; coding correctness is mediocre and it's 73% CPU-resident — no redeeming speed to offset the mediocre coding score. |
+| GLM-4.7-Flash | 10/23 | 12/12 | Coding score dropped sharply vs. the Mac run (22→10) — flagged as likely sampling variance, worth a repeat run before drawing conclusions. |
+| llama3.1:70b | 8/23 | 12/12 | Reasoning holds up; coding fails on spec-adherence details (wrong model reused for partial update) that a newer/code-tuned model wouldn't miss. 73% CPU-resident, 1.44 tok/s — impractical regardless. |
+| Qwen2.5-Coder-7B | 6/23 | 6/12 | Both scores dropped vs. the Mac run — again flagged as sampling variance pending a repeat, but even generously this is a fast/cheap floor, not a daily driver. |
+| llama3.3:70b | 0/23 | 12/12 | Same base weights as llama3.1:70b, redone post-training didn't fix (or introduced) a coding-side bug (stray debug `print`) — proof that "newer version of the same family" isn't automatically better at this task. Also demonstrates raw size doesn't buy coding correctness: it's beaten on coding by every model half its size or smaller. |
+| Nemotron-70B | 0/23 | 11/12 | Same story as llama3.1/3.3 — reasoning intact, coding fails on a basic missing-import bug. All three 70B dense generalists land in the same "fine at puzzles, bad at spec-following code" bucket regardless of which post-training recipe or lab produced them. |
+| DeepSeek-Coder-V2-Lite | 0/23 (arch bug) | 9/12 | Same fatal architectural bug as the Mac run — confirmed the full-size sibling model fixes this. |
+
+**Bottom line on workstation1**: raw parameter count does not correlate
+with coding correctness in this test set — the two best coding performers
+(Gemma4-26B, Qwen3.8-27B) are both ≤27B, and every 70B+ generalist model
+tested (Llama 3.1/3.3, Qwen2.5-72B, Nemotron) scored worse on coding than
+every sub-30B model except the architecturally-broken DeepSeek-Lite. Size
+bought reliable puzzle-reasoning across the board but not meticulous
+spec-adherence, which is a training/tuning-era effect, not a scale effect.
+Separately: **every model over ~16 GB VRAM runs at 0.4-1.5 tok/s regardless
+of size or quality** once it falls off the "fits in VRAM" cliff — going
+from 27% GPU-resident (llama3.1:70b) to 8% GPU-resident (DeepSeek-full,
+236B) barely changes the tok/s, because CPU/RAM bandwidth — not GPU
+compute — sets the pace for the CPU-resident majority of the model either
+way (Amdahl's-law effect, confirmed empirically rather than assumed).
+
+## Cross-machine comparison (shared models only)
+
+| Model | Mac coding | WS1 coding | Mac reasoning | WS1 reasoning | WS1 speed vs. Mac |
+|---|---|---|---|---|---|
+| Gemma4-26B (A4B) | 23/23 @ 29.6 tok/s | 23/23 @ 85.9 tok/s | 12/12 @ 29.6 tok/s | 12/12 @ 87.0 tok/s | ~2.9x faster |
+| Qwen3-Coder-30B-A3B | 21/23 @ 47.5 tok/s | 21/23 @ 107.3 tok/s | 11/12 @ 47.5 tok/s | 12/12 @ 109.9 tok/s | ~2.3x faster |
+| GLM-4.7-Flash | 22/23 @ 30.3 tok/s | 10/23 @ 77.3 tok/s | 11/12 @ 28.1 tok/s | 12/12 @ 73.9 tok/s | ~2.6x faster |
+| Qwen3.8-27B | 18/23 @ 6.3 tok/s | 23/23 @ 10.9 tok/s | 12/12 @ 7.3 tok/s | 12/12 @ 12.0 tok/s | ~1.7x faster |
+| Qwen2.5-Coder-7B | 9/23 @ 27.8 tok/s | 6/23 @ 142.5 tok/s | 10/12 @ 26.4 tok/s | 6/12 @ 157.9 tok/s | ~5.4x faster |
+| DeepSeek-Coder-V2-Lite | 0/23 @ 52-54 tok/s | 0/23 @ 56.2 tok/s | 8/12 @ 52.3 tok/s | 9/12 @ 61.9 tok/s | ~1.1x faster |
+
+Every model that fits fully in the 5070 Ti's 16 GB VRAM is meaningfully
+faster than the same model on the M3 Pro's unified memory — 2-3x is the
+typical range, with the smallest model (Qwen2.5-Coder-7B) showing the
+largest gap (~5x), likely because it's furthest from saturating either
+machine's compute and most exposed to the M3 Pro's lower raw throughput at
+small batch/short-sequence workloads. Scores mostly hold within 1-2 tests
+of each other (expected noise) except GLM-4.7-Flash and Qwen2.5-Coder-7B,
+which dropped more than that on workstation1 — worth a repeat run on both
+machines before concluding hardware itself affects correctness (it
+shouldn't, in principle, beyond floating-point non-determinism).
+
+---
+
+## Methodology notes / pitfalls hit while building this (read before re-running)
+
+From the original Mac-only build:
+
+1. **Don't use `ollama run --verbose` piped to a file** — it emits ANSI
+   terminal control codes into stdout even when not attached to a TTY,
+   which can corrupt extracted code. Use the HTTP API (`/api/generate`)
+   directly instead — that's what `run_bench.sh` does.
+2. **Use streaming (`"stream": true`), not `"stream": false`** — a
+   non-streaming call blocks with zero data until the entire generation is
+   done. For slow/dense models this can run past any reasonable timeout
+   with no visibility into progress. Streaming gives live token counts and
+   only needs the *gap* between chunks to stay under the timeout, not the
+   total duration.
+3. **Don't cap `num_predict` too low for dense/reasoning models.** A hard
+   cap can cut a model off mid-answer before it ever produces a code fence
+   or final answer, understating its real ability. `num_predict: -1` (no
+   cap, bounded only by context length) is what these scripts use.
+4. **Reasoning models put throwaway code snippets inside their
+   `<think>...</think>` block** — extracting the *first* ```python ```
+   block can grab a scratch snippet instead of the final answer. Strip
+   everything up to `</think>` first, then extract the *last* code block
+   after that.
+5. **pytest fixture isolation bug (now fixed in `test_tasks.py`)**: an
+   earlier version deleted the SQLite file before every test, but some
+   generated apps only create their tables once at import time. Since
+   pytest caches the module import, tables never got recreated after the
+   first test, failing every subsequent test for a reason that had nothing
+   to do with the model's code. Fixed by `importlib.reload()` + entering
+   `TestClient` as a context manager on every test, which forces
+   re-initialization regardless of whether the model put its init logic at
+   module level or in a FastAPI startup/lifespan handler.
+6. **Long background runs got killed unpredictably** on the Mac's session
+   (observed after anywhere from under a minute to ~50 minutes, with the
+   underlying Ollama generation still alive afterward — so it wasn't Ollama
+   or the model crashing). Cause not fully diagnosed. Fix: run fully
+   detached with `nohup ... & disown` (see `run_detached.sh`) so the
+   benchmark survives regardless of what's killing tracked background shell
+   tasks in the calling session.
+
+New, found while running on workstation1:
+
+7. **Ollama's default context length is not portable across hosts.** The
+   scripts didn't originally set `num_ctx` explicitly, relying on Ollama's
+   per-model default. On workstation1 that default turned out to be only
+   4096 tokens — far smaller than whatever the Mac's Ollama picked, and
+   nowhere near enough for GLM-4.7-Flash's verbose double-pass `<think>`
+   style. This truncated its response mid-generation (Ollama's
+   `done_reason: "length"`) on **both** benchmarks, producing a
+   corrupted/incomplete extraction and a false `0/12` reasoning score.
+   **Fix**: set `"num_ctx": 32768` explicitly in the `/api/generate`
+   request options. Confirmed the other models weren't silently affected by
+   checking `done_reason` (`"stop"` = finished naturally, `"length"` =
+   truncated) on every already-completed run before trusting any score.
+8. **Extraction regex breaks on a doubled opening code fence.** Some models
+   (Nemotron-70B, observed once) emit a malformed doubled fence-open —
+   an opening ```python``` marker immediately followed by a second
+   ```python``` marker before the real code starts. The original
+   extraction regex (non-greedy `python fence ... closing fence`) matches
+   from the *first* fence to the very next fence it finds, which is the
+   *second* opening marker — producing an **empty** captured block instead
+   of the real code, silently scoring a genuinely working model as `0/23`
+   by extraction failure, not model failure. **Fix**: collapse the doubled
+   opening marker down to a single one before running the extraction
+   regex. Caught by noticing `main.py` was 0 bytes despite a non-trivial
+   `response.md`, not by any test failure message — worth spot-checking
+   extracted file sizes whenever a model scores surprisingly `0`.
+   surprisingly `0`.
+9. **KV cache memory scales with context length independently of model
+   size, and can dwarf the model weights themselves.** Running
+   DeepSeek-Coder-V2-full (236B/21B active MoE, 142 GB on disk) at
+   `num_ctx=32768` failed outright:
+   `ggml_aligned_malloc: insufficient memory (attempted to allocate
+   153600.00 MB)` — a ~150 GB KV cache allocation, on a 123 GB RAM machine,
+   for a 32K-token context. Reducing to `num_ctx=8192` for this model
+   specifically fixed it (its predecessor, DeepSeek-Coder-V2-Lite, was
+   never verbose enough to need more). **Takeaway**: for very large/deep
+   architectures, KV cache — not model weight size — can be the actual
+   memory bottleneck, and needs its own headroom calculation separate from
+   "does the model file fit."
+10. **Split GGUF files (>50 GB, auto-chunked by Hugging Face) aren't
+    reliably loadable by `ollama create` on this Ollama version (0.33.3)** —
+    see `MODELS.md` for the full "has N shards, expected M" failure and the
+    Python-`gguf`-library merge workaround. Confirmed this is a genuine
+    Ollama limitation, not a path/Modelfile placement mistake, by
+    reproducing the identical failure with the Modelfile colocated directly
+    alongside all 4 shards.
+11. **Running downloads concurrently with an active CPU-offloaded
+    benchmark measurably inflates its wall-clock time** (llama3.3:70b's
+    coding run: `total_duration` 2,134s vs. `eval_duration` (pure
+    generation) only 1,091s — a ~1,000s gap that doesn't appear on any other
+    run). The large background `hf download`/`ollama pull` processes
+    compete for the same CPU cycles the offloaded model layers need.
+    **Takeaway**: don't trust wall-clock/`total_duration` numbers for any
+    run with concurrent downloads in flight — `eval_tokens_per_s` (pure
+    generation rate) is unaffected and remains comparable.
+12. **`ollama ps`'s reported CPU/GPU split is the single most useful
+    number for predicting a model's speed on a VRAM-constrained machine** —
+    far more predictive than parameter count or MoE-vs-dense architecture.
+    Every model at ~100% GPU-resident hit 56-142 tok/s; every model below
+    ~30% GPU-resident hit under 2 tok/s, regardless of whether it was a 70B
+    dense model or a 236B MoE model with only 21B active parameters — MoE
+    sparsity doesn't help once the *inactive* experts still need to live in
+    (slow) system RAM rather than VRAM.

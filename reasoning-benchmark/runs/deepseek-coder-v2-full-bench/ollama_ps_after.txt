@@ -1,0 +1,2 @@
+NAME                                   ID              SIZE      PROCESSOR         CONTEXT    UNTIL              
+deepseek-coder-v2-full-bench:latest    101bc6464db7    186 GB    92%/8% CPU/GPU    8192       4 minutes from now    

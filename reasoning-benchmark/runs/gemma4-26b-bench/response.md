@@ -1,0 +1,64 @@
+1. Maria's total cost before the discount is calculated as follows:
+   7 notebooks × $4/notebook = $28
+   12 pens × $1.50/pen = $18
+   Total = $28 + $18 = $46
+   A 10% discount on $46 is $4.60.
+   The final amount she pays is $46 - $4.60 = $41.40.
+
+2. Let B be Ben's current age and C be Cara's current age.
+   From the second clue: B + 4 = 30, so B = 26.
+   From the first clue: B = 2(C - 6).
+   Substituting B: 26 = 2(C - 6) => 13 = C - 6 => C = 19.
+
+3. From clue (c), Ben drinks juice. From clue (d), Cleo does not drink tea, and since Ben drinks juice, Cleo must drink coffee. From clue (b), the dog owner drinks coffee, so Cleo owns the dog. The remaining drinks are tea, which must go to Alice. The remaining pets are cat and fish. From clue (a), Alice does not own the fish, so Alice owns the cat. This leaves the fish for Ben.
+
+4. The sequence is 2, 6, 12, 20, 30...
+   The differences between terms are:
+   6 - 2 = 4
+   12 - 6 = 6
+   20 - 12 = 8
+   30 - 20 = 10
+   The differences are increasing by 2 each time. The next difference is 12.
+   30 + 12 = 42.
+
+5. The phrase "all but 9 die" means that 9 sheep remain alive.
+
+6. Pipe A's rate is 1/6 of a tank per hour. Pipe B's rate is 1/3 of a tank per hour.
+   Combined rate = 1/6 + 1/3 = 1/6 + 2/6 = 3/6 = 1/2 tank per hour.
+   Time to fill the tank = 1 / (1/2) = 2 hours.
+
+7. A kilogram is approximately 2.2 pounds. Therefore, a kilogram of feathers is heavier than a pound of steel.
+
+8. Let the cost be C.
+   Retail price = C + 0.25C = 1.25C.
+   Sale price = 1.25C - (0.20 × 1.25C) = 1.25C - 0.25C = 1.00C.
+   The sale price is 100% of the original cost.
+
+9. If X were a liar, the statement "At least one of us is a liar" would have to be false. The negation of that statement is "Both of us are truth-tellers," which would mean X is a truth-teller, creating a contradiction. Therefore, X must be a truth-teller. For X's statement to be true, at least one of them must be a liar. Since X is a truth-teller, Y must be the liar.
+
+10. 3x + 7 = 2x + 15
+    Subtract 2x from both sides: x + 7 = 15.
+    Subtract 7 from both sides: x = 8.
+
+11. The number of ways to choose a committee of 3 from 5 candidates is given by the combination formula C(5,3):
+    C(5,3) = 5! / (3!(5-3)!) = (5 × 4 × 3 × 2 × 1) / ((3 × 2 × 1) × (2 × 1)) = 120 / 12 = 10.
+
+12. From the clues:
+    Dan > Ellie
+    Farah > Ellie
+    Dan > Farah
+    Putting them in order: Dan > Farah > Ellie.
+    The tallest is Dan and the shortest is Ellie.
+
+ANSWER 1: 41.40
+ANSWER 2: 19
+ANSWER 3: Cleo owns the dog, and Ben owns the fish
+ANSWER 4: 42
+ANSWER 5: 9
+ANSWER 6: 2
+ANSWER 7: A kilogram of feathers
+ANSWER 8: 100%
+ANSWER 9: X is a truth-teller and Y is a liar
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan is the tallest and Ellie is the shortest

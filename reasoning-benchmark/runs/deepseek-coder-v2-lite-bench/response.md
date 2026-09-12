@@ -1,0 +1,87 @@
+ Let's solve each problem step by step.
+
+### Problem 1
+Maria buys 7 notebooks at $4 each and 12 pens at $1.50 each. The total cost before discount is:
+\[ 7 \times 4 + 12 \times 1.50 = 28 + 18 = 46 \]
+She gets a 10% discount, so she pays:
+\[ 46 - 0.10 \times 46 = 46 - 4.6 = 41.4 \]
+
+### Problem 2
+Let Cara's current age be \( C \). Ben is currently 30 - 4 = 26 years old. Since Ben is twice as old as Cara was 6 years ago:
+\[ 26 = 2 \times (C - 6) \]
+\[ 26 = 2C - 12 \]
+\[ 38 = 2C \]
+\[ C = 19 \]
+
+### Problem 3
+- Alice does not own the fish (a).
+- The dog owner drinks coffee (b).
+- Ben drinks juice (c).
+- Cleo does not drink tea (d).
+
+From (d), Cleo does not own the dog. From (c), Ben owns the fish. From (b), the dog owner drinks coffee, so Ben does not own the dog. Therefore, Ben owns the cat, and the dog owner is either Alice or Cleo. Since Alice does not own the fish, Alice owns the dog. Cleo must own the cat.
+
+So, Ben owns the cat and the fish, and the dog owner is Alice.
+
+### Problem 4
+The sequence is: \( 2, 6, 12, 20, 30, \ldots \)
+The differences between consecutive terms are: \( 4, 6, 8, 10, \ldots \)
+The next difference would be 12, so the next number is:
+\[ 30 + 12 = 42 \]
+
+### Problem 5
+The farmer has 17 sheep. All but 9 die, so the number of sheep left is:
+\[ 17 - 9 = 8 \]
+
+### Problem 6
+Pipe A fills the tank in 6 hours, so its rate is \( \frac{1}{6} \) of the tank per hour. Pipe B fills the tank in 3 hours, so its rate is \( \frac{1}{3} \) of the tank per hour. Together, their rate is:
+\[ \frac{1}{6} + \frac{1}{3} = \frac{1}{6} + \frac{2}{6} = \frac{3}{6} = \frac{1}{2} \]
+So, they fill the tank in 2 hours.
+
+### Problem 7
+A kilogram of feathers is heavier than a pound of steel. This is because the density of steel is much higher than feathers, so a pound of steel takes up much less space than a kilogram of feathers.
+
+### Problem 8
+Let the original cost be \( C \). The retail price is marked up by 25%, so it is \( 1.25C \). During the sale, this is discounted by 20%, so the sale price is:
+\[ 1.25C \times 0.8 = 1C = C \]
+The sale price is 80% of the original cost.
+
+### Problem 9
+X says: "At least one of us is a liar." If X is a truth-teller, then X is telling the truth, and it is possible for both to be truth-tellers. If X is a liar, then what X says is false, meaning both are truth-tellers. Therefore, X could be either a truth-teller or a liar, but Y must be a truth-teller.
+
+### Problem 10
+\[ 3x + 7 = 2x + 15 \]
+Subtract \( 2x \) from both sides:
+\[ x + 7 = 15 \]
+Subtract 7 from both sides:
+\[ x = 8 \]
+
+### Problem 11
+The number of ways to choose 3 people from 5 candidates is given by the combination formula \( \binom{5}{3} \):
+\[ \binom{5}{3} = \frac{5!}{3!(5-3)!} = \frac{5 \times 4}{2 \times 1} = 10 \]
+
+### Problem 12
+From the statements:
+- Dan is taller than Ellie.
+- Ellie is shorter than Farah.
+- Farah is shorter than Dan.
+
+Combining these, we get:
+- Ellie < Farah
+- Farah < Dan
+- Dan > Ellie
+
+So, Dan is the tallest and Ellie is the shortest.
+
+ANSWER 1: 41.4
+ANSWER 2: 19
+ANSWER 3: Ben owns the cat and the fish, and Alice owns the dog.
+ANSWER 4: 42
+ANSWER 5: 8
+ANSWER 6: 2
+ANSWER 7: A kilogram of feathers is heavier.
+ANSWER 8: 80%
+ANSWER 9: X could be either a truth-teller or a liar, but Y is a truth-teller.
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan is the tallest, and Ellie is the shortest.

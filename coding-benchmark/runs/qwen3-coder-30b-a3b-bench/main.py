@@ -1,0 +1,217 @@
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, validator
+from typing import Optional, List
+import sqlite3
+import datetime
+from contextlib import contextmanager
+
+app = FastAPI()
+
+# Database setup
+@contextmanager
+def get_db():
+    conn = sqlite3.connect('tasks.db')
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+def init_db():
+    with get_db() as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority TEXT DEFAULT 'medium',
+                created_at TEXT NOT NULL
+            )
+        ''')
+        conn.commit()
+
+# Pydantic models
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    priority: Optional[str] = 'medium'
+
+    @validator('title')
+    def title_must_not_be_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Title must not be empty')
+        return v.strip()
+
+    @validator('priority')
+    def priority_must_be_valid(cls, v):
+        if v not in ['low', 'medium', 'high']:
+            raise ValueError('Priority must be one of: low, medium, high')
+        return v
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[str] = None
+
+    @validator('title')
+    def title_must_not_be_empty(cls, v):
+        if v is not None and (not v or not v.strip()):
+            raise ValueError('Title must not be empty')
+        return v.strip() if v else None
+
+    @validator('priority')
+    def priority_must_be_valid(cls, v):
+        if v is not None and v not in ['low', 'medium', 'high']:
+            raise ValueError('Priority must be one of: low, medium, high')
+        return v
+
+class Task(TaskCreate):
+    id: int
+    completed: bool
+    created_at: str
+
+    class Config:
+        orm_mode = True
+
+class TaskListResponse(BaseModel):
+    items: List[Task]
+    total: int
+    page: int
+    page_size: int
+
+# Initialize database on startup
+init_db()
+
+# Helper functions
+def task_from_row(row):
+    return Task(
+        id=row['id'],
+        title=row['title'],
+        description=row['description'],
+        completed=bool(row['completed']),
+        priority=row['priority'],
+        created_at=row['created_at']
+    )
+
+def get_task_by_id(task_id: int):
+    with get_db() as conn:
+        row = conn.execute('SELECT * FROM tasks WHERE id = ?', (task_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Task not found")
+        return task_from_row(row)
+
+# API Endpoints
+@app.post("/tasks", response_model=Task, status_code=201)
+def create_task(task: TaskCreate):
+    created_at = datetime.datetime.utcnow().isoformat() + 'Z'
+    with get_db() as conn:
+        cursor = conn.execute('''
+            INSERT INTO tasks (title, description, priority, created_at)
+            VALUES (?, ?, ?, ?)
+        ''', (task.title, task.description, task.priority, created_at))
+        conn.commit()
+        task_id = cursor.lastrowid
+        return get_task_by_id(task_id)
+
+@app.get("/tasks", response_model=TaskListResponse)
+def list_tasks(
+    completed: Optional[bool] = None,
+    priority: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100)
+):
+    offset = (page - 1) * page_size
+    where_clauses = []
+    params = []
+
+    if completed is not None:
+        where_clauses.append("completed = ?")
+        params.append(int(completed))
+    
+    if priority is not None:
+        if priority not in ['low', 'medium', 'high']:
+            raise HTTPException(status_code=422, detail="Invalid priority")
+        where_clauses.append("priority = ?")
+        params.append(priority)
+
+    where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
+    
+    with get_db() as conn:
+        total = conn.execute(f"SELECT COUNT(*) FROM tasks WHERE {where_sql}", params).fetchone()[0]
+        rows = conn.execute(f'''
+            SELECT * FROM tasks WHERE {where_sql}
+            ORDER BY id ASC
+            LIMIT ? OFFSET ?
+        ''', params + [page_size, offset]).fetchall()
+
+    items = [task_from_row(row) for row in rows]
+    return TaskListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size
+    )
+
+@app.get("/tasks/{task_id}", response_model=Task)
+def get_task(task_id: int):
+    return get_task_by_id(task_id)
+
+@app.put("/tasks/{task_id}", response_model=Task)
+def update_task(task_id: int, task_update: TaskUpdate):
+    # Get current task
+    current_task = get_task_by_id(task_id)
+    
+    # Validate update data
+    if task_update.title is not None:
+        if not task_update.title or not task_update.title.strip():
+            raise HTTPException(status_code=422, detail="Title must not be empty")
+        task_update.title = task_update.title.strip()
+    
+    if task_update.priority is not None:
+        if task_update.priority not in ['low', 'medium', 'high']:
+            raise HTTPException(status_code=422, detail="Priority must be one of: low, medium, high")
+
+    # Prepare update query
+    updates = []
+    params = []
+    
+    if task_update.title is not None:
+        updates.append("title = ?")
+        params.append(task_update.title)
+    
+    if task_update.description is not None:
+        updates.append("description = ?")
+        params.append(task_update.description)
+    
+    if task_update.completed is not None:
+        updates.append("completed = ?")
+        params.append(int(task_update.completed))
+    
+    if task_update.priority is not None:
+        updates.append("priority = ?")
+        params.append(task_update.priority)
+    
+    if not updates:
+        # No updates provided
+        return current_task
+    
+    # Add task_id to params
+    params.append(task_id)
+    
+    # Execute update
+    with get_db() as conn:
+        conn.execute(f"UPDATE tasks SET {', '.join(updates)} WHERE id = ?", params)
+        conn.commit()
+    
+    return get_task_by_id(task_id)
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int):
+    with get_db() as conn:
+        cursor = conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Task not found")
+    return {"detail": "Task deleted"}

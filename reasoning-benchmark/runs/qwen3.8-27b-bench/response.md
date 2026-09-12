@@ -1,0 +1,103 @@
+We need solve 12 problems. Need final with ANSWER lines exact format one per problem in order at very end. Need show work if want. Need be careful with ambiguous ones. Let's analyze each.
+
+1. Notebooks 7*4=28. Pens 12*1.50=18. Total 46. 10% discount = 0.9*46=41.4. Pay $41.40. Could answer 41.40.
+
+2. Ben in 4 years will be 30 => Ben now 26. Ben is twice as old as Cara was 6 years ago: 26 = 2*(Cara_now - 6) => Cara_now -6=13 => 19. Check Ben twice age Cara was 6 years ago 13. Answer 19.
+
+3. Three friends each own pet cat/dog/fish, drink tea/coffee/juice. Clues: Alice not fish. Dog owner drinks coffee. Ben drinks juice. Cleo not tea. Need who owns dog, and what pet does Ben own?
+Let's solve. Drinks: Ben=juice. Cleo not tea, not juice? Each prefer one drink distinct? It says each prefer one drink (tea, coffee, or juice) among three friends, likely assignment one each. Then Cleo not tea and Ben juice => Cleo coffee. Then Alice tea. Dog owner drinks coffee => Cleo owns dog. Then Ben pet? Alice not fish; Cleo dog; remaining pets cat/fish for Alice/Ben; Alice not fish => Alice cat, Ben fish. Answer: Cleo owns the dog; Ben owns the fish.
+
+But need ensure if each prefer one drink maybe not necessarily distinct? Usually exactly one of each? The statement: each own exactly one pet (cat, dog, or fish) and each prefer one drink (tea, coffee, or juice). Could imply each has one of the options, not necessarily unique? But puzzle likely one-to-one. If not distinct, clues insufficient? Let's test: Ben juice. Dog owner drinks coffee, so Ben cannot dog. Cleo not tea. Alice not fish. If drinks not unique, possible: Alice coffee dog? Cleo coffee? but Ben juice. Need who owns dog? Could be Alice or Cleo. But with uniqueness, Cleo. The phrasing "each prefer one drink (tea, coffee, or juice)" not explicitly "exactly one of each drink". But likely intended as each person has a distinct drink? The puzzle: "Three friends — Alice, Ben, and Cleo — each own exactly one pet (cat, dog, or fish) and each prefer one drink (tea, coffee, or juice)." It doesn't say the pets/drinks are all different, but logic puzzle convention: each attribute assigned uniquely? It says each own exactly one pet (cat, dog, or fish) and each prefer one drink (tea, coffee, or juice). The list of three categories for three people often means one-to-one. Clues enough if unique. We'll answer Cleo owns dog, Ben owns fish.
+
+4. Sequence 2,6,12,20,30. Differences 4,6,8,10 => next diff 12 => 42. Or n(n+1): 1*2,2*3,... 6*7=42. Answer 42.
+
+5. Farmer has 17 sheep. All but 9 die. How many left? 9. Common trick. Answer 9.
+
+6. Pipe A 6 h => rate 1/6. B 3 => 1/3. Together 1/2 per h => 2 h. Answer 2.
+
+7. Which is heavier: a kilogram of feathers, or a pound of steel? Need compare mass: 1 kg = 2.20462 lb > 1 lb. So kilogram of feathers heavier. But potential trick "heavier" could mean weight; in Earth same. kg heavier. Answer kilogram of feathers.
+
+8. Cost C. Retail markup 25% => 1.25C. Discount 20% off retail => 0.8*1.25C=1.0C. Sale price 100% of original cost. Answer 100%.
+
+9. Knights/knaves. X says: "At least one of us is a liar." If X truth-teller, statement true => at least one liar among X,Y. Since X truthful, Y liar. Consistent. If X liar, statement false => not (at least one liar) => neither is liar => both truth-tellers, contradiction X liar. So X truth-teller, Y liar. Answer: X truth-teller; Y liar.
+
+10. 3x+7=2x+15 => x=8. Answer 8.
+
+11. Committee of 3 from 5: C(5,3)=10. Answer 10.
+
+12. Dan taller than Ellie. Ellie shorter than Farah => Farah taller than Ellie. Farah shorter than Dan => Dan taller than Farah. Thus Dan > Farah > Ellie. Tallest Dan, shortest Ellie. Answer Dan tallest; Ellie shortest.
+
+Need final includes work maybe concise, then exact answer lines. Ensure no extra lines after ANSWER 12? "at the very end of your response" likely answer lines at end. We can include work before, then final lines. Each answer line exact format: ANSWER 1: <your answer>. Need maybe answers with punctuation? It says <your answer>. We can write concise. Need one per problem, in order, at very end. Ensure not include period after? It's okay? Format exact likely "ANSWER 1: 41.40". We can include units? Problem asks how much in dollars; answer 41.40. For 3 answer maybe "Cleo owns the dog; Ben owns the fish". For 7 "a kilogram of feathers". For 9 "X is a truth-teller; Y is a liar". For 12 "Dan is tallest; Ellie is shortest". Need all. Let's craft final with short work.
+
+Double-check problem 2: Ben is twice as old as Cara was 6 years ago. In 4 years, Ben will be 30. Ben now 26. 26 = 2*(Cara - 6) => 13 = Cara -6 => 19. Good.
+
+Problem 3: If drinks unique: Ben juice, Cleo not tea -> coffee, Alice tea. Dog owner coffee => Cleo dog. Alice not fish -> cat, Ben fish. Good.
+
+Potential issue problem 7: "a kilogram of feathers, or a pound of steel?" Some may say kilogram is heavier because kg > lb. But if comparing on Moon? no. Good.
+
+Potential issue problem 5: all but 9 die => 9 left alive. If asks sheep farmer have left maybe dead sheep still there? Trick: all but 9 die, so 9 alive left. Good.
+
+Need maybe include dollar sign? ANSWER 1: $41.40? Problem says how much does she pay, in dollars. Format answer <your answer>. Could be "41.40" or "$41.40". Exact? It doesn't prohibit dollar sign. But "in dollars" maybe numeric. I'd answer "41.40". Could include "$41.40"? To be safe numeric: 41.40. If they expect 41.4. Use 41.40.
+
+Problem 8: sale price as percentage of original cost = 100%. Answer 100%.
+
+Let's consider if problem 3 could be trick: Ben drinks juice, dog owner drinks coffee, so Ben cannot own dog. Cleo doesn't drink tea; if drinks not unique, Cleo could drink coffee or juice? But Ben drinks juice, if each prefer one drink (not unique) Cleo could also juice? But "each prefer one drink (tea, coffee, or juice)" maybe each picks one, not necessarily distinct, but if not distinct there are multiple solutions. Let's enumerate non-unique with clues to see if unique maybe still. Persons A,B,C; pets distinct? It says each own exactly one pet (cat, dog, fish). Could be not distinct? Usually "each own exactly one pet (cat, dog, or fish)" could mean could own same? But "three friends each own exactly one pet (cat, dog, or fish)" and puzzle asks who owns dog implies uniqueness likely. Drinks: clue (c) Ben drinks juice. (d) Cleo does not drink tea. If drinks not unique, dog owner drinks coffee. Need who owns dog? Could be Alice or Cleo. If pets unique: Cases. Pets: Alice not fish. Ben not dog? because Ben juice and dog coffee. Dog owner must drink coffee. Cleo not tea; can drink coffee or juice. If Cleo dog, coffee. Then Alice? Ben? Drinks maybe Alice tea/juice/coffee. Pets remaining cat/fish, Alice not fish => Alice cat, Ben fish. Works. If Alice dog, coffee. Cleo not tea and not? could coffee or juice. Ben juice. Pets: Cleo cat/fish? Alice dog, Ben not dog, remaining cat/fish; Cleo can cat/fish; Alice not fish satisfied. Many possibilities: e.g. Alice dog coffee, Ben cat juice, Cleo fish coffee. Or Alice dog coffee, Ben fish juice, Cleo cat coffee. So not unique. Thus uniqueness of drinks/pets intended. Good.
+
+Need final maybe show work in bullets. Then answer lines. Ensure at very end. Could include "Here is the work:" then lines. The final answer lines must be at very end; no trailing commentary. Good.
+
+Let's draft:
+
+1. 7*4=28; 12*1.50=18; subtotal 46; 10% off => 46*0.9=41.40.
+...
+
+Then:
+ANSWER 1: 41.40
+...
+
+Check exact format: "ANSWER 1: <your answer>" one per problem, in order, at the very end. Should we include no blank line after? Fine.
+
+Need maybe use "ANSWER 3: Cleo owns the dog; Ben owns the fish". Good.
+
+Double-check if problem 4 "next number" could be 42. Good.
+
+Now final. Ensure no accidental extra answer lines after. Need maybe if I include code block? No, exact lines. Use plain text.
+
+Let's produce final with moderate work.
+</think>
+
+1. Subtotal: \(7(4)+12(1.50)=28+18=46\). After 10% off: \(0.9(46)=41.40\).
+
+2. Ben now is \(30-4=26\). Then \(26=2(\text{Cara now}-6)\), so Cara now is \(19\).
+
+3. Ben drinks juice; Cleo does not drink tea, so Cleo drinks coffee. The dog owner drinks coffee, so Cleo owns the dog. Alice does not own the fish, so Alice owns the cat and Ben owns the fish.
+
+4. Differences are \(4,6,8,10\), so next difference is \(12\): \(30+12=42\).
+
+5. “All but 9 die” means 9 remain.
+
+6. Combined rate: \(\frac16+\frac13=\frac12\), so time \(=2\) hours.
+
+7. 1 kilogram is heavier than 1 pound.
+
+8. \(1.25 \times 0.80 = 1.00\), so 100% of original cost.
+
+9. If X is a liar, the statement is false, meaning neither is a liar—contradiction. So X is truthful, making Y a liar.
+
+10. \(3x+7=2x+15 \Rightarrow x=8\).
+
+11. \(\binom{5}{3}=10\).
+
+12. Dan > Farah > Ellie.
+
+ANSWER 1: 41.40
+ANSWER 2: 19
+ANSWER 3: Cleo owns the dog; Ben owns the fish
+ANSWER 4: 42
+ANSWER 5: 9
+ANSWER 6: 2
+ANSWER 7: a kilogram of feathers
+ANSWER 8: 100%
+ANSWER 9: X is a truth-teller; Y is a liar
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan is tallest; Ellie is shortest

@@ -1,0 +1,2 @@
+NAME                                   ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+deepseek-coder-v2-lite-bench:latest    9094879d2d30    20 GB    28%/72% CPU/GPU    32768      4 minutes from now    

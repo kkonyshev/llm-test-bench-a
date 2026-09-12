@@ -1,0 +1,2665 @@
+EEEEEEEEEEEEEEEEEEEEEEE                                                  [100%]
+==================================== ERRORS ====================================
+__________________ ERROR at setup of test_create_task_minimal __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+___________________ ERROR at setup of test_create_task_full ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_______________ ERROR at setup of test_create_task_missing_title _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+________________ ERROR at setup of test_create_task_empty_title ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_____________ ERROR at setup of test_create_task_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+______________ ERROR at setup of test_create_task_title_too_long _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+____________________ ERROR at setup of test_get_task_found _____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+__________________ ERROR at setup of test_get_task_not_found ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+______________________ ERROR at setup of test_list_empty _______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_____________ ERROR at setup of test_list_returns_all_and_ordered ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_______________ ERROR at setup of test_list_filter_by_completed ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+________________ ERROR at setup of test_list_filter_by_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_____________ ERROR at setup of test_list_filter_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+____________________ ERROR at setup of test_list_pagination ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+___________________ ERROR at setup of test_list_invalid_page ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+________________ ERROR at setup of test_list_invalid_page_size _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_________________ ERROR at setup of test_update_partial_field __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+________________ ERROR at setup of test_update_multiple_fields _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+___________________ ERROR at setup of test_update_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+________________ ERROR at setup of test_update_invalid_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+__________________ ERROR at setup of test_update_empty_title ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+_____________________ ERROR at setup of test_delete_found ______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+___________________ ERROR at setup of test_delete_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    from fastapi import FastAPI, HTTPException, status
+    from pydantic import BaseModel, validator
+    from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
+    from typing import List, Optional
+    
+    # Initialize FastAPI app
+    app = FastAPI()
+    
+    # Initialize SQLite database
+    SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Initialize SQLAlchemy base model
+    Base = declarative_base()
+    
+    # Define Task model for SQLAlchemy
+    class Task(Base):
+        __tablename__ = "tasks"
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, nullable=False)
+        description = Column(String, nullable=True)
+        completed = Column(Boolean, default=False)
+        priority = Column(Enum("low", "medium", "high", name="priority"), default="medium")
+        created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Create all tables in the engine
+    Base.metadata.create_all(engine)
+    
+    # Define Task model for Pydantic (API request/response validation)
+    class TaskBase(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = "medium"
+    
+        @validator("title")
+        def title_must_not_be_empty(cls, v):
+            if not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid(cls, v):
+            if v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskCreate(TaskBase):
+        pass
+    
+    class TaskUpdate(BaseModel):
+        title: Optional[str] = None
+        description: Optional[str] = None
+        completed: Optional[bool] = None
+        priority: Optional[str] = None
+    
+        @validator("title")
+        def title_must_not_be_empty_if_provided(cls, v):
+            if v is not None and not v.strip():
+                raise ValueError("Title must not be empty")
+            return v
+    
+        @validator("priority")
+        def priority_must_be_valid_if_provided(cls, v):
+            if v is not None and v not in ["low", "medium", "high"]:
+                raise ValueError("Priority must be one of 'low', 'medium', 'high'")
+            return v
+    
+    class TaskResponse(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool
+        priority: str
+        created_at: datetime
+    
+        class Config:
+            orm_mode = True
+    
+    # Define pagination response model
+    class PaginatedTasks(BaseModel):
+        items: List[TaskResponse]
+        total: int
+        page: int
+        page_size: int
+    
+    # Dependency to get a database session
+    def get_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+>   def create_task(task: TaskCreate, db = Depends(get_db)):
+                                           ^^^^^^^
+E   NameError: name 'Depends' is not defined
+
+main.py:99: NameError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/nemotron:70b/main.py:18: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/nemotron:70b/main.py:39: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("title")
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/nemotron:70b/main.py:45: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("priority")
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/nemotron:70b/main.py:60: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("title")
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/nemotron:70b/main.py:66: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("priority")
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/nemotron:70b/main.py:72: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class TaskResponse(BaseModel):
+
+test_tasks.py: 23 warnings
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/pydantic/_internal/_config.py:386: UserWarning: Valid config keys have changed in V2:
+  * 'orm_mode' has been renamed to 'from_attributes'
+    warnings.warn(message, UserWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR test_tasks.py::test_create_task_minimal - NameError: name 'Depends' is ...
+ERROR test_tasks.py::test_create_task_full - NameError: name 'Depends' is not...
+ERROR test_tasks.py::test_create_task_missing_title - NameError: name 'Depend...
+ERROR test_tasks.py::test_create_task_empty_title - NameError: name 'Depends'...
+ERROR test_tasks.py::test_create_task_invalid_priority - NameError: name 'Dep...
+ERROR test_tasks.py::test_create_task_title_too_long - NameError: name 'Depen...
+ERROR test_tasks.py::test_get_task_found - NameError: name 'Depends' is not d...
+ERROR test_tasks.py::test_get_task_not_found - NameError: name 'Depends' is n...
+ERROR test_tasks.py::test_list_empty - NameError: name 'Depends' is not defined
+ERROR test_tasks.py::test_list_returns_all_and_ordered - NameError: name 'Dep...
+ERROR test_tasks.py::test_list_filter_by_completed - NameError: name 'Depends...
+ERROR test_tasks.py::test_list_filter_by_priority - NameError: name 'Depends'...
+ERROR test_tasks.py::test_list_filter_invalid_priority - NameError: name 'Dep...
+ERROR test_tasks.py::test_list_pagination - NameError: name 'Depends' is not ...
+ERROR test_tasks.py::test_list_invalid_page - NameError: name 'Depends' is no...
+ERROR test_tasks.py::test_list_invalid_page_size - NameError: name 'Depends' ...
+ERROR test_tasks.py::test_update_partial_field - NameError: name 'Depends' is...
+ERROR test_tasks.py::test_update_multiple_fields - NameError: name 'Depends' ...
+ERROR test_tasks.py::test_update_not_found - NameError: name 'Depends' is not...
+ERROR test_tasks.py::test_update_invalid_priority - NameError: name 'Depends'...
+ERROR test_tasks.py::test_update_empty_title - NameError: name 'Depends' is n...
+ERROR test_tasks.py::test_delete_found - NameError: name 'Depends' is not def...
+ERROR test_tasks.py::test_delete_not_found - NameError: name 'Depends' is not...
+163 warnings, 23 errors in 0.75s

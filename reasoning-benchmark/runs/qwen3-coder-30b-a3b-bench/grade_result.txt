@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  2. In 4 years, Ben will be 30, so Ben is currently 26.    Let C
+[PASS] Q2: 19  3. Let's work through clues systematically:    - Clue (c): Ben dri
+[PASS] Q3: Cleo owns the dog; Ben owns the fish.  4. Look at the sequence: 2, 6, 
+[PASS] Q4: 42  5. "All but 9 die" means 9 sheep survive.
+[PASS] Q5: 9  6. Pipe A fills the tank in 6 hours → rate = 1/6 per hour.    Pipe 
+[PASS] Q6: 2  7. A kilogram is exactly equal to 2.20462 pounds.    So a kilogram 
+[PASS] Q7: A kilogram of feathers  8. Let the original cost be C.    Retail price
+[PASS] Q8: 100%  9. Let's consider both cases:    Case 1: X is a truth-teller.   
+[PASS] Q9: X is a truth-teller; Y is a liar  10. Solve 3x + 7 = 2x + 15:    3x − 
+[PASS] Q10: 8  11. Choose 3 from 5: C(5,3) = 5! / (3! × 2!) = 10.
+[PASS] Q11: 10  12. Given:    - Dan > Ellie    - Ellie < Farah → Farah > Ellie    
+[PASS] Q12: Dan is tallest, Ellie is shortest
+
+12/12 correct

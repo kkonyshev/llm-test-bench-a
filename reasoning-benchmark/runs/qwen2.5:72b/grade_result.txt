@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  2. **Ben and Cara's Ages:**    - In 4 years, Ben will be 30, so
+[PASS] Q2: 19  3. **Pet and Drink Ownership:**    - From clue (b), the dog owner 
+[PASS] Q3: Cleo owns the dog, Ben owns the fish  4. **Sequence:**    - The sequen
+[PASS] Q4: 42  5. **Sheep Survivors:**    - The farmer has 17 sheep, and all but 
+[PASS] Q5: 9  6. **Tank Filling:**    - Pipe A fills the tank in 6 hours, so its 
+[PASS] Q6: 2  7. **Weight Comparison:**    - A kilogram of feathers is 1 kg.    -
+[PASS] Q7: a kilogram of feathers  8. **Markup and Discount:**    - Let the origi
+[PASS] Q8: 100%  9. **Islanders' Truth:**    - If X is a truth-teller, then "At l
+[PASS] Q9: X is a truth-teller, Y is a liar  10. **Equation Solution:**     - \(3
+[PASS] Q10: 8  11. **Committee Selection:**     - The number of ways to choose 3 p
+[PASS] Q11: 10  12. **Height Comparison:**     - Dan is taller than Ellie.     - E
+[PASS] Q12: Dan is the tallest, Ellie is the shortest
+
+12/12 correct

@@ -1,0 +1,2 @@
+NAME            ID              SIZE     PROCESSOR          CONTEXT    UNTIL               
+nemotron:70b    2262f047a28a    53 GB    73%/27% CPU/GPU    32768      41 seconds from now    

@@ -1,0 +1,88 @@
+To solve these problems, we will go through each one step by step.
+
+1. First, calculate the total cost of the notebooks and pens before the discount. Notebooks cost $4 each, and pens cost $1.50 each. Maria buys 7 notebooks and 12 pens.
+   - Cost of notebooks: 7 * $4 = $28
+   - Cost of pens: 12 * $1.50 = $18
+   - Total cost before discount: $28 + $18 = $46
+   - Discount: 10% of $46 = 0.10 * $46 = $4.60
+   - Total cost after discount: $46 - $4.60 = $41.40
+
+2. Ben is twice as old as Cara was 6 years ago. In 4 years, Ben will be 30. 
+   - Let's denote Cara's current age as C and Ben's current age as B.
+   - From the information, we have: B = 2*(C - 6)
+   - Also, B + 4 = 30, so B = 26.
+   - Substituting B in the first equation gives: 26 = 2*(C - 6)
+   - Simplifying: 26 = 2C - 12
+   - 2C = 26 + 12
+   - 2C = 38
+   - C = 19
+   - So, Cara is currently 19 years old.
+
+3. From the clues:
+   - (a) Alice does not own the fish.
+   - (b) The dog owner drinks coffee.
+   - (c) Ben drinks juice.
+   - (d) Cleo does not drink tea.
+   - Since Ben drinks juice, and there are only three drinks, the other two must drink tea and coffee. Given Cleo does not drink tea, Cleo must drink coffee, which means Cleo owns the dog (from clue b).
+   - Since Alice does not own the fish, and Cleo owns the dog, Ben must own the fish (as each person owns one pet).
+
+4. The sequence given is 2, 6, 12, 20, 30. Let's examine the pattern:
+   - From 2 to 6, the increase is 4.
+   - From 6 to 12, the increase is 6.
+   - From 12 to 20, the increase is 8.
+   - From 20 to 30, the increase is 10.
+   - The pattern of increases is +4, +6, +8, +10, which suggests the next increase should be +12.
+   - So, the next number in the sequence after 30 would be 30 + 12 = 42.
+
+5. The farmer originally had 17 sheep. All but 9 died, which means 9 sheep are left alive.
+
+6. Pipe A fills the tank in 6 hours, and Pipe B fills it in 3 hours.
+   - The rate of Pipe A is 1/6 of the tank per hour.
+   - The rate of Pipe B is 1/3 of the tank per hour.
+   - Combined rate when both pipes are open: 1/6 + 1/3 = (1/6) + (2/6) = 3/6 = 1/2 of the tank per hour.
+   - Therefore, it takes 2 hours to fill the tank when both pipes are opened together.
+
+7. A kilogram of feathers and a pound of steel are compared. 
+   - 1 kilogram = 2.20462 pounds (approximately).
+   - So, a kilogram of feathers weighs more than a pound of steel because it is approximately 2.20462 pounds.
+
+8. The original cost of an item is marked up by 25% to set the retail price, then discounted by 20% during a sale.
+   - Let the original cost be $100.
+   - After a 25% markup: $100 + (25% of $100) = $100 + $25 = $125.
+   - Then, a 20% discount on $125: $125 - (20% of $125) = $125 - $25 = $100.
+   - The sale price is $100, which is the same as the original cost, meaning the sale price is 100% of the original cost.
+
+9. X says, "At least one of us is a liar."
+   - If X is a truth-teller, then the statement must be true, which means at least one of them (X or Y) is indeed a liar. But since X is telling the truth, Y must be the liar.
+   - If X is a liar, then the statement "at least one of us is a liar" is false, which means neither X nor Y is a liar. However, this creates a paradox because if X is a liar, then the statement should be true, indicating at least one liar.
+   - Therefore, X must be a truth-teller, and Y must be a liar because if X were a liar, it would lead to a logical contradiction.
+
+10. Given the equation 3x + 7 = 2x + 15:
+    - Subtract 2x from both sides: x + 7 = 15
+    - Subtract 7 from both sides: x = 8
+
+11. Choosing a committee of 3 people from 5 candidates can be calculated using combinations (since the order does not matter).
+    - The formula for combinations is C(n, k) = n! / [k!(n-k)!], where n is the total number of items, k is the number of items to choose, and "!" denotes factorial, which is the product of all positive integers up to that number.
+    - Here, n = 5 (total candidates), and k = 3 (committee size).
+    - C(5, 3) = 5! / [3!(5-3)!] = 5! / (3! * 2!) = (5*4*3*2*1) / [(3*2*1)*(2*1)] = (120) / [(6)*(2)] = 120 / 12 = 10
+
+12. Given the information:
+    - Dan is taller than Ellie.
+    - Ellie is shorter than Farah.
+    - Farah is shorter than Dan.
+    - From the first and third statements, Dan is taller than both Ellie and Farah.
+    - Since Ellie is shorter than Farah, and Dan is taller than both, the order from tallest to shortest is: Dan, Farah, Ellie.
+    - Therefore, Dan is the tallest, and Ellie is the shortest.
+
+ANSWER 1: $41.40
+ANSWER 2: 19
+ANSWER 3: Cleo owns the dog, and Ben owns the fish.
+ANSWER 4: 42
+ANSWER 5: 9
+ANSWER 6: 2
+ANSWER 7: A kilogram of feathers
+ANSWER 8: 100%
+ANSWER 9: X is a truth-teller, and Y is a liar.
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan is the tallest, and Ellie is the shortest.

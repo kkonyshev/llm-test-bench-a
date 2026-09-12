@@ -1,0 +1,2 @@
+NAME                        ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+qwen3.8-27b-bench:latest    dcd0d455970d    18 GB    21%/79% CPU/GPU    32768      4 minutes from now    

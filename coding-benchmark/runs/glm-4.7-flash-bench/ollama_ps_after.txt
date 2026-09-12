@@ -1,0 +1,2 @@
+NAME                          ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+glm-4.7-flash-bench:latest    fbd7fb516f89    20 GB    26%/74% CPU/GPU    32768      4 minutes from now    

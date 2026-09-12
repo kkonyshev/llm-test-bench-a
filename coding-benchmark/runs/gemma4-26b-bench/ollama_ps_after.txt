@@ -1,0 +1,2 @@
+NAME                       ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+gemma4-26b-bench:latest    dd6241521652    17 GB    20%/80% CPU/GPU    32768      4 minutes from now    

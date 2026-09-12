@@ -1,0 +1,14 @@
+[PASS] Q1: 41.4  2. Let Cara's current age be \(C\). Six years ago, Cara was \(C 
+[PASS] Q2: 19  3. From clue (a), Alice does not own the fish, so she owns either 
+[FAIL] Q3: Ben owns the dog, and Alice owns the cat.  4. The sequence is \(2, 6, 
+[FAIL] Q4: 12  5. If all but 9 sheep die, the farmer has \(17 - 9 = 8\) sheep lef
+[FAIL] Q5: 8  6. Pipe A fills the tank in 6 hours, and Pipe B fills it in 3 hours
+[PASS] Q6: 2  7. A kilogram is approximately 2.20462 pounds. Since 2.20462 pounds
+[FAIL] Q7: A pound of steel is heavier.  8. The retail price is 25% more than the
+[PASS] Q8: 100%  9. X says, "At least one of us is a liar." If X is a truth-telle
+[FAIL] Q9: X is a liar, and Y is a liar.  10. Solving the equation \(3x + 7 = 2x 
+[PASS] Q10: 8  11. The number of different committees of 3 people chosen from 5 ca
+[PASS] Q11: 10  12. Dan is taller than Ellie, Ellie is shorter than Farah, and Far
+[FAIL] Q12: Farah is the tallest, and Ellie is the shortest.
+
+6/12 correct

@@ -1,0 +1,2 @@
+NAME            ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+llama3.1:70b    711a9e8463af    53 GB    73%/27% CPU/GPU    32768      4 minutes from now    

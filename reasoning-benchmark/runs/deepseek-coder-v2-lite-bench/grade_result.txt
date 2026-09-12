@@ -1,0 +1,14 @@
+[PASS] Q1: 41.4
+[PASS] Q2: 19
+[FAIL] Q3: Ben owns the cat and the fish, and Alice owns the dog.
+[PASS] Q4: 42
+[FAIL] Q5: 8
+[PASS] Q6: 2
+[PASS] Q7: A kilogram of feathers is heavier.
+[FAIL] Q8: 80%
+[PASS] Q9: X could be either a truth-teller or a liar, but Y is a truth-teller.
+[PASS] Q10: 8
+[PASS] Q11: 10
+[PASS] Q12: Dan is the tallest, and Ellie is the shortest.
+
+9/12 correct
