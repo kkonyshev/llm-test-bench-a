@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  2. Let Cara's current age be \(C\).    - Cara was \(C - 6\) yea
+[PASS] Q2: 19  3. (a) Alice does not own the fish.    (b) The dog owner drinks co
+[PASS] Q3: Cleo owns the dog, and Ben owns the fish.  4. The sequence is: 2, 6, 1
+[PASS] Q4: 42  5. The farmer starts with 17 sheep and loses \(17 - 9 = 8\) sheep.
+[FAIL] Q5: 8  6. Pipe A fills the tank in 6 hours, so the rate is \(\frac{1}{6}\)
+[PASS] Q6: 2  7. A kilogram is approximately 2.20462 pounds.    - Therefore, a ki
+[PASS] Q7: A kilogram of feathers  8. Let the original cost be \(C\).    - Retail
+[PASS] Q8: 100%  9. X says: "At least one of us is a liar."    - If X is a truth-
+[PASS] Q9: X is a liar, Y is a truth-teller  10. Solve the equation: \(3x + 7 = 2
+[PASS] Q10: 8  11. The number of ways to choose 3 people from 5 candidates is give
+[PASS] Q11: 10  12. Dan is taller than Ellie, Ellie is shorter than Farah, and Far
+[FAIL] Q12: Farah is the tallest, Dan is the shortest.
+
+10/12 correct

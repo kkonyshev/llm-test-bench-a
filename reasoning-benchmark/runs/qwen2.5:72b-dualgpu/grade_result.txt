@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  2. Let's denote Ben's current age as B and Cara's current age a
+[PASS] Q2: 19  3. We need to match each person to their pet and drink based on th
+[FAIL] Q3: Cleo owns the dog, Ben owns the cat  4. The sequence is increasing by 
+[PASS] Q4: 42  5. The farmer had 17 sheep, and all but 9 died. This means 9 sheep
+[PASS] Q5: 9  6. Pipe A fills the tank in 6 hours, so its rate is 1/6 of the tank
+[PASS] Q6: 2  7. A kilogram of feathers and a pound of steel are compared:    - 1
+[PASS] Q7: a kilogram of feathers  8. Let the original cost be C.    - Retail pri
+[PASS] Q8: 100  9. If X is a truth-teller, then his statement "At least one of us
+[PASS] Q9: X is a truth-teller, Y is a liar  10. Solve the equation 3x + 7 = 2x +
+[PASS] Q10: 8  11. The number of different committees possible is calculated using
+[PASS] Q11: 10  12. From the statements:     - Dan is taller than Ellie.     - Ell
+[PASS] Q12: Dan is the tallest, Ellie is the shortest
+
+11/12 correct

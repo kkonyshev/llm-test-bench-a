@@ -9,7 +9,7 @@ mkdir -p "$OUT"
 
 echo "=== $MODEL ==="
 
-docker exec ollama-test ollama ps > "$OUT/ollama_ps_before.txt" 2>&1
+ollama ps > "$OUT/ollama_ps_before.txt" 2>&1
 
 START_EPOCH=$(date +%s)
 
@@ -20,12 +20,12 @@ model, prompt_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 prompt = open(prompt_path).read()
 
 req = urllib.request.Request(
-    "http://localhost:11436/api/generate",
+    "http://localhost:11434/api/generate",
     data=json.dumps({
         "model": model,
         "prompt": prompt,
         "stream": True,
-        "options": {"num_predict": -1, "num_ctx": 32768},
+        "options": {"num_predict": -1, "num_ctx": int(__import__("os").environ.get("BENCH_NUM_CTX", "32768"))},
     }).encode(),
     headers={"Content-Type": "application/json"},
 )
@@ -57,7 +57,7 @@ PYEOF
 END_EPOCH=$(date +%s)
 echo "wall_clock_seconds=$((END_EPOCH - START_EPOCH))" > "$OUT/wall_clock.txt"
 
-docker exec ollama-test ollama ps > "$OUT/ollama_ps_after.txt" 2>&1
+ollama ps > "$OUT/ollama_ps_after.txt" 2>&1
 
 python3 - "$OUT/raw_response.json" "$OUT" <<'PYEOF'
 import json, sys

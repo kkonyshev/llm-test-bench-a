@@ -1,0 +1,191 @@
+```python
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel, validator
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+from typing import List, Optional
+from fastapi.responses import JSONResponse
+
+# Define the database connection
+SQLALCHEMY_DATABASE_URL = "sqlite:///tasks.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# Define the Task model
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    description = Column(String, nullable=True)
+    completed = Column(Boolean, default=False)
+    priority = Column(String, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+Base.metadata.create_all(bind=engine)
+
+# Define the FastAPI application
+app = FastAPI()
+
+# Define the Pydantic models
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str]
+    priority: Optional[str] = "medium"
+
+    @validator("title")
+    def title_must_not_be_empty(cls, v):
+        if not v.strip():
+            raise ValueError("Title must not be empty")
+        return v
+
+    @validator("priority")
+    def priority_must_be_valid(cls, v):
+        if v not in ["low", "medium", "high"]:
+            raise ValueError("Priority must be one of 'low', 'medium', or 'high'")
+        return v
+
+class TaskUpdate(BaseModel):
+    title: Optional[str]
+    description: Optional[str]
+    completed: Optional[bool]
+    priority: Optional[str]
+
+    @validator("title")
+    def title_must_not_be_empty(cls, v):
+        if v and not v.strip():
+            raise ValueError("Title must not be empty")
+        return v
+
+    @validator("priority")
+    def priority_must_be_valid(cls, v):
+        if v and v not in ["low", "medium", "high"]:
+            raise ValueError("Priority must be one of 'low', 'medium', or 'high'")
+        return v
+
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    completed: bool
+    priority: str
+    created_at: str
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Endpoints
+@app.post("/tasks", response_model=TaskResponse, status_code=201)
+def create_task(task: TaskCreate, db: SessionLocal = Depends(get_db)):
+    if not task.title.strip():
+        raise HTTPException(status_code=422, detail="Title must not be empty")
+    if task.priority not in ["low", "medium", "high"]:
+        raise HTTPException(status_code=422, detail="Priority must be one of 'low', 'medium', or 'high'")
+    db_task = Task(title=task.title, description=task.description, priority=task.priority)
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return TaskResponse(
+        id=db_task.id,
+        title=db_task.title,
+        description=db_task.description,
+        completed=db_task.completed,
+        priority=db_task.priority,
+        created_at=db_task.created_at.isoformat()
+    )
+
+@app.get("/tasks", response_model=dict)
+def read_tasks(
+    completed: Optional[bool] = None,
+    priority: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 10,
+    db: SessionLocal = Depends(get_db)
+):
+    if page < 1:
+        raise HTTPException(status_code=422, detail="Page must be greater than or equal to 1")
+    if not 1 <= page_size <= 100:
+        raise HTTPException(status_code=422, detail="Page size must be between 1 and 100")
+    if priority and priority not in ["low", "medium", "high"]:
+        raise HTTPException(status_code=422, detail="Priority must be one of 'low', 'medium', or 'high'")
+    query = db.query(Task).order_by(Task.id)
+    if completed is not None:
+        query = query.filter(Task.completed == completed)
+    if priority:
+        query = query.filter(Task.priority == priority)
+    total = query.count()
+    query = query.offset((page - 1) * page_size).limit(page_size)
+    tasks = query.all()
+    return {
+        "items": [
+            TaskResponse(
+                id=task.id,
+                title=task.title,
+                description=task.description,
+                completed=task.completed,
+                priority=task.priority,
+                created_at=task.created_at.isoformat()
+            ) for task in tasks
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
+
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
+def read_task(task_id: int, db: SessionLocal = Depends(get_db)):
+    db_task = db.query(Task).filter(Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return TaskResponse(
+        id=db_task.id,
+        title=db_task.title,
+        description=db_task.description,
+        completed=db_task.completed,
+        priority=db_task.priority,
+        created_at=db_task.created_at.isoformat()
+    )
+
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task: TaskUpdate, db: SessionLocal = Depends(get_db)):
+    db_task = db.query(Task).filter(Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if task.title and not task.title.strip():
+        raise HTTPException(status_code=422, detail="Title must not be empty")
+    if task.priority and task.priority not in ["low", "medium", "high"]:
+        raise HTTPException(status_code=422, detail="Priority must be one of 'low', 'medium', or 'high'")
+    if task.title:
+        db_task.title = task.title
+    if task.description:
+        db_task.description = task.description
+    if task.completed is not None:
+        db_task.completed = task.completed
+    if task.priority:
+        db_task.priority = task.priority
+    db.commit()
+    db.refresh(db_task)
+    return TaskResponse(
+        id=db_task.id,
+        title=db_task.title,
+        description=db_task.description,
+        completed=db_task.completed,
+        priority=db_task.priority,
+        created_at=db_task.created_at.isoformat()
+    )
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int, db: SessionLocal = Depends(get_db)):
+    db_task = db.query(Task).filter(Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    db.delete(db_task)
+    db.commit()
+    return

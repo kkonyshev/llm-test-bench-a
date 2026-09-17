@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  **Problem 2:** - Let Ben's current age be \( B \). - Cara's age
+[FAIL] Q2: 16  **Problem 3:** - Ben drinks juice (clue c). - The dog owner drinks
+[FAIL] Q3: Ben owns the dog.  **Problem 4:** - The sequence is \( 2, 6, 12, 20, 3
+[PASS] Q4: 42  **Problem 5:** - The farmer has 17 sheep initially. - All but 9 di
+[FAIL] Q5: 8  **Problem 6:** - Pipe A fills the tank in 6 hours. - Pipe B fills t
+[PASS] Q6: 2  **Problem 7:** - A kilogram of feathers is heavier than a pound of 
+[PASS] Q7: A kilogram of feathers.  **Problem 8:** - Let the original cost be \( 
+[PASS] Q8: 100%  **Problem 9:** - X says: "At least one of us is a liar." - If X 
+[PASS] Q9: X could be either a truth-teller or a liar. Y is a truth-teller.  **Pr
+[PASS] Q10: 8  **Problem 11:** - The number of ways to choose 3 people from 5 is g
+[PASS] Q11: 10  **Problem 12:** - Dan is taller than Ellie. - Ellie is shorter tha
+[PASS] Q12: Dan is the tallest, Ellie is the shortest.
+
+9/12 correct

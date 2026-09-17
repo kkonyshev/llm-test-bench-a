@@ -1,0 +1,197 @@
+import sqlite3
+from datetime import datetime, timezone
+from typing import Optional, Literal
+
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, Field, field_validator
+
+DB_NAME = "tasks.db"
+
+
+def get_db() -> sqlite3.Connection:
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_db()
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            completed INTEGER DEFAULT 0,
+            priority TEXT DEFAULT 'medium',
+            created_at TEXT NOT NULL
+        )"""
+    )
+    conn.commit()
+    conn.close()
+
+
+app = FastAPI()
+
+init_db()
+
+
+class TaskCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    priority: Literal["low", "medium", "high"] = "medium"
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("title must be non-empty after trimming whitespace")
+        return v
+
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(default=None, min_length=1, max_length=200)
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[Literal["low", "medium", "high"]] = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not v.strip():
+            raise ValueError("title must be non-empty after trimming whitespace")
+        return v
+
+
+class Task(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    completed: bool
+    priority: str
+    created_at: str
+
+
+def row_to_task(row: sqlite3.Row) -> Task:
+    return Task(
+        id=row["id"],
+        title=row["title"],
+        description=row["description"],
+        completed=bool(row["completed"]),
+        priority=row["priority"],
+        created_at=row["created_at"],
+    )
+
+
+@app.post("/tasks", response_model=Task, status_code=201)
+def create_task(body: TaskCreate):
+    created_at = datetime.now(timezone.utc).isoformat()
+    conn = get_db()
+    cur = conn.execute(
+        "INSERT INTO tasks (title, description, completed, priority, created_at) VALUES (?, ?, ?, ?, ?)",
+        (body.title, body.description, 0, body.priority, created_at),
+    )
+    conn.commit()
+    task_id = cur.lastrowid
+    row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    conn.close()
+    return row_to_task(row)
+
+
+@app.get("/tasks")
+def list_tasks(
+    completed: Optional[bool] = Query(None),
+    priority: Optional[Literal["low", "medium", "high"]] = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+):
+    where_clauses = []
+    params: list = []
+
+    if completed is not None:
+        where_clauses.append("completed = ?")
+        params.append(1 if completed else 0)
+    if priority is not None:
+        where_clauses.append("priority = ?")
+        params.append(priority)
+
+    where_sql = ""
+    if where_clauses:
+        where_sql = "WHERE " + " AND ".join(where_clauses)
+
+    conn = get_db()
+    total = conn.execute(
+        f"SELECT COUNT(*) FROM tasks {where_sql}", params
+    ).fetchone()[0]
+
+    offset = (page - 1) * page_size
+    rows = conn.execute(
+        f"SELECT * FROM tasks {where_sql} ORDER BY id ASC LIMIT ? OFFSET ?",
+        params + [page_size, offset],
+    ).fetchall()
+    conn.close()
+
+    return {
+        "items": [row_to_task(r) for r in rows],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+    }
+
+
+@app.get("/tasks/{task_id}", response_model=Task)
+def get_task(task_id: int):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    conn.close()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return row_to_task(row)
+
+
+@app.put("/tasks/{task_id}", response_model=Task)
+def update_task(task_id: int, body: TaskUpdate):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    if row is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    updates = body.model_dump(exclude_unset=True)
+
+    if "title" in updates and updates["title"] is not None:
+        updates["title"] = updates["title"]
+    if "description" in updates:
+        pass  # can be None (set to null) or a string
+    if "completed" in updates and updates["completed"] is not None:
+        updates["completed"] = 1 if updates["completed"] else 0
+    if "completed" in updates and updates["completed"] is None:
+        # If explicitly set to None, treat as not provided
+        del updates["completed"]
+    if "priority" in updates and updates["priority"] is None:
+        del updates["priority"]
+
+    if updates:
+        set_clauses = ", ".join(f"{k} = ?" for k in updates.keys())
+        values = list(updates.values())
+        conn.execute(
+            f"UPDATE tasks SET {set_clauses} WHERE id = ?",
+            values + [task_id],
+        )
+        conn.commit()
+
+    row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    conn.close()
+    return row_to_task(row)
+
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int):
+    conn = get_db()
+    row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    if row is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+    conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    conn.commit()
+    conn.close()
+    return None

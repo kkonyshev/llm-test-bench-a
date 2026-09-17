@@ -1,0 +1,116 @@
+ ```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, validator
+from typing import Optional, List, Tuple
+from datetime import datetime
+import sqlite3
+import os
+
+app = FastAPI()
+
+DATABASE_URL = "tasks.db"
+
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE_URL)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db_connection()
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            completed BOOLEAN NOT NULL DEFAULT 0,
+            priority TEXT NOT NULL DEFAULT 'medium',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+@app.on_event("startup")
+def startup():
+    init_db()
+
+class Task(BaseModel):
+    title: str
+    description: Optional[str] = None
+    completed: Optional[bool] = False
+    priority: Optional[str] = "medium"
+
+    @validator('title')
+    def title_not_empty(cls, v):
+        if not v:
+            raise ValueError('Title must not be empty')
+        return v
+
+    @validator('priority')
+    def priority_valid(cls, v):
+        if v not in ['low', 'medium', 'high']:
+            raise ValueError('Priority must be one of low, medium, high')
+        return v
+
+@app.post("/tasks", status_code=201)
+def create_task(task: Task):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO tasks (title, description, completed, priority, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (task.title, task.description, task.completed, task.priority, datetime.now()))
+    conn.commit()
+    task.id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return task
+
+@app.get("/tasks")
+def list_tasks(completed: Optional[bool] = None, priority: Optional[str] = None, page: int = 1, page_size: int = 10):
+    if page < 1 or page_size < 1 or page_size > 100:
+        raise HTTPException(status_code=422, detail="Invalid page or page_size")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    query = 'SELECT * FROM tasks'
+    params = []
+    if completed is not None:
+        query += ' WHERE completed = ?'
+        params.append(completed)
+    if priority is not None:
+        if priority not in ['low', 'medium', 'high']:
+            raise HTTPException(status_code=422, detail="Invalid priority")
+        if params:
+            query += ' AND priority = ?'
+        else:
+            query += ' WHERE priority = ?'
+        params.append(priority)
+    query += ' ORDER BY id ASC LIMIT ? OFFSET ?'
+    params.extend([page_size, (page - 1) * page_size])
+    cursor.execute(query, params)
+    tasks = cursor.fetchall()
+    total_count = cursor.execute('SELECT COUNT(*) FROM tasks' + (' WHERE completed = ? AND priority = ?' if params else '')).fetchone()[0]
+    result = {
+        "items": [dict(task) for task in tasks],
+        "total": total_count,
+        "page": page,
+        "page_size": page_size
+    }
+    cursor.close()
+    conn.close()
+    return result
+
+@app.get("/tasks/{id}")
+def get_task(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM tasks WHERE id = ?', (id,))
+    task = cursor.fetchone()
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    cursor.close()
+    conn.close()
+    return task
+
+@app.put("/tasks/{id}")
+def update_task(id: int, task

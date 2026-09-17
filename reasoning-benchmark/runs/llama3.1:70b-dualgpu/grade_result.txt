@@ -1,0 +1,14 @@
+[PASS] Q1: $41.40   2. Ben is twice as old as Cara was 6 years ago. In 4 years, B
+[PASS] Q2: 19   3. Three friends — Alice, Ben, and Cleo — each own exactly one pe
+[PASS] Q3: Cleo owns the dog, and Ben owns the fish.   4. What is the next number
+[PASS] Q4: 42   5. A farmer has 17 sheep. All but 9 die. How many sheep does the 
+[PASS] Q5: 9   6. Pipe A fills a tank in 6 hours. Pipe B fills the same tank in 3
+[PASS] Q6: 2   7. Which is heavier: a kilogram of feathers, or a pound of steel? 
+[PASS] Q7: A kilogram of feathers   8. A store marks up the cost of an item by 25
+[PASS] Q8: 100   9. On an island, every person always tells the truth or always l
+[PASS] Q9: X is a truth-teller, and Y is a liar.   10. If 3x + 7 = 2x + 15, what 
+[PASS] Q10: 8   11. A committee of 3 people is chosen from 5 candidates. How many 
+[PASS] Q11: 10   12. Dan is taller than Ellie. Ellie is shorter than Farah. Farah 
+[PASS] Q12: Dan is the tallest, and Ellie is the shortest.
+
+12/12 correct

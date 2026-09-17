@@ -1,0 +1,2 @@
+NAME           ID              SIZE     PROCESSOR          CONTEXT    UNTIL              
+qwen2.5:72b    424bad2cc13f    58 GB    21%/79% CPU/GPU    32768      4 minutes from now    

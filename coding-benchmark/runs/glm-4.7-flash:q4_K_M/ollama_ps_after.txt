@@ -1,0 +1,2 @@
+NAME                    ID              SIZE     PROCESSOR    CONTEXT    UNTIL              
+glm-4.7-flash:q4_K_M    4475827791a2    21 GB    100% GPU     32768      4 minutes from now    

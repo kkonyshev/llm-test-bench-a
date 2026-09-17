@@ -1,0 +1,1095 @@
+EEEEEEEEEEEEEEEEEEEEEEE                                                  [100%]
+==================================== ERRORS ====================================
+__________________ ERROR at setup of test_create_task_minimal __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+___________________ ERROR at setup of test_create_task_full ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_______________ ERROR at setup of test_create_task_missing_title _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+________________ ERROR at setup of test_create_task_empty_title ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_____________ ERROR at setup of test_create_task_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+______________ ERROR at setup of test_create_task_title_too_long _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+____________________ ERROR at setup of test_get_task_found _____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+__________________ ERROR at setup of test_get_task_not_found ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+______________________ ERROR at setup of test_list_empty _______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_____________ ERROR at setup of test_list_returns_all_and_ordered ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_______________ ERROR at setup of test_list_filter_by_completed ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+________________ ERROR at setup of test_list_filter_by_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_____________ ERROR at setup of test_list_filter_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+____________________ ERROR at setup of test_list_pagination ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+___________________ ERROR at setup of test_list_invalid_page ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+________________ ERROR at setup of test_list_invalid_page_size _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_________________ ERROR at setup of test_update_partial_field __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+________________ ERROR at setup of test_update_multiple_fields _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+___________________ ERROR at setup of test_update_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+________________ ERROR at setup of test_update_invalid_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+__________________ ERROR at setup of test_update_empty_title ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+_____________________ ERROR at setup of test_delete_found ______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+___________________ ERROR at setup of test_delete_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:31: in <module>
+    class TaskCreate(BaseModel):
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:243: in __new__
+    set_model_fields(cls, config_wrapper=config_wrapper, ns_resolver=ns_resolver)
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_model_construction.py:579: in set_model_fields
+    fields, pydantic_extra_info, class_vars = collect_model_fields(
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_fields.py:265: in collect_model_fields
+    type_hints = _typing_extra.get_model_type_hints(cls, ns_resolver=ns_resolver)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:368: in get_model_type_hints
+    hints[name] = try_eval_type(value, globalns, localns)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:423: in try_eval_type
+    return eval_type_backport(value, globalns, localns), True
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:474: in eval_type_backport
+    return _eval_type_backport(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:511: in _eval_type_backport
+    return _eval_type(value, globalns, localns, type_params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/pydantic/_internal/_typing_extra.py:543: in _eval_type
+    evaluated = typing._eval_type(  # type: ignore
+/usr/lib64/python3.14/typing.py:461: in _eval_type
+    return evaluate_forward_ref(t, globals=globalns, locals=localns,
+/usr/lib64/python3.14/typing.py:1003: in evaluate_forward_ref
+    value = forward_ref.evaluate(globals=globals, locals=locals,
+/usr/lib64/python3.14/annotationlib.py:207: in evaluate
+    return eval(code, globals=globals, locals=locals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   TypeError: constr() got an unexpected keyword argument 'regex'
+E   Unable to evaluate type annotation "Optional[constr(regex='^(low|medium|high)$')]".
+
+<string>:1: TypeError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR test_tasks.py::test_create_task_minimal - TypeError: constr() got an un...
+ERROR test_tasks.py::test_create_task_full - TypeError: constr() got an unexp...
+ERROR test_tasks.py::test_create_task_missing_title - TypeError: constr() got...
+ERROR test_tasks.py::test_create_task_empty_title - TypeError: constr() got a...
+ERROR test_tasks.py::test_create_task_invalid_priority - TypeError: constr() ...
+ERROR test_tasks.py::test_create_task_title_too_long - TypeError: constr() go...
+ERROR test_tasks.py::test_get_task_found - TypeError: constr() got an unexpec...
+ERROR test_tasks.py::test_get_task_not_found - TypeError: constr() got an une...
+ERROR test_tasks.py::test_list_empty - TypeError: constr() got an unexpected ...
+ERROR test_tasks.py::test_list_returns_all_and_ordered - TypeError: constr() ...
+ERROR test_tasks.py::test_list_filter_by_completed - TypeError: constr() got ...
+ERROR test_tasks.py::test_list_filter_by_priority - TypeError: constr() got a...
+ERROR test_tasks.py::test_list_filter_invalid_priority - TypeError: constr() ...
+ERROR test_tasks.py::test_list_pagination - TypeError: constr() got an unexpe...
+ERROR test_tasks.py::test_list_invalid_page - TypeError: constr() got an unex...
+ERROR test_tasks.py::test_list_invalid_page_size - TypeError: constr() got an...
+ERROR test_tasks.py::test_update_partial_field - TypeError: constr() got an u...
+ERROR test_tasks.py::test_update_multiple_fields - TypeError: constr() got an...
+ERROR test_tasks.py::test_update_not_found - TypeError: constr() got an unexp...
+ERROR test_tasks.py::test_update_invalid_priority - TypeError: constr() got a...
+ERROR test_tasks.py::test_update_empty_title - TypeError: constr() got an une...
+ERROR test_tasks.py::test_delete_found - TypeError: constr() got an unexpecte...
+ERROR test_tasks.py::test_delete_not_found - TypeError: constr() got an unexp...
+2 warnings, 23 errors in 1.33s

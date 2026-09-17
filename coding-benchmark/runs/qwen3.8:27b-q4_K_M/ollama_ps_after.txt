@@ -1,0 +1,3 @@
+NAME                                ID              SIZE      PROCESSOR    CONTEXT    UNTIL                   
+qwen3.8:27b-q4_K_M                  25b843619e94    19 GB     100% GPU     32768      4 minutes from now         
+qwen2.5-coder:7b-instruct-q4_K_M    dae161e27b0e    6.6 GB    100% GPU     32768      About a minute from now    

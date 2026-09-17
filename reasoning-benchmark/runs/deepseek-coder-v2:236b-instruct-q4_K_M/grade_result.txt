@@ -1,0 +1,14 @@
+[FAIL] Q1: $40.50
+[FAIL] Q2: 13
+[FAIL] Q3: Ben owns the dog, Ben owns a cat
+[PASS] Q4: 42
+[PASS] Q5: 9
+[PASS] Q6: 2
+[PASS] Q7: A kilogram of feathers is heavier
+[PASS] Q8: 100%
+[PASS] Q9: X is a liar, Y is a truth-teller
+[PASS] Q10: 8
+[PASS] Q11: 10
+[PASS] Q12: Dan is the tallest, Ellie is the shortest
+
+9/12 correct

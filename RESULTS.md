@@ -229,6 +229,158 @@ shouldn't, in principle, beyond floating-point non-determinism).
 
 ---
 
+# Results — workstation1, dual-GPU (RTX 5090 + RTX 5070 Ti)
+
+Same box as Machine 2 (`RESULTS.md`'s "workstation1" section), after adding
+a second GPU — see `HARDWARE.md`'s Machine 3 entry for exact specs
+(including the native-Ollama-vs-Docker methodology caveat). All 11 models
+from the Machine 2 run were re-tested unchanged; scripts were patched to
+point at the current Ollama endpoint (`:11434` native, not the old
+`ollama-test` Docker container's `:11436`) and `num_ctx` was made
+per-model-overridable, since the 236B model still needs `num_ctx=8192` to
+avoid a KV-cache OOM (see `MODELS.md`/methodology note 9).
+
+## Machine 3 tag mapping
+
+All 11 models were already present as locally-pulled Ollama models on this
+host, under different tags than the ones originally used in `MODELS.md` (in
+most cases — verified same underlying GGUF/quant by file size). No
+re-downloading was needed.
+
+| MODELS.md name | Machine 3 Ollama tag | Run directory suffix |
+|---|---|---|
+| qwen3-coder-30b-a3b | `qwen3-coder:30b-a3b-q4_K_M` | (none — new tag, no collision) |
+| glm-4.7-flash | `glm-4.7-flash:q4_K_M` | (none) |
+| qwen3.8-27b | `qwen3.8:27b-q4_K_M` | (none) |
+| qwen2.5-coder-7b-test | `qwen2.5-coder:7b-instruct-q4_K_M` | (none) |
+| deepseek-coder-v2-lite | `deepseek-coder-v2:16b-lite-instruct-q4_K_M` | (none) |
+| gemma4-26b | `gemma4:26b-a4b-it-q4_K_M` | (none) |
+| llama3.1:70b | `llama3.1:70b` | `-dualgpu` (same tag as Machine 2's baseline run — suffixed to avoid overwriting that tracked data) |
+| llama3.3:70b | `llama3.3:70b` | `-dualgpu` |
+| qwen2.5:72b | `qwen2.5:72b` | `-dualgpu` (two attempts recorded — see below) |
+| nemotron:70b | `nemotron:70b` | `-dualgpu` |
+| deepseek-coder-v2-full-bench | `deepseek-coder-v2:236b-instruct-q4_K_M` | (none — new tag, no collision) |
+
+## Coding benchmark (23 tests)
+
+| Model | Tests passed | Time | Speed | GPU/CPU split | vs. Machine 2 |
+|---|---|---|---|---|---|
+| **Qwen3-Coder-30B-A3B** | **23/23** | 11s | 292.2 tok/s | 100% GPU | 21/23 → 23/23, 2.7x faster |
+| GLM-4.7-Flash | 10/23 (attempt 1: 0/23) | 52s | 186.6 tok/s | 100% GPU | 10/23 → 10/23 (same), 2.4x faster |
+| **Qwen3.8-27B** | **23/23** | 59s | 60.6 tok/s | 100% GPU | 23/23 → 23/23, wall-clock 39m30s → 59s (**40x**) |
+| Qwen2.5-Coder-7B | 9/23 | 5s | 263.2 tok/s | 100% GPU | 6/23 → 9/23, 1.8x faster |
+| DeepSeek-Coder-V2-Lite | 8/23 (attempt 1: 0/23, arch bug) | 13s | 246.9 tok/s | 100% GPU | 0/23 → 8/23, 4.4x faster |
+| Gemma4-26B (A4B) | 22/23 | 35s | 230.2 tok/s | 100% GPU | 23/23 → 22/23 (noise), 2.7x faster |
+| Llama3.1:70b | 3/23 | 2m38s | 6.57 tok/s | **14%/86% CPU/GPU** | 8/23 → 3/23 (noise), 4.6x faster |
+| Llama3.3:70b | 11/23 | 4m8s | 6.52 tok/s | **14%/86% CPU/GPU** | 0/23\* → 11/23, 4.7x faster |
+| Qwen2.5-72B | 0/23 (both attempts) | 5m10s | 4.14 tok/s | 21%/79% CPU/GPU | 10/23 → 0/23 (noise, see below), 3.3x faster |
+| Nemotron-70B | 9/23 | 3m10s | 6.56 tok/s | **14%/86% CPU/GPU** | 0/23 → 9/23, 4.7x faster |
+| DeepSeek-Coder-V2 (236B) | 20/23 | 15m49s | 1.87 tok/s | 75%/25% CPU/GPU | 18/23 → 20/23, 4x faster |
+
+\* Machine 2's llama3.3:70b coding run was flagged as timing-contaminated by
+concurrent downloads (see methodology note 11); its 0/23 score itself was
+unaffected by that, so the score comparison above still holds.
+
+**GPU-residency jump for the 70B-class dense models is the story here**:
+14-21% CPU / **79-86% GPU** on Machine 3, vs. 27% GPU / 73% CPU on Machine 2
+for the same models. The 236B MoE model went from 8% to 25% GPU-resident.
+That's the direct cause of the ~4.5-4.7x speedup on every dense 70B+ model.
+
+### Re-running the 0/23 scores (requested check: "is this a dumb error?")
+
+Three models scored 0/23 on the first pass through the full suite:
+GLM-4.7-Flash, DeepSeek-Coder-V2-Lite, and Qwen2.5-72B. Each was re-run once
+more from scratch (fresh generation, same prompt) specifically to rule out
+a harness/extraction fluke before trusting the score. First-attempt
+artifacts are preserved under `runs/<tag>-attempt1` (or
+`runs/qwen2.5:72b-dualgpu-attempt1` / `-attempt2` for both of Qwen2.5-72B's
+tries) alongside the current `runs/<tag>` directory (which holds the
+higher-scoring, more-recent attempt for GLM and DeepSeek-Lite).
+
+- **GLM-4.7-Flash**: attempt 1 failed all 23 tests via `NameError:
+  declarative_base` — the code called `declarative_base()` but never
+  imported it. A real, verified bug (confirmed by reading `main.py`, which
+  extracted cleanly at 4419 chars — not an extraction failure). Attempt 2
+  scored 10/23, tripping a *different* bug (`TypeError: Priority.validate()
+  takes...`). Conclusion: both are real generation bugs, not harness
+  errors, but GLM's score is genuinely volatile run-to-run (22 on Mac, 10 on
+  Machine 2's original run, 0 then 10 here) — consistent with the variance
+  this file already flags for GLM.
+- **DeepSeek-Coder-V2-Lite**: attempt 1 failed via `NameError: Depends`
+  (used FastAPI's `Depends()` without importing it). Attempt 2 scored 8/23,
+  failing instead via `ValueError: "Task" object has no field...` — the
+  model again conflated its SQLAlchemy ORM class with a plain object/dict,
+  the same *class* of bug (ORM/response-model confusion) documented for
+  this model back on Machine 1 and Machine 2. Real, reproducible weakness,
+  not a fluke.
+- **Qwen2.5-72B**: 0/23 on *both* attempts, and for the same underlying
+  reason both times — the model consistently writes Pydantic v1-style code
+  (`constr(regex=...)` on attempt 1, `Field(..., regex=...)` on attempt 2)
+  against the installed Pydantic v2, which rejects the removed `regex`
+  kwarg outright (`PydanticUserError`/`TypeError` depending on call site).
+  This is the most solid finding of the three: a genuinely, repeatably
+  broken model output on this task, not noise.
+
+## Reasoning benchmark (12 puzzles)
+
+| Model | Correct | Time | Speed | vs. Machine 2 |
+|---|---|---|---|---|
+| Qwen3-Coder-30B-A3B | **12/12** | 4s | 302.6 tok/s | 12/12 → 12/12, 2.8x faster |
+| GLM-4.7-Flash | **12/12** | 22s | 189.6 tok/s | 12/12 → 12/12, 2.6x faster |
+| **Qwen3.8-27B** | **12/12** | 30s | 60.9 tok/s | 12/12 → 12/12, wall-clock 3m56s → 30s (~8x) |
+| Qwen2.5-Coder-7B | 10/12 | 6s | 264.3 tok/s | 6/12 → 10/12, 1.7x faster |
+| DeepSeek-Coder-V2-Lite | 9/12 | 5s | 278.9 tok/s | 9/12 → 9/12 (same), 4.5x faster |
+| Gemma4-26B (A4B) | **12/12** | 26s | 231.5 tok/s | 12/12 → 12/12, 2.7x faster |
+| Llama3.1:70b | **12/12** | 3m7s | 6.57 tok/s | 12/12 → 12/12, 4.6x faster |
+| Llama3.3:70b | 11/12 | 4m0s | 6.55 tok/s | 12/12 → 11/12 (noise), 4.5x faster |
+| Qwen2.5-72B | 11/12 | 5m3s | 4.13 tok/s | 12/12 → 11/12 (noise), 3.3x faster |
+| Nemotron-70B | **12/12** | 4m34s | 6.55 tok/s | 11/12 → 12/12 (score up), 4.7x faster |
+| DeepSeek-Coder-V2 (236B) | 9/12 | 1m29s | 3.15 tok/s | 9/12 → 9/12 (same), 4x faster |
+
+No reasoning score came back at 0/12, so no retries were needed there.
+
+## Combined picture (Machine 3)
+
+| Model | Coding | Reasoning | Practical read |
+|---|---|---|---|
+| Qwen3-Coder-30B-A3B | 23/23 | 12/12 | Now perfect on coding too (was 21/23) — the clear daily-driver pick on this hardware: fastest strong performer at 292 tok/s. |
+| Qwen3.8-27B | 23/23 | 12/12 | Still perfect on both, and the GPU upgrade turned its 85-minute coding run into 59 seconds — no longer a "reasoning-only" tradeoff model on this box. |
+| Gemma4-26B (A4B) | 22/23 | 12/12 | Essentially unchanged correctness, 2.7x faster — still an excellent all-rounder. |
+| Llama3.3:70b / Nemotron-70B | 11/23, 9/23 | 11/12, 12/12 | Both jumped from 0/23 to double digits on coding once GPU-resident — the dense 70B "fine at puzzles, bad at spec-following code" pattern from Machine 2 still holds, but less severely now. |
+| DeepSeek-Coder-V2 (236B) | 20/23 | 9/12 | Still the best absolute coding correctness of the big models, still impractically slow (1.87 tok/s, 16-minute single run) even with 3x better GPU residency. |
+| Qwen2.5-72B | 0/23 (reproduced twice) | 11/12 | Reasoning is fine; coding is reliably broken by outdated Pydantic API usage, independent of hardware. |
+| GLM-4.7-Flash, DeepSeek-Coder-V2-Lite | volatile / weak | 12/12, 9/12 | Same known weaknesses as prior machines — see retry notes above. |
+
+## Cross-machine comparison (Machine 2 → Machine 3, shared models)
+
+| Model | M2 coding | M3 coding | M2 reasoning | M3 reasoning | M3 speed vs. M2 |
+|---|---|---|---|---|---|
+| Qwen3-Coder-30B-A3B | 21/23 @ 107.3 tok/s | 23/23 @ 292.2 tok/s | 12/12 @ 109.9 tok/s | 12/12 @ 302.6 tok/s | ~2.7x faster |
+| GLM-4.7-Flash | 10/23 @ 77.3 tok/s | 10/23 @ 186.6 tok/s | 12/12 @ 73.9 tok/s | 12/12 @ 189.6 tok/s | ~2.5x faster |
+| Qwen3.8-27B | 23/23 @ 10.9 tok/s | 23/23 @ 60.6 tok/s | 12/12 @ 12.0 tok/s | 12/12 @ 60.9 tok/s | ~5.5x faster |
+| Qwen2.5-Coder-7B | 6/23 @ 142.5 tok/s | 9/23 @ 263.2 tok/s | 6/12 @ 157.9 tok/s | 10/12 @ 264.3 tok/s | ~1.8x faster |
+| DeepSeek-Coder-V2-Lite | 0/23 @ 56.2 tok/s | 8/23 @ 246.9 tok/s | 9/12 @ 61.9 tok/s | 9/12 @ 278.9 tok/s | ~4.5x faster |
+| Gemma4-26B (A4B) | 23/23 @ 85.9 tok/s | 22/23 @ 230.2 tok/s | 12/12 @ 87.0 tok/s | 12/12 @ 231.5 tok/s | ~2.7x faster |
+| Llama3.1:70b | 8/23 @ 1.44 tok/s | 3/23 @ 6.57 tok/s | 12/12 @ 1.43 tok/s | 12/12 @ 6.57 tok/s | ~4.6x faster |
+| Llama3.3:70b | 0/23 @ 1.4 tok/s | 11/23 @ 6.52 tok/s | 12/12 @ 1.45 tok/s | 11/12 @ 6.55 tok/s | ~4.6x faster |
+| Qwen2.5-72B | 10/23 @ 1.27 tok/s | 0/23 @ 4.14 tok/s | 12/12 @ 1.27 tok/s | 11/12 @ 4.13 tok/s | ~3.3x faster |
+| Nemotron-70B | 0/23 @ 1.39 tok/s | 9/23 @ 6.56 tok/s | 11/12 @ ~1.4 tok/s | 12/12 @ 6.55 tok/s | ~4.7x faster |
+| DeepSeek-Coder-V2 (236B) | 18/23 @ 0.46 tok/s | 20/23 @ 1.87 tok/s | 9/12 @ 0.79 tok/s | 9/12 @ 3.15 tok/s | ~4x faster |
+
+**Bottom line on the RTX 5090 upgrade**: every model got faster (2.5-5.5x
+depending on how GPU-resident it already was on Machine 2), but the biggest
+win by far is for the models that used to fall off the VRAM cliff — the
+dense 70B class went from "impractical" (1.3-1.45 tok/s) to "usable"
+(6.5-6.6 tok/s), and the 236B MoE model's single coding run dropped from
+61 minutes to under 16. Coding/reasoning *correctness* moved in both
+directions by a test or two for several models (expected — see the
+repeat-run note above and existing single-run-noise caveats), except for
+Qwen2.5-72B and DeepSeek-Coder-V2-Lite, whose specific failure *reasons*
+changed but whose overall pattern (broken/weak) was independently
+reproduced.
+
+---
+
 ## Methodology notes / pitfalls hit while building this (read before re-running)
 
 From the original Mac-only build:
@@ -333,3 +485,42 @@ New, found while running on workstation1:
     dense model or a 236B MoE model with only 21B active parameters — MoE
     sparsity doesn't help once the *inactive* experts still need to live in
     (slow) system RAM rather than VRAM.
+
+New, found while re-running on Machine 3 (dual-GPU):
+
+13. **A prior benchmark run's serving setup can silently rot underneath
+    you.** `run_bench.sh` on both benchmarks hardcoded `docker exec
+    ollama-test ...` and port `11436`, pointing at a Docker container from
+    the Machine 2 run that no longer existed by the time Machine 3 was set
+    up — a currently-running native `ollama serve` on port `11434` had
+    replaced it. Scripts failed silently in a way that would have produced
+    empty/garbage results rather than an obvious error if not caught first.
+    **Fix**: always verify the target Ollama endpoint (`curl
+    localhost:<port>/api/version`, `ollama ps`) actually responds before
+    trusting a re-run of old orchestration scripts on new/changed hardware.
+14. **Directory-name collisions can silently overwrite tracked baseline
+    data.** Several Machine 3 runs reused the exact same Ollama tag (and
+    therefore the exact same `runs/<tag>` output directory) as Machine 2's
+    already-committed baseline results for `llama3.1:70b`, `llama3.3:70b`,
+    `qwen2.5:72b`, and `nemotron:70b` — `run_detached.sh`'s `rm -rf
+    "$BENCH/runs/$MODEL"` step overwrote that historical data before the
+    overwrite was noticed via `git status`/`git diff`. **Fix**: recovered
+    from `git checkout --` since the repo was committed and clean beforehand
+    (always confirm a clean working tree before a scripted re-run for
+    exactly this reason), then re-ran on `<tag>-dualgpu`-suffixed
+    directories to avoid the same collision going forward. If reusing an
+    old tag name on new hardware, rename the output directory *before*
+    running, not after.
+15. **A 0/N score is worth one free re-run before you trust it, but a
+    re-run is a *reproducibility* check, not a *fix*.** All three 0/23
+    coding scores on Machine 3 (GLM-4.7-Flash, DeepSeek-Coder-V2-Lite,
+    Qwen2.5-72B) were re-run from scratch. In every case the `main.py`
+    extraction itself was clean (non-empty, matched the response length),
+    ruling out an extraction bug like note 8's doubled-fence issue — so all
+    three were confirmed to be real model-generated bugs. Two of the three
+    (GLM, DeepSeek-Lite) scored higher on the second attempt but failed for
+    a *different* reason each time (sampling variance in which mistake the
+    model happens to make, not the harness). The third (Qwen2.5-72B) failed
+    identically both times for the same root cause (Pydantic v1 `regex=`
+    kwarg against an installed Pydantic v2) — that's the one worth trusting
+    as a real, stable finding rather than noise.

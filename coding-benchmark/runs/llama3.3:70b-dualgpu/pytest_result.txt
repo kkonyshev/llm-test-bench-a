@@ -1,0 +1,193 @@
+F.....F..FFF.F..FFFFFF.                                                  [100%]
+=================================== FAILURES ===================================
+___________________________ test_create_task_minimal ___________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60ab21b770>
+
+    def test_create_task_minimal(client):
+        r = create_task(client)
+>       assert r.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+test_tasks.py:36: AssertionError
+_____________________________ test_get_task_found ______________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9f74490>
+
+    def test_get_task_found(client):
+        created = create_task(client, title="Findme").json()
+>       r = client.get(f"/tasks/{created['id']}")
+                                 ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+test_tasks.py:79: KeyError
+______________________ test_list_returns_all_and_ordered _______________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9f1dae0>
+
+    def test_list_returns_all_and_ordered(client):
+>       ids = [create_task(client, title=f"t{i}").json()["id"] for i in range(3)]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+test_tasks.py:102: KeyError
+________________________ test_list_filter_by_completed _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60ab157350>
+
+    def test_list_filter_by_completed(client):
+        a = create_task(client, title="a").json()
+        create_task(client, title="b")
+>       client.put(f"/tasks/{a['id']}", json={"completed": True})
+                             ^^^^^^^
+E       KeyError: 'id'
+
+test_tasks.py:112: KeyError
+_________________________ test_list_filter_by_priority _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9e03460>
+
+    def test_list_filter_by_priority(client):
+        create_task(client, title="a", priority="low")
+        create_task(client, title="b", priority="high")
+        r = client.get("/tasks", params={"priority": "high"})
+        data = r.json()
+>       assert data["total"] == 1
+E       assert 0 == 1
+
+test_tasks.py:128: AssertionError
+_____________________________ test_list_pagination _____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9e0aad0>
+
+    def test_list_pagination(client):
+        for i in range(15):
+            create_task(client, title=f"t{i}")
+    
+        r = client.get("/tasks", params={"page": 1, "page_size": 10})
+        data = r.json()
+>       assert len(data["items"]) == 10
+E       assert 0 == 10
+E        +  where 0 = len([])
+
+test_tasks.py:143: AssertionError
+__________________________ test_update_partial_field ___________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9cfe140>
+
+    def test_update_partial_field(client):
+        created = create_task(client, title="orig", description="d", priority="low").json()
+        r = client.put(f"/tasks/{created['id']}", json={"completed": True})
+>       assert r.status_code == 200
+E       assert 422 == 200
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+test_tasks.py:170: AssertionError
+_________________________ test_update_multiple_fields __________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9ed5d00>
+
+    def test_update_multiple_fields(client):
+        created = create_task(client).json()
+        r = client.put(
+>           f"/tasks/{created['id']}",
+                      ^^^^^^^^^^^^^
+            json={"title": "new title", "priority": "high"},
+        )
+E       KeyError: 'id'
+
+test_tasks.py:181: KeyError
+____________________________ test_update_not_found _____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9d8ff00>
+
+    def test_update_not_found(client):
+        r = client.put("/tasks/99999", json={"completed": True})
+>       assert r.status_code == 404
+E       assert 422 == 404
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+test_tasks.py:191: AssertionError
+_________________________ test_update_invalid_priority _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a93e9ae0>
+
+    def test_update_invalid_priority(client):
+        created = create_task(client).json()
+>       r = client.put(f"/tasks/{created['id']}", json={"priority": "urgent"})
+                                 ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+test_tasks.py:196: KeyError
+___________________________ test_update_empty_title ____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a9450270>
+
+    def test_update_empty_title(client):
+        created = create_task(client).json()
+>       r = client.put(f"/tasks/{created['id']}", json={"title": ""})
+                                 ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+test_tasks.py:202: KeyError
+______________________________ test_delete_found _______________________________
+
+client = <starlette.testclient.TestClient object at 0x7f60a94529c0>
+
+    def test_delete_found(client):
+        created = create_task(client).json()
+>       r = client.delete(f"/tasks/{created['id']}")
+                                    ^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+test_tasks.py:210: KeyError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/llama3.3:70b/main.py:14: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/llama3.3:70b/main.py:37: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("title")
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/llama3.3:70b/main.py:43: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("priority")
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/llama3.3:70b/main.py:55: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("title")
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/llama3.3:70b/main.py:61: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    @validator("priority")
+
+test_tasks.py::test_create_task_full
+test_tasks.py::test_update_partial_field
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/sqlalchemy/sql/schema.py:3627: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_tasks.py::test_create_task_minimal - assert 422 == 201
+FAILED test_tasks.py::test_get_task_found - KeyError: 'id'
+FAILED test_tasks.py::test_list_returns_all_and_ordered - KeyError: 'id'
+FAILED test_tasks.py::test_list_filter_by_completed - KeyError: 'id'
+FAILED test_tasks.py::test_list_filter_by_priority - assert 0 == 1
+FAILED test_tasks.py::test_list_pagination - assert 0 == 10
+FAILED test_tasks.py::test_update_partial_field - assert 422 == 200
+FAILED test_tasks.py::test_update_multiple_fields - KeyError: 'id'
+FAILED test_tasks.py::test_update_not_found - assert 422 == 404
+FAILED test_tasks.py::test_update_invalid_priority - KeyError: 'id'
+FAILED test_tasks.py::test_update_empty_title - KeyError: 'id'
+FAILED test_tasks.py::test_delete_found - KeyError: 'id'
+12 failed, 11 passed, 124 warnings in 1.15s

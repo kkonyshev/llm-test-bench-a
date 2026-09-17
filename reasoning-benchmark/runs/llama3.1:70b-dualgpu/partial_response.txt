@@ -1,0 +1,103 @@
+Here are the solutions to the problems:
+
+
+1. A shop sells notebooks for $4 each and pens for $1.50 each. Maria buys 7 notebooks and 12 pens, then gets a 10% discount on the total. How much does she pay, in dollars?
+
+Total cost = (7 x $4) + (12 x $1.50) = $28 + $18 = $46
+Discount = 10% of $46 = $4.60
+Maria pays = $46 - $4.60 = $41.40
+
+ANSWER 1: $41.40
+
+
+2. Ben is twice as old as Cara was 6 years ago. In 4 years, Ben will be 30. How old is Cara now?
+
+Let Cara's age now be x. Then, Cara's age 6 years ago was x - 6.
+Ben's age now is 30 - 4 = 26.
+Since Ben is twice as old as Cara was 6 years ago, 26 = 2(x - 6).
+Solving for x, we get x = 19.
+
+ANSWER 2: 19
+
+
+3. Three friends — Alice, Ben, and Cleo — each own exactly one pet (cat, dog, or fish) and each prefer one drink (tea, coffee, or juice).
+   Clues: (a) Alice does not own the fish. (b) The dog owner drinks coffee. (c) Ben drinks juice. (d) Cleo does not drink tea.
+
+From clue (c), Ben drinks juice, so he cannot own the dog (which drinks coffee). From clue (a), Alice does not own the fish, so Ben must own the fish (since one of them must own the fish). From clue (b), the dog owner drinks coffee, so Cleo must own the dog. Therefore, Alice owns the cat, Ben owns the fish, and Cleo owns the dog.
+
+ANSWER 3: Cleo owns the dog, and Ben owns the fish.
+
+
+4. What is the next number in the sequence: 2, 6, 12, 20, 30, ?
+
+The pattern is adding 4, 6, 8, 10, ... to the previous term. Therefore, the next number is 30 + 12 = 42.
+
+ANSWER 4: 42
+
+
+5. A farmer has 17 sheep. All but 9 die. How many sheep does the farmer have left?
+
+The farmer has 9 sheep left.
+
+ANSWER 5: 9
+
+
+6. Pipe A fills a tank in 6 hours. Pipe B fills the same tank in 3 hours. If both pipes are opened together, how many hours does it take to fill the tank?
+
+Let the capacity of the tank be x.
+Pipe A fills x/6 of the tank in 1 hour.
+Pipe B fills x/3 of the tank in 1 hour.
+Together, they fill (x/6 + x/3) of the tank in 1 hour.
+Combining the fractions, we get (x/6 + 2x/6) = 3x/6 = x/2 of the tank in 1 hour.
+So, it takes 2 hours to fill the tank.
+
+ANSWER 6: 2
+
+
+7. Which is heavier: a kilogram of feathers, or a pound of steel?
+
+One kilogram is equal to 2.2 pounds, so a kilogram of feathers is heavier than a pound of steel.
+
+ANSWER 7: A kilogram of feathers
+
+
+8. A store marks up the cost of an item by 25% to set the retail price. During a sale, the retail price is discounted by 20%. What is the sale price as a percentage of the original cost?
+
+Let the original cost be $100.
+The retail price is $100 + 25% of $100 = $125.
+The sale price is $125 - 20% of $125 = $100.
+So, the sale price is 100% of the original cost.
+
+ANSWER 8: 100
+
+
+9. On an island, every person always tells the truth or always lies. You meet two islanders, X and Y. X says: "At least one of us is a liar." Is X a truth-teller or a liar? What about Y?
+
+If X is a truth-teller, then at least one of them is a liar, so Y must be a liar.
+If X is a liar, then both X and Y are truth-tellers, which is a contradiction.
+So, X is a truth-teller, and Y is a liar.
+
+ANSWER 9: X is a truth-teller, and Y is a liar.
+
+
+10. If 3x + 7 = 2x + 15, what is x?
+
+Subtracting 2x from both sides, we get x + 7 = 15.
+Subtracting 7 from both sides, we get x = 8.
+
+ANSWER 10: 8
+
+
+11. A committee of 3 people is chosen from 5 candidates. How many different committees are possible?
+
+This is a combination problem, since the order of selection doesn't matter.
+The number of combinations is 5C3 = (5!)/(3!2!) = 10.
+
+ANSWER 11: 10
+
+
+12. Dan is taller than Ellie. Ellie is shorter than Farah. Farah is shorter than Dan. Who is the tallest, and who is the shortest?
+
+From the first statement, Dan is taller than Ellie.
+From the second statement, Farah is taller than Ellie.
+From the third statement, Dan is taller than Far

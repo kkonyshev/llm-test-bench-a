@@ -1,0 +1,2 @@
+NAME                                      ID              SIZE      PROCESSOR          CONTEXT    UNTIL              
+deepseek-coder-v2:236b-instruct-q4_K_M    f37bcc863826    188 GB    75%/25% CPU/GPU    8192       4 minutes from now    

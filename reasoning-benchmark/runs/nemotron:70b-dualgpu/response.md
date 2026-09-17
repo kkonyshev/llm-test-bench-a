@@ -1,0 +1,114 @@
+Here are the solutions to each problem, followed by the answer in the requested format:
+
+**1. A shop sells notebooks for $4 each and pens for $1.50 each. Maria buys 7 notebooks and 12 pens, then gets a 10% discount on the total. How much does she pay, in dollars?**
+
+* Cost of notebooks: 7 * $4 = $28
+* Cost of pens: 12 * $1.50 = $18
+* Total cost: $28 + $18 = $46
+* Discount: $46 * 0.10 = $4.60
+* Final amount paid: $46 - $4.60 = $41.40
+
+ANSWER 1: $41.40
+
+**2. Ben is twice as old as Cara was 6 years ago. In 4 years, Ben will be 30. How old is Cara now?**
+
+* Ben's age in 4 years: 30
+* Ben's current age: 30 - 4 = 26
+* Cara's age 6 years ago: Ben's current age / 2 = 26 / 2 = 13
+* Cara's current age: 13 + 6 = 19
+
+ANSWER 2: 19
+
+**3. Three friends — Alice, Ben, and Cleo — each own exactly one pet (cat, dog, or fish) and each prefer one drink (tea, coffee, or juice).**
+**Clues: (a) Alice does not own the fish. (b) The dog owner drinks coffee. (c) Ben drinks juice. (d) Cleo does not drink tea.**
+**Who owns the dog, and what pet does Ben own?**
+
+* From (b), the dog owner drinks coffee. Since Ben drinks juice (c), Ben doesn't own the dog.
+* From (d), Cleo doesn't drink tea, but this doesn't directly help with the pet. Given Ben drinks juice and doesn't own the dog (from above), and assuming each drink is associated with a different person, Cleo must drink coffee (as tea is left for Alice or the remaining association, but Alice can't own the fish, leaving flexibility).
+* Since Cleo drinks coffee, Cleo owns the dog (from b).
+* Ben owns juice, and by elimination (Alice can't own the fish, and Cleo owns the dog), Ben must own the fish, and Alice the cat.
+
+ANSWER 3: Dog owner: Cleo, Ben's pet: Fish
+
+**4. What is the next number in the sequence: 2, 6, 12, 20, 30, ?**
+
+* Sequence analysis: 
+	+ 2 to 6: +4
+	+ 6 to 12: +6
+	+ 12 to 20: +8
+	+ 20 to 30: +10
+* Pattern: Increase by consecutive even numbers (+4, +6, +8, +10, ...).
+* Next difference should be +12.
+* Next number: 30 + 12 = 42
+
+ANSWER 4: 42
+
+**5. A farmer has 17 sheep. All but 9 die. How many sheep does the farmer have left?**
+
+* "All but 9 die" means 9 sheep survive.
+* No calculation needed based on the wording.
+
+ANSWER 5: 9
+
+**6. Pipe A fills a tank in 6 hours. Pipe B fills the same tank in 3 hours. If both pipes are opened together, how many hours does it take to fill the tank?**
+
+* Rate of Pipe A: 1 tank / 6 hours
+* Rate of Pipe B: 1 tank / 3 hours
+* Combined rate: (1/6 + 1/3) tanks per hour = (1/6 + 2/6) tanks per hour = 3/6 tanks per hour = 1/2 tank per hour
+* Time to fill the tank together: 1 tank / (1/2 tank per hour) = 2 hours
+
+ANSWER 6: 2
+
+**7. Which is heavier: a kilogram of feathers, or a pound of steel?**
+
+* 1 kilogram = 2.20462 pounds (approximately)
+* A pound of steel weighs the same as a pound of feathers in terms of pounds, but in kilograms, the steel would be approximately 0.453592 kilograms.
+* A kilogram of feathers and a pound of steel are not equal in weight when compared directly (kilogram to kilogram or pound to pound). However, the question seems to aim at understanding unit differences rather than direct weight comparisons. By the question's likely intent (comparing within the same unit system for a direct answer):
+	+ If comparing by kilogram (and converting the pound of steel to kilograms), the kilogram of feathers is heavier.
+	+ If forced to choose without conversion (though scientifically inaccurate for direct comparison), the premise might seem to lean towards the kilogram of feathers being "heavier" due to the unit's larger base value in this context.
+
+ANSWER 7: A kilogram of feathers (with the clarification that this response aligns with the likely educational intent of highlighting unit differences)
+
+**8. A store marks up the cost of an item by 25% to set the retail price. During a sale, the retail price is discounted by 20%. What is the sale price as a percentage of the original cost?**
+
+* Original cost: $100 (for ease of calculation)
+* Markup by 25%: $100 * 0.25 = $25; Retail price = $100 + $25 = $125
+* Discount of 20% on retail: $125 * 0.20 = $25; Sale price = $125 - $25 = $100
+* Sale price as a percentage of the original cost: ($100 / $100) * 100 = 100%
+
+ANSWER 8: 100%
+
+**9. On an island, every person always tells the truth or always lies. You meet two islanders, X and Y. X says: "At least one of us is a liar." Is X a truth-teller or a liar? What about Y?**
+
+* If X is a truth-teller, then at least one of them must indeed be a liar, which would make Y the liar (since X is telling the truth). This scenario is possible.
+* If X is a liar, then neither of them would be a liar (to make X's statement false), which leads to a contradiction since X would then be telling the truth, making this scenario impossible.
+* Thus, X must be a truth-teller, and Y must be a liar (since X's true statement indicates at least one liar, and it can't be X in this scenario).
+
+ANSWER 9: X: Truth-teller, Y: Liar
+
+**10. If 3x + 7 = 2x + 15, what is x?**
+
+* 3x + 7 = 2x + 15
+* Subtract 2x from both sides: x + 7 = 15
+* Subtract 7 from both sides: x = 8
+
+ANSWER 10: 8
+
+**11. A committee of 3 people is chosen from 5 candidates. How many different committees are possible?**
+
+* This is a combination problem since the order doesn't matter.
+* Formula for combinations: C(n, r) = n! / [r!(n - r)!]
+* Here, n = 5 (total candidates), r = 3 (committee size)
+* C(5, 3) = 5! / [3!(5 - 3)!] = (5*4*3*2*1) / [(3*2*1)*(2*1)] = 120 / (6*2) = 120 / 12 = 10
+
+ANSWER 11: 10
+
+**12. Dan is taller than Ellie. Ellie is shorter than Farah. Farah is shorter than Dan. Who is the tallest, and who is the shortest?**
+
+* Dan is taller than Ellie.
+* Farah is taller than Ellie (since Ellie is shorter than Farah).
+* Farah is shorter than Dan, so the order from tallest to shortest is: Dan, Farah, Ellie.
+* Tallest: Dan
+* Shortest: Ellie
+
+ANSWER 12: Tallest: Dan, Shortest: Ellie

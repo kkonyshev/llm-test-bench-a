@@ -1,0 +1,14 @@
+[PASS] Q1: $41.40
+[PASS] Q2: 19
+[PASS] Q3: Cleo owns the dog, and Ben owns the fish
+[PASS] Q4: 42
+[PASS] Q5: 9
+[PASS] Q6: 2
+[PASS] Q7: A kilogram of feathers
+[PASS] Q8: 100%
+[FAIL] Q9: X is a truth-teller
+[PASS] Q10: 8
+[PASS] Q11: 10
+[PASS] Q12: Dan is the tallest, and Ellie is the shortest
+
+11/12 correct

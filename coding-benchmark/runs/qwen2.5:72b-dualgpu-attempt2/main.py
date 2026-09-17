@@ -1,0 +1,155 @@
+from fastapi import FastAPI, HTTPException, Query, Path, Body, Depends
+from pydantic import BaseModel, Field, validator
+from typing import Optional, List
+import sqlite3
+from datetime import datetime
+from contextlib import closing
+
+app = FastAPI()
+
+DATABASE = 'tasks.db'
+
+class TaskCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    priority: Optional[str] = Field(default='medium', regex='^(low|medium|high)$')
+
+    @validator('title')
+    def title_not_empty(cls, v):
+        if not v.strip():
+            raise ValueError('Title cannot be empty')
+        return v.strip()
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[str] = Field(None, regex='^(low|medium|high)$')
+
+    @validator('title')
+    def title_not_empty(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError('Title cannot be empty')
+        return v.strip() if v is not None else v
+
+class Task(TaskCreate):
+    id: int
+    completed: bool = False
+    created_at: str
+
+    class Config:
+        orm_mode = True
+
+def get_db():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    yield conn
+    conn.close()
+
+@app.on_event("startup")
+def startup():
+    with closing(sqlite3.connect(DATABASE)) as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority TEXT DEFAULT 'medium',
+                created_at TEXT NOT NULL
+            )
+        ''')
+        conn.commit()
+
+@app.post("/tasks", response_model=Task, status_code=201)
+def create_task(task: TaskCreate, db: sqlite3.Connection = Depends(get_db)):
+    now = datetime.utcnow().isoformat()
+    cursor = db.execute('''
+        INSERT INTO tasks (title, description, priority, created_at)
+        VALUES (?, ?, ?, ?)
+    ''', (task.title, task.description, task.priority, now))
+    db.commit()
+    task_id = cursor.lastrowid
+    return Task(id=task_id, completed=False, created_at=now, **task.dict())
+
+@app.get("/tasks", response_model=List[Task])
+def list_tasks(
+    completed: Optional[bool] = None,
+    priority: Optional[str] = Query(None, regex='^(low|medium|high)$'),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: sqlite3.Connection = Depends(get_db)
+):
+    query = 'SELECT * FROM tasks WHERE 1=1'
+    params = []
+
+    if completed is not None:
+        query += ' AND completed = ?'
+        params.append(completed)
+
+    if priority is not None:
+        query += ' AND priority = ?'
+        params.append(priority)
+
+    query += ' ORDER BY id ASC LIMIT ? OFFSET ?'
+    params.extend([page_size, (page - 1) * page_size])
+
+    cursor = db.execute(query, params)
+    tasks = [Task(**row) for row in cursor.fetchall()]
+
+    total_query = 'SELECT COUNT(*) AS total FROM tasks WHERE 1=1'
+    total_params = []
+
+    if completed is not None:
+        total_query += ' AND completed = ?'
+        total_params.append(completed)
+
+    if priority is not None:
+        total_query += ' AND priority = ?'
+        total_params.append(priority)
+
+    total_cursor = db.execute(total_query, total_params)
+    total = total_cursor.fetchone()['total']
+
+    return {
+        "items": tasks,
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
+
+@app.get("/tasks/{id}", response_model=Task)
+def get_task(id: int = Path(..., ge=1), db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.execute('SELECT * FROM tasks WHERE id = ?', (id,))
+    row = cursor.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return Task(**row)
+
+@app.put("/tasks/{id}", response_model=Task)
+def update_task(
+    id: int = Path(..., ge=1),
+    task_update: TaskUpdate = Body(...),
+    db: sqlite3.Connection = Depends(get_db)
+):
+    update_fields = task_update.dict(exclude_unset=True)
+    if not update_fields:
+        raise HTTPException(status_code=422, detail="No fields to update")
+
+    set_clause = ', '.join(f"{field} = ?" for field in update_fields)
+    params = list(update_fields.values())
+    params.append(id)
+
+    cursor = db.execute(f'UPDATE tasks SET {set_clause} WHERE id = ?', params)
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    db.commit()
+    return get_task(id, db)
+
+@app.delete("/tasks/{id}", status_code=204)
+def delete_task(id: int = Path(..., ge=1), db: sqlite3.Connection = Depends(get_db)):
+    cursor = db.execute('DELETE FROM tasks WHERE id = ?', (id,))
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    db.commit()

@@ -1,0 +1,141 @@
+```python
+```python
+from fastapi import FastAPI, HTTPException, Response, status
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, validator
+from typing import Optional, List
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+import sqlite3
+
+# Create the database engine
+engine = create_engine('sqlite:///tasks.db')
+Base = declarative_base()
+
+# Define the Task model for SQLAlchemy
+class Task(Base):
+    __tablename__ = 'tasks'
+    id = Column(Integer, primary_key=True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    completed = Column(Boolean, default=False, nullable=False)
+    priority = Column(Enum('low', 'medium', 'high'), default='medium', nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+# Create the table if it doesn't exist
+Base.metadata.create_all(engine)
+
+# Create a session maker
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Define the Task model for Pydantic (API responses and requests)
+class TaskPydantic(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    completed: bool
+    priority: str
+    created_at: str
+
+    class Config:
+        orm_mode = True
+
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str]
+    priority: Optional[str] = 'medium'
+
+    @validator('title')
+    def title_not_empty(cls, v):
+        if not v.strip():
+            raise ValueError('Title must not be empty')
+        return v
+
+    @validator('priority')
+    def priority_valid(cls, v):
+        if v not in ['low', 'medium', 'high']:
+            raise ValueError('Priority must be one of low, medium, high')
+        return v
+
+class TaskUpdate(BaseModel):
+    title: Optional[str]
+    description: Optional[str]
+    completed: Optional[bool]
+    priority: Optional[str]
+
+    @validator('title')
+    def title_not_empty_if_provided(cls, v):
+        if v and not v.strip():
+            raise ValueError('Title must not be empty if provided')
+        return v
+
+    @validator('priority')
+    def priority_valid_if_provided(cls, v):
+        if v and v not in ['low', 'medium', 'high']:
+            raise ValueError('Priority must be one of low, medium, high if provided')
+        return v
+
+# Create the FastAPI app
+app = FastAPI()
+
+# Endpoint to create a task
+@app.post("/tasks", status_code=201, response_model=TaskPydantic)
+def create_task(task: TaskCreate):
+    db_task = Task(title=task.title, description=task.description, priority=task.priority)
+    session.add(db_task)
+    session.commit()
+    return db_task
+
+# Endpoint to list tasks
+@app.get("/tasks", response_model=List[TaskPydantic])
+def list_tasks(completed: Optional[bool] = None, priority: Optional[str] = None, 
+               page: int = 1, page_size: int = 10):
+    if page < 1:
+        raise HTTPException(status_code=422, detail="Page must be >= 1")
+    if page_size < 1 or page_size > 100:
+        raise HTTPException(status_code=422, detail="Page size must be between 1 and 100")
+    query = session.query(Task)
+    if completed is not None:
+        query = query.filter(Task.completed == completed)
+    if priority and priority not in ['low', 'medium', 'high']:
+        raise HTTPException(status_code=422, detail="Priority must be one of low, medium, high")
+    if priority:
+        query = query.filter(Task.priority == priority)
+    total = query.count()
+    query = query.offset((page - 1) * page_size).limit(page_size)
+    tasks = query.all()
+    return {"items": tasks, "total": total, "page": page, "page_size": page_size}
+
+# Endpoint to get one task
+@app.get("/tasks/{task_id}", response_model=TaskPydantic)
+def get_task(task_id: int):
+    task = session.query(Task).filter(Task.id == task_id).first()
+    if task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return task
+
+# Endpoint to partially update a task
+@app.put("/tasks/{task_id}", response_model=TaskPydantic)
+def update_task(task_id: int, task: TaskUpdate):
+    db_task = session.query(Task).filter(Task.id == task_id).first()
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if task.title:
+        db_task.title = task.title
+    if task.description:
+        db_task.description = task.description
+    if task.completed:
+        db_task.completed = task.completed
+    if task.priority:
+        db_task.priority = task.priority
+    session.commit()
+    return db_task
+
+# Endpoint to delete a task
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int):
+    task = session.query(Task).filter(Task.id == task_id).first()
+    if task

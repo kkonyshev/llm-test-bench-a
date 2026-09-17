@@ -1,0 +1,130 @@
+```python
+from fastapi import FastAPI, HTTPException, Query, Path, Body, Depends
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, constr, Field
+from typing import Optional, List
+import sqlite3
+from datetime import datetime
+
+app = FastAPI()
+
+# Database initialization
+def get_db():
+    conn = sqlite3.connect('tasks.db')
+    conn.row_factory = sqlite3.Row
+    create_table(conn)
+    return conn
+
+def create_table(conn):
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            completed BOOLEAN DEFAULT FALSE,
+            priority TEXT DEFAULT 'medium',
+            created_at TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+
+# Pydantic Models
+class TaskCreate(BaseModel):
+    title: constr(min_length=1, max_length=200, strip_whitespace=True)
+    description: Optional[str]
+    priority: Optional[constr(regex="^(low|medium|high)$")] = 'medium'
+
+class TaskUpdate(BaseModel):
+    title: Optional[constr(min_length=1, max_length=200, strip_whitespace=True)]
+    description: Optional[str]
+    completed: Optional[bool]
+    priority: Optional[constr(regex="^(low|medium|high)$")]
+
+class Task(TaskCreate):
+    id: int
+    completed: bool = False
+    created_at: str
+
+# Dependency to get a database connection
+def get_conn():
+    conn = get_db()
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+# Endpoints
+@app.post("/tasks", response_model=Task, status_code=201)
+def create_task(task: TaskCreate, conn: sqlite3.Connection = Depends(get_conn)):
+    now = datetime.utcnow().isoformat()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO tasks (title, description, completed, priority, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (task.title, task.description, task.completed, task.priority, now))
+    conn.commit()
+    task_id = cursor.lastrowid
+    return Task(id=task_id, **task.dict(), created_at=now)
+
+@app.get("/tasks", response_model=List[Task])
+def list_tasks(
+    completed: Optional[bool] = None,
+    priority: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    conn: sqlite3.Connection = Depends(get_conn)
+):
+    query = "SELECT * FROM tasks WHERE 1=1"
+    params = []
+    if completed is not None:
+        query += " AND completed = ?"
+        params.append(completed)
+    if priority is not None:
+        query += " AND priority = ?"
+        params.append(priority)
+    
+    cursor = conn.cursor()
+    cursor.execute(query + " ORDER BY id ASC LIMIT ? OFFSET ?", params + [page_size, (page - 1) * page_size])
+    tasks = [Task(**row) for row in cursor.fetchall()]
+    
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE 1=1" + query[len("SELECT * FROM tasks WHERE 1=1"):], params)
+    total = cursor.fetchone()[0]
+    
+    return JSONResponse(content={"items": tasks, "total": total, "page": page, "page_size": page_size})
+
+@app.get("/tasks/{id}", response_model=Task)
+def get_task(id: int, conn: sqlite3.Connection = Depends(get_conn)):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    task = cursor.fetchone()
+    if task:
+        return Task(**task)
+    raise HTTPException(status_code=404, detail="Task not found")
+
+@app.put("/tasks/{id}", response_model=Task)
+def update_task(id: int, task_update: TaskUpdate, conn: sqlite3.Connection = Depends(get_conn)):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    existing_task = cursor.fetchone()
+    if not existing_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    update_data = task_update.dict(exclude_unset=True)
+    if update_data:
+        set_clause = ", ".join([f"{field} = ?" for field in update_data.keys()])
+        params = list(update_data.values()) + [id]
+        cursor.execute(f"UPDATE tasks SET {set_clause} WHERE id = ?", params)
+        conn.commit()
+    
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    updated_task = cursor.fetchone()
+    return Task(**updated_task)
+
+@app.delete("/tasks/{id}", status_code=204)
+def delete_task(id: int, conn: sqlite3.Connection = Depends(get_conn)):
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (id,))
+    if cursor.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Task not found")
+    conn.commit()
+```
