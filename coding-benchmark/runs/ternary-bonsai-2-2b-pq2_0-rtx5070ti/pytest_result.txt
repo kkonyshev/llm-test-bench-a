@@ -1,0 +1,1877 @@
+EEEEEEEEEEEEEEEEEEEEEEE                                                  [100%]
+==================================== ERRORS ====================================
+__________________ ERROR at setup of test_create_task_minimal __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+___________________ ERROR at setup of test_create_task_full ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_______________ ERROR at setup of test_create_task_missing_title _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+________________ ERROR at setup of test_create_task_empty_title ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_____________ ERROR at setup of test_create_task_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+______________ ERROR at setup of test_create_task_title_too_long _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+____________________ ERROR at setup of test_get_task_found _____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+__________________ ERROR at setup of test_get_task_not_found ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+______________________ ERROR at setup of test_list_empty _______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_____________ ERROR at setup of test_list_returns_all_and_ordered ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_______________ ERROR at setup of test_list_filter_by_completed ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+________________ ERROR at setup of test_list_filter_by_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_____________ ERROR at setup of test_list_filter_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+____________________ ERROR at setup of test_list_pagination ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+___________________ ERROR at setup of test_list_invalid_page ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+________________ ERROR at setup of test_list_invalid_page_size _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_________________ ERROR at setup of test_update_partial_field __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+________________ ERROR at setup of test_update_multiple_fields _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+___________________ ERROR at setup of test_update_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+________________ ERROR at setup of test_update_invalid_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+__________________ ERROR at setup of test_update_empty_title ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+_____________________ ERROR at setup of test_delete_found ______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+___________________ ERROR at setup of test_delete_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    import os
+    import sqlite3
+    from datetime import datetime
+    from typing import Optional, List
+    from fastapi import APIRouter, HTTPException, Depends
+    from fastapi import status
+    from pydantic import BaseModel
+    
+    # Define the database path
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tasks.db')
+    
+    # Create database table if not exists
+    def create_table(db_connection):
+        cursor = db_connection.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                completed BOOLEAN DEFAULT FALSE,
+                priority VARCHAR(10) DEFAULT 'medium',
+                created_at TIMESTAMP
+            )
+        ''')
+        db_connection.commit()
+    
+    # Create API router
+    router = APIRouter()
+    
+    class TaskCreate(BaseModel):
+        title: str
+        description: Optional[str] = None
+        priority: Optional[str] = 'medium'
+    
+        def validate(self):
+            if not self.title or not self.title.strip():
+                raise HTTPException(status_code=422, detail='title is required')
+            if self.priority and not self.priority in ['low', 'medium', 'high']:
+                raise HTTPException(status_code=422, detail='priority must be one of low, medium, high')
+    
+    class Task(BaseModel):
+        id: int
+        title: str
+        description: Optional[str] = None
+        completed: bool = False
+        priority: str = 'medium'
+        created_at: datetime = None
+    
+    def get_db_connection():
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def create_db():
+        try:
+            conn = get_db_connection()
+            create_table(conn)
+            conn.commit()
+            conn.close()
+        except sqlite3.Error as e:
+            print(f'Database error: {e}')
+    
+    # Create database on startup
+    create_db()
+    
+>   router.register(r'POST', TaskCreate)
+    ^^^^^^^^^^^^^^^
+E   AttributeError: 'APIRouter' object has no attribute 'register'
+
+main.py:66: AttributeError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR test_tasks.py::test_create_task_minimal - AttributeError: 'APIRouter' o...
+ERROR test_tasks.py::test_create_task_full - AttributeError: 'APIRouter' obje...
+ERROR test_tasks.py::test_create_task_missing_title - AttributeError: 'APIRou...
+ERROR test_tasks.py::test_create_task_empty_title - AttributeError: 'APIRoute...
+ERROR test_tasks.py::test_create_task_invalid_priority - AttributeError: 'API...
+ERROR test_tasks.py::test_create_task_title_too_long - AttributeError: 'APIRo...
+ERROR test_tasks.py::test_get_task_found - AttributeError: 'APIRouter' object...
+ERROR test_tasks.py::test_get_task_not_found - AttributeError: 'APIRouter' ob...
+ERROR test_tasks.py::test_list_empty - AttributeError: 'APIRouter' object has...
+ERROR test_tasks.py::test_list_returns_all_and_ordered - AttributeError: 'API...
+ERROR test_tasks.py::test_list_filter_by_completed - AttributeError: 'APIRout...
+ERROR test_tasks.py::test_list_filter_by_priority - AttributeError: 'APIRoute...
+ERROR test_tasks.py::test_list_filter_invalid_priority - AttributeError: 'API...
+ERROR test_tasks.py::test_list_pagination - AttributeError: 'APIRouter' objec...
+ERROR test_tasks.py::test_list_invalid_page - AttributeError: 'APIRouter' obj...
+ERROR test_tasks.py::test_list_invalid_page_size - AttributeError: 'APIRouter...
+ERROR test_tasks.py::test_update_partial_field - AttributeError: 'APIRouter' ...
+ERROR test_tasks.py::test_update_multiple_fields - AttributeError: 'APIRouter...
+ERROR test_tasks.py::test_update_not_found - AttributeError: 'APIRouter' obje...
+ERROR test_tasks.py::test_update_invalid_priority - AttributeError: 'APIRoute...
+ERROR test_tasks.py::test_update_empty_title - AttributeError: 'APIRouter' ob...
+ERROR test_tasks.py::test_delete_found - AttributeError: 'APIRouter' object h...
+ERROR test_tasks.py::test_delete_not_found - AttributeError: 'APIRouter' obje...
+2 warnings, 23 errors in 0.39s

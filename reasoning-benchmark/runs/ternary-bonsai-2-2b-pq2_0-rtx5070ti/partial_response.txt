@@ -1,0 +1,540 @@
+The user wants me to solve 12 math/logic problems and provide a specific format for the answer.
+
+**Problem 1:**
+Shop sells notebooks for $4 and pens for $1.50.
+Maria buys 7 notebooks and 12 pens.
+Total cost before discount = 7 * 4 + 12 * 1.50
+= 28 + 18
+= 46
+Discount is 10% on the total.
+Discount amount = 46 * 0.10 = 4.60
+Final price = 46 - 4.60 = 41.40
+
+**Problem 2:**
+Ben is twice as old as Cara was 6 years ago.
+Let Ben's age be $B$ and Cara's age be $C$.
+$B = 2(C - 6)$
+In 4 years, Ben will be 30.
+$B + 4 = 30 \Rightarrow B = 26$
+Substitute $B$ into the equation:
+$26 = 2(C - 6)$
+$13 = C - 6$
+$C = 19$
+Cara is 19.
+
+**Problem 3:**
+Three friends: Alice, Ben, Cleo. Pets: cat, dog, fish. Drinks: tea, coffee, juice.
+Clues:
+(a) Alice $\neq$ fish.
+(b) Dog owner drinks coffee.
+(c) Ben drinks juice.
+(d) Cleo $\neq$ tea.
+
+Who owns the dog?
+Dog owner drinks coffee.
+Ben drinks juice. So Ben is not the dog owner.
+Alice doesn't own the fish.
+We have 3 pets (cat, dog, fish) and 3 people (Alice, Ben, Cleo).
+Possible mappings:
+1. Alice = Fish? Then Dog = ?
+   - Dog owner drinks coffee.
+   - Ben drinks juice (not coffee). So Ben $\neq$ Dog owner.
+   - If Alice owns fish, then Dog owner is either Ben or Cleo.
+   - If Ben is Dog owner, contradiction (drinks juice). So Ben $\neq$ Dog.
+   - Therefore, Cleo must own the dog.
+   - If Cleo owns the dog, he drinks coffee.
+   - But clue (d) says Cleo does not drink tea. Coffee is not tea. This holds.
+   - Let's check the pet assignment.
+   - Alice (not fish).
+   - Ben (juice).
+   - Cleo (dog, coffee).
+   - Fish owner must be Alice.
+   - Cat owner must be Ben? No, pets are distinct.
+   - Let's re-evaluate.
+   - Pets: Cat, Dog, Fish.
+   - People: Alice, Ben, Cleo.
+   - Drinks: Tea, Coffee, Juice.
+   - Constraints:
+     - Ben drinks Juice.
+     - Dog owner drinks Coffee.
+     - Alice $\neq$ Fish.
+     - Cleo $\neq$ Tea.
+   - Scenario A: Alice owns Fish.
+     - Dog owner = Ben or Cleo.
+     - Ben drinks Juice (not Coffee). So Ben $\neq$ Dog.
+     - So Cleo must own Dog and drink Coffee.
+     - Alice owns Fish.
+     - Ben owns Cat.
+     - Does this fit?
+     - Alice (Fish), Ben (Cat, Juice), Cleo (Dog, Coffee).
+     - Alice $\neq$ Fish? No, Alice owns Fish. Clue says "Alice does not own the fish". Contradiction.
+   - Scenario B: Alice owns Cat.
+     - Dog owner drinks Coffee.
+     - Fish owner?
+     - If Alice owns Cat, Alice is not Fish. (Consistent).
+     - If Cleo owns Fish, what is the drink?
+       - Dog owner (Coffee) $\neq$ Cleo (Fish owner).
+       - Dog owner is either Alice or Ben.
+       - Alice $\neq$ Fish, so Alice could be Dog.
+       - If Alice owns Dog, she drinks Coffee. But Alice owns Cat? No.
+       - Let's list valid scenarios for (Dog, Drink, Person):
+         - Dog $\to$ Coffee $\to$ Not Alice (if Alice $\neq$ Fish, and Alice is not Dog because she drinks Coffee? No, Dog owner is Coffee drinker).
+         - Wait, Dog Owner drinks Coffee.
+         - Ben drinks Juice. So Ben is not Dog owner.
+         - Dog owner is Alice or Cleo.
+         - If Alice is Dog owner: Drinks Coffee. But Alice $\neq$ Fish. This is allowed.
+         - If Alice is Dog owner, Alice owns Dog.
+           - Then Pet: Dog, Drink: Coffee.
+           - Alice owns Dog. Contradicts (a) Alice $\neq$ Fish. But she owns Dog, not Fish. That works.
+           - What about Pet assignment?
+           - Alice = Dog.
+           - Ben = ?
+           - Cleo = ?
+           - Fish owner?
+             - Fish owner cannot be Alice (Dog).
+             - Fish owner cannot be Ben (Juice). Fish owner must be Cleo.
+             - If Cleo owns Fish, she drinks ?
+             - Drinks: Tea, Coffee, Juice.
+             - Coffee is Alice. Juice is Ben.
+             - Tea must be Cleo.
+             - But clue (d) says Cleo does not drink tea.
+             - So Cleo cannot be Tea drinker.
+             - So this scenario (Alice Dog) fails.
+         - If Alice is NOT Dog owner.
+           - Alice must be Fish? No, Alice $\neq$ Fish.
+           - Alice must be Cat.
+           - Dog owner is Alice or Cleo. Since Alice is Cat, Dog owner is Cleo.
+           - If Cleo owns Dog, she drinks Coffee.
+           - Then Alice owns Cat.
+           - Fish owner must be Ben. But Ben drinks Juice. Fish owner $\neq$ Dog owner.
+           - So Fish owner is Alice? No.
+           - So Fish owner is someone else.
+           - Let's list:
+             - People: A, B, C.
+             - Pets: F, D, Cpet.
+             - Drinks: T, Co, Ju.
+             - Constraints: B=Ju. A!=F. C!=T. D=Co.
+             - B cannot be D.
+             - So D is A or C.
+             - If A=D (Alice Dog, Coffee):
+               - A != F. (So A != Fish).
+               - C != T.
+               - C owns Pet? If C=D? No, distinct pets.
+               - Pets: A=D, B=Cat, C=Fish.
+               - Check: C != T. Fish owner is C. C drinks Coffee? No, C owns Fish. Drink not specified.
+               - Does C drink Tea? No.
+               - Who drinks Coffee? Alice.
+               - Who drinks Tea? Must be Ben? No, Ben drinks Juice.
+               - Who drinks Tea? Cleo? No, Cleo != Tea.
+               - Contradiction: If D=A, Coffee is A. B=Juice. C!=T.
+               - Fish owner is C. Drink unknown.
+               - Wait, I need to check the full mapping.
+               - A=Dog, Coffee.
+               - B=Cat, Juice.
+               - C=Fish, Drink=Tea (Must be Fish owner's drink).
+               - But C!=T. So this fails.
+             - If C=D (Cleo Dog, Coffee):
+               - B=Juice.
+               - A!=Fish.
+               - Drinks: Co, Ju, T.
+               - Who is T?
+               - Must be A or B? No, B=Ju.
+               - Must be A.
+               - So A=Tea.
+               - But A != Fish.
+               - Is A allowed to drink Tea? Yes.
+               - So C=Dog, Coffee.
+               - A=Tea, Cat?
+               - B=Cat, Juice.
+               - C=Fish, Coffee. (C != Tea).
+               - Pets: Cat, Dog, Fish.
+               - Who owns what?
+               - Alice: Tea.
+               - Ben: Juice.
+               - Cleo: Dog, Coffee.
+               - Fish owner is someone.
+               - Alice owns Fish? No, Alice != Fish.
+               - So Fish owner is not Alice.
+               - Fish owner is Ben or Cleo.
+               - Ben drinks Juice. Fish owner is a person who owns fish? No restriction on drink for fish owner.
+               - So Fish owner is Ben? No, Ben drinks Juice.
+               - So Fish owner must be Cleo? But Cleo owns Dog.
+               - Fish owner is Alice? No, Alice != Fish.
+               - Who is the fish owner?
+               - There are only 3 people. 3 pets.
+               - Alice != Fish.
+               - Ben drinks Juice.
+               - Cleo != Tea.
+               - Dog = Coffee.
+               - Possible Animals:
+                 - If Alice != Dog, and Alice != Fish.
+                 - Alice must be Cat. (Since Dog is Coffee, but Coffee drinker is distinct from Fish owner? No).
+                 - Dog Owner drinks Coffee.
+                 - If Alice is Dog, she drinks Coffee.
+                   - If Alice is Dog, she owns Dog.
+                   - Then Fish owner is Ben or Cleo.
+                   - Fish owner drink?
+                   - If Fish owner is Ben (Juice), no contradiction.
+                   - If Fish owner is Cleo (?).
+                   - Let's check Cleo != Tea.
+                   - Drinks: Coffee (Alice), Juice (Ben). Tea must be Cleo.
+                   - Contradiction: Cleo != Tea.
+                 - So Alice cannot be Dog.
+                 - So Dog Owner is Cleo.
+                   - Cleo drinks Coffee.
+                 - Fish Owner?
+                   - Must be Alice or Ben.
+                   - If Alice is Fish, Contradicts (a) Alice != Fish.
+                   - So Fish Owner is Ben.
+                   - But Ben drinks Juice.
+                 - Is there a constraint that says "Drink is not specified for Fish"? No.
+                 - So: Alice=Cat, Ben=Fish, Cleo=Dog, Coffee.
+                 - Check:
+                   - Alice $\neq$ Fish (True, she is Cat).
+                   - Dog owner drinks Coffee (True, Cleo).
+                   - Ben drinks Juice (True).
+                   - Cleo $\neq$ Tea (True, she is Coffee).
+                   - Who owns dog? Cleo.
+                   - Who owns fish? Ben.
+                 - Wait, let's check if there is a unique solution.
+                 - Is there a conflict with Pet? No.
+                 - So Dog = Cleo, Pet = Dog.
+                 - Fish = Ben.
+                 - Cat = Alice.
+                 - Drink for Fish = Juice? (Since Fish owner is Ben, but Ben drinks Juice).
+                 - Drinks: Alice (?), Ben (Juice), Cleo (Coffee).
+                 - Tea is for Alice?
+                 - Alice $\neq$ Fish. (Satisfied).
+                 - So Alice drinks Tea.
+                 - Solution seems robust: Cleo owns dog. Ben owns fish. Alice owns cat.
+
+Wait, let me re-read "Who owns the dog, and what pet does Ben own?"
+The question asks for:
+1. Who owns the dog?
+2. What pet does Ben own?
+
+My deduction:
+- Dog owner drinks Coffee.
+- Ben drinks Juice. So Ben is not Dog owner.
+- Dog owner is not Alice (not specified why, but let's check).
+  - If Alice is Dog owner, she drinks Coffee.
+  - If Alice is Fish owner -> Contradicts (a). So Alice is not Fish owner.
+  - Fish owner is either Ben or Alice.
+  - If Fish owner is Alice (contradiction) -> Fish owner is Ben.
+  - If Fish owner is Ben, he drinks Juice.
+  - So Ben owns Fish.
+  - If Alice is Dog owner, she drinks Coffee.
+  - Then Dog owner is Alice.
+  - Let's check Alice = Dog.
+  - Then Alice drinks Coffee.
+  - Cleo != Tea.
+  - Fish owner is Ben.
+  - Fish owner drinks Juice.
+  - Remaining drink for Alice is Coffee.
+  - Remaining drink for Cleo is Tea.
+  - But Cleo != Tea. So Alice cannot be Dog owner.
+  - Therefore Alice is NOT Dog owner.
+  - So Dog owner must be Cleo.
+  - Dog owner is Cleo.
+  - Cleo drinks Coffee.
+  - Remaining:
+    - Alice (Cat?).
+    - Ben (Fish?).
+    - Wait, Fish owner must be someone.
+    - People: Alice, Ben, Cleo.
+    - Pets: Cat, Dog, Fish.
+    - Dogs: Cleo.
+    - Fish: Ben or Alice.
+    - If Fish is Alice -> Contradiction.
+    - So Fish is Ben.
+    - So Alice must be Cat.
+    - Check constraints again:
+      - Alice != Fish (True).
+      - Dog owner (Cleo) drinks Coffee (True).
+      - Ben drinks Juice (True).
+      - Cleo != Tea (True).
+    - So:
+      - Dog: Cleo.
+      - Ben's Pet: Fish.
+
+Answer for Problem 3:
+Dog owner: Cleo.
+Ben's pet: Fish.
+
+Wait, the prompt asks "What pet does Ben own?"
+The answer is Fish.
+The question asks "Who owns the dog, and what pet does Ben own?"
+Answer: Cleo owns the dog, and Ben owns the fish.
+
+**Problem 4:**
+Sequence: 2, 6, 12, 20, 30, ?
+Differences:
+6-2 = 4
+12-6 = 6
+20-12 = 8
+30-20 = 10
+Next difference should be 12? (Arithmetic progression with increasing diffs).
+Or is it $n(n+2)$?
+$n=1 \to 2$
+$n=2 \to 6$
+$n=3 \to 12$
+$n=4 \to 20$
+$n=5 \to 30$
+Formula: $2n(n-1) + 2$? No.
+$2n^2 - 2n + 2n$? No.
+Let's look at the differences again.
+4, 6, 8, 10.
+Next difference is 12.
+$30 + 12 = 42$.
+Sequence: $2, 6, 12, 20, 30, 42$.
+Pattern: $+4, +6, +8, +10, +12...$
+Wait, $n$ terms: $4$ is $4(2n-2)$? No.
+Differences are even numbers starting from 4: 4, 6, 8, 10, 12.
+Next term: $30 + 12 = 42$.
+
+**Problem 5:**
+Farmer has 17 sheep. All but 9 die.
+How many sheep does the farmer have left?
+$17 - 9 = 8$.
+
+**Problem 6:**
+Pipe A fills in 6 hours.
+Pipe B fills in 3 hours.
+Together:
+$1/6 + 1/3 = 1/6 + 2/6 = 3/6 = 1/2$.
+Time to fill tank = 2 hours.
+
+**Problem 7:**
+KG feathers vs lb steel.
+1 kg = 2.2 lb.
+Feathers weigh 1 kg.
+Steel weighs 1 lb.
+1 lb $\approx$ 0.45 kg.
+Wait, standard comparison.
+1 kg is approx 2.2 lbs.
+So 2.2 lbs of steel = 1 kg of feathers.
+Feathers are heavier.
+Wait, 1 kg = 1000 grams. 1 lb = 453.59 grams.
+1 kg feathers = 2.2046 lbs.
+So 2.2 lbs of steel < 1 kg.
+Feathers weigh more.
+Actually, the question asks "Which is heavier".
+1 kg of feathers > 1 lb of steel.
+Answer: Feathers.
+
+**Problem 8:**
+Mark up cost by 25%.
+Retail price = $C + 0.25C = 1.25C$.
+Discounted by 20%.
+Sale price = $1.25C \times 0.80 = 1.00C$.
+Percentage of original cost = 100%.
+Wait, usually this is a trick question.
+Let's check.
+Original cost $X$.
+Retail $1.25X$.
+Discount 20%.
+Price = $1.25X \times 0.80 = 1.00X$.
+So sale price is 100% of the original cost.
+
+**Problem 9:**
+Island logic. Truth/Tell.
+X says: "At least one of us is a liar."
+X is either a Truth-teller or a Liar.
+If X is Truth-teller: Then at least one is a liar. So at least one is Liar.
+If X is Liar: Then the statement "At least one is a liar" is False.
+So no one is a liar. So both are Truth-tellers.
+This leads to a contradiction if X is a Liar (implies no lizards).
+If X is Truth-teller, then at least one is a liar.
+Contradiction for X is Liar.
+Let's re-evaluate.
+Assume X is a Truth-teller.
+Then "At least one is a liar" is true.
+So one of us is a liar.
+So Y is a liar.
+Assume X is a Liar.
+Then "At least one is a liar" is false.
+So no one is a liar.
+So Y is a Truth-teller.
+This is the standard Liar's Paradox setup?
+Wait.
+Scenario A: X is T. Then Y is L.
+Scenario B: X is L. Then Y is T.
+Which is consistent?
+We need to check Y's statement. We don't know Y's statement.
+Wait, X's statement is the only information.
+We need to determine the type.
+Usually, in these riddles, if the statement implies a contradiction, then the assumption is false.
+If X is T -> At least one Liar. (True).
+If X is L -> "No one is a Liar" is false. (False -> implies at least one Liar).
+So X being a Liar contradicts the logic of the statement.
+Because if X says "At least one is Liar" and is a Liar, the statement is False. So "No one is Liar".
+But the existence of one liar (from the scenario) would make the statement True?
+No, the statement is evaluated against the truth value of the world.
+If X is a Liar, he lies. He says "At least one is Liar".
+This is False.
+So "No one is Liar".
+But this is a state of affairs (we are in a universe).
+If X is Liar, then the condition "At least one is Liar" is violated.
+But we established earlier that if X is T, then at least one is Liar.
+Let's check if X can be Liar.
+If X is Liar, then X is lying about the truth. So it's not the case that "At least one is Liar".
+So everyone is a Truth-teller.
+Does this work?
+If everyone is T, then X is T.
+But we assumed X is L. Contradiction.
+So X must be a Truth-teller.
+Then "At least one is a liar" must be true.
+So Y is a Liar.
+So Y is a Liar.
+
+Let's check logic again.
+X says: $\exists L \in \{X, Y\}$.
+If X is T, then $\exists L \in \{X, Y\}$ is True. So Y is L.
+If X is L, then $\exists L \in \{X, Y\}$ is False. So neither X nor Y is L. So Y is T.
+Since X is T implies Y=L.
+Since X is L implies Y=T.
+Which is consistent with the puzzle?
+Usually, these puzzles rely on the self-referential property.
+If X was T, then "At least one is Liar" is true. But X is T. If X is T, he asserts the truth.
+If Y is L, Y is a liar.
+But Y's status is unknown to X.
+However, usually the "Truth-teller" is the only solution for "At least one" statements involving one person.
+Actually, in standard LSAT/Logic puzzles:
+If X says "At least one of us is a liar", and X is a truth-teller, then at least one is a liar.
+If X is a liar, the statement is false, meaning "No one is a liar".
+If "No one is a liar", then X is a truth-teller. Contradiction (X is liar).
+Therefore X must be a truth-teller.
+So Y is a liar.
+
+**Problem 10:**
+$3x + 7 = 2x + 15$
+$3x - 2x = 15 - 7$
+$x = 8$.
+
+**Problem 11:**
+Committee of 3 from 5 candidates.
+Combination formula: $C(n, k) = \frac{n!}{k!(n-k)!}$
+$C(5, 3) = \frac{5 \times 4 \times 3}{3 \times 2 \times 1} = 5 \times 4 / 2 = 10$.
+
+**Problem 12:**
+Dan > Ellie.
+Ellie < Farah.
+Farah < Dan.
+Chain: Dan > Ellie > Farah.
+Order: Dan (Tallest) > Ellie > Farah (Shortest).
+Tallest: Dan.
+Shortest: Farah.
+
+**Double Check Problem 3:**
+Alice does not own the fish.
+Dog owner drinks coffee.
+Ben drinks juice.
+Cleo does not drink tea.
+Alice != Fish.
+Dog = Coffee.
+Dog owner $\neq$ Ben (Juice).
+Dog owner $\neq$ Alice (if Alice=Fish, she's not Dog).
+Dog owner is Alice or Cleo.
+Case 1: Alice owns Dog (Coffee).
+- Alice != Fish. (Consistent).
+- Alice owns Dog.
+- Fish owner = ?
+- If Fish owner = Ben (Juice) or Cleo (?).
+- Drinks left: Tea.
+- If Cleo drinks Tea, he is not Coffee.
+- Wait, if Alice owns Dog, Coffee is Alice.
+- If Cleo drinks Tea, he is not Coffee.
+- Is Tea valid for anyone?
+- We need to assign Pet: Fish, Dog, Cat.
+- If Alice = Dog.
+- Dog owner = Coffee. (Consistent).
+- Ben = Juice.
+- Cleo != Tea. So Cleo drinks Coffee or Tea? No, Coffee is taken by Alice.
+- So Cleo drinks Tea.
+- But Clue says Cleo != Tea. Contradiction.
+- So Alice cannot be Dog owner.
+- Case 2: Cleo owns Dog (Coffee).
+- Coffee = Cleo.
+- Ben = Juice.
+- Alice != Fish.
+- Fish owner is Alice or Ben.
+- If Fish owner is Ben (Juice). Consistent.
+- Cat owner is Alice.
+- Does this fit?
+- Alice != Fish. (Alice is Cat). Yes.
+- Cleo != Tea. (Cleo is Coffee). Yes.
+- Dog owner = Cleo (Drinks Coffee). Yes.
+- So Dog is Cleo.
+- Fish is Ben.
+- This seems the only solution.
+
+Wait, check the phrasing of the question:
+"Who owns the dog, and what pet does Ben own?"
+Answer: Cleo, Fish.
+
+**Double Check Problem 2:**
+Ben is twice as old as Cara was 6 years ago.
+$B = 2(C - 6)$.
+In 4 years, Ben is 30.
+$B = 26$.
+$26 = 2(C - 6) \Rightarrow C = 19$.
+Correct.
+
+**Double Check Problem 1:**
+$7 \times 4 + 12 \times 1.5 = 28 + 18 = 46$.
+$46 \times 0.1 = 4.6$.
+$46 - 4.6 = 41.4$.
+Correct.
+
+**Double Check Problem 5:**
+$17 - 9 = 8$.
+Correct.
+
+**Double Check Problem 6:**
+$1/6 + 1/3 = 1/2$.
+Time = 2 hours.
+Correct.
+
+**Double Check Problem 7:**
+KG feathers = 1000g.
+1 lb = 453.6g.
+1 kg > 1 lb.
+Feathers heavier.
+Correct.
+
+**Double Check Problem 8:**
+Cost 1.25 * 0.8 = 1.0.
+Percentage = 100%.
+Correct.
+
+**Double Check Problem 9:**
+Logic holds. X=T, Y=L.
+Answer: X is truth-teller, Y is liar.
+
+**Double Check Problem 10:**
+$3x + 7 = 2x + 15 \rightarrow x = 8$.
+Correct.
+
+**Double Check Problem 11:**
+$5 \times 4 \times 3 / 6 = 10$.
+Correct.
+
+**Double Check Problem 12:**
+Dan > Ellie > Farah.
+Tallest: Dan.
+Shortest: Farah.
+Correct.
+
+The format requires:
+ANSWER 1: <your answer>
+ANSWER 2: <your answer>
+...
+ANSWER 12: <your answer>
+
+I will write the answers clearly.
+One minor detail: "Show your work if you want". I will keep the reasoning concise but ensure the final line is exact.
+
+Problem 1:
+Total Cost: $4 \times 7 + 1.50 \times 12 = 28 +
+
+=== answer ===

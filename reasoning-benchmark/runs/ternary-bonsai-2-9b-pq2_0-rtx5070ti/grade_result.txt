@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  2. **Work:** Let B be Ben's age, C be Cara's age. $B + 4 = 30 \
+[PASS] Q2: 19  3. **Work:** (c) Ben drinks Juice. (b) Dog owner drinks Coffee, so
+[FAIL] Q3: Cleo, Fish  4. **Work:** Differences between terms: $6-2=4$ $12-6=6$ $
+[PASS] Q4: 42  5. **Work:** All but 9 die means 9 survived.
+[PASS] Q5: 9  6. **Work:** Rate of A = $1/6$ tank/hour. Rate of B = $1/3$ tank/ho
+[PASS] Q6: 2  7. **Work:** 1 kilogram = 1000 grams. 1 pound $\approx$ 453.6 grams
+[PASS] Q7: A kilogram of feathers  8. **Work:** Retail price = Cost $\times 1.25$
+[PASS] Q8: 100%  9. **Work:** If X were a liar, the statement "At least one of us
+[PASS] Q9: X is a truth-teller, Y is a liar  10. **Work:** $3x + 7 = 2x + 15$ Sub
+[PASS] Q10: 8  11. **Work:** Combinations: $\binom{5}{3} = \frac{5!}{3!(5-3)!} = \
+[PASS] Q11: 10  12. **Work:** Dan is taller than Ellie (D > E). Farah is taller th
+[FAIL] Q12: Dan, Ellie
+
+10/12 correct

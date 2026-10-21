@@ -1,0 +1,700 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Goal:** Implement a REST API for task tracking.
+    *   **Framework:** FastAPI.
+    *   **Database:** SQLite (`tasks.db`) in the working directory.
+    *   **Constraints:**
+        *   Single file: `main.py`.
+        *   Importable app as `main.app`.
+        *   No manual migrations (create on startup).
+        *   Allowed libraries: `fastapi`, `uvicorn`, `pydantic`, `sqlite3` or `sqlalchemy`. I'll use `sqlite3` for simplicity and minimal dependencies since `sqlalchemy` isn't strictly necessary for SQLite with just `sqlite3` (and often `sqlite3` is stdlib). However, standard FastAPI examples often use SQLAlchemy for ORM. The spec says "either the stdlib `sqlite3` or `sqlalchemy`". I'll use `sqlite3` to reduce dependencies and keep it lightweight, but I need to handle the transaction/commit properly. Actually, for a robust API, an ORM like SQLAlchemy is easier to handle relationships and constraints. But the spec allows stdlib `sqlite3`. Let's stick to raw `sqlite3` via `asyncpg`? No, no asyncpg allowed. Just `sqlite3`. Wait, FastAPI is async. Standard `sqlite3` module is synchronous. `aiosqlite` is async, but that's an external package. Using standard `sqlite3` with `aio` features requires `asyncpg` or `aiosqlite`? No, `sqlite3` has an async extension `aiosqlite`.
+        *   Actually, using `sqlalchemy` with `sqlite` is often cleaner for FastAPI apps (session management). But the spec allows `sqlite3`. Let's look at the constraints: "Allowed dependencies: `fastapi`, `uvicorn`, `pydantic`, and either the stdlib `sqlite3` or `sqlalchemy`."
+        *   To keep it simple and ensure it works exactly as a "script", using `sqlalchemy` requires `sqlalchemy` installed. Using `sqlite3` requires no extra DB package. However, FastAPI's `Database` dependency usually works best with SQLAlchemy. If I use raw `sqlite3` inside async endpoints, it requires `concurrent` locking or async wrapper.
+        *   Decision: I will use `sqlalchemy` (specifically `sqlalchemy.ext.asyncio` or just sync with `ThreadPoolExecutor`? No, FastAPI recommends async DB). Actually, to be safe and minimal, I can use `sqlalchemy` with the `sqlite` dialect and `async_sessionmaker`.
+        *   Wait, the prompt says "Output ONLY the full contents of a single file...". I need to make sure imports are correct.
+        *   Let's check the spec again: "either the stdlib `sqlite3` or `sqlalchemy`".
+        *   If I use `sqlite3`, I have to handle connection pooling/transactions manually in an async way. That's messy.
+        *   If I use `sqlalchemy`, it's standard practice for FastAPI.
+        *   However, `sqlalchemy` is a dependency. I will use `sqlalchemy` for cleaner code (ORM, session management).
+        *   Wait, one more constraint: "The FastAPI app instance must be importable as `main.app`". This means the code needs to define `app` at module level.
+        *   "No other framework substitutions".
+        *   "Do not split across multiple files."
+
+    *   **Data Model (Task):**
+        *   `id`: int (auto-inc)
+        *   `title`: str (required, 1-200)
+        *   `description`: str | null
+        *   `completed`: bool (default false)
+        *   `priority`: str (default medium, enum: low, medium, high)
+        *   `created_at`: datetime (server set)
+
+    *   **Endpoints:**
+        *   `POST /tasks`: Create. Validation on title (empty/non-empty). Priority (low/med/high). Return 201 with full object.
+        *   `GET /tasks`: List. Filters: `completed`, `priority`. Pagination: `page`, `page_size`. Ordering: `id` asc.
+        *   `GET /tasks/{id}`: Get one. 200 or 404.
+        *   `PUT /tasks/{id}`: Partial update. Same validation. 200 or 404.
+        *   `DELETE /tasks/{id}`: Delete. 204 or 404.
+
+    *   **Validation Logic:**
+        *   `title`: non-empty after trim, 1-200 chars.
+        *   `priority`: 'low', 'medium', 'high'.
+        *   `page`: >= 1.
+        *   `page_size`: 1-100.
+
+    *   **Implementation Details:**
+        *   FastAPI `Depends` for DB session.
+        *   Pydantic models for request/response schemas.
+        *   `Base` model for SQLAlchemy.
+        *   `create_db_in_memory`? No, file named `tasks.db`.
+        *   Ensure `main.app` is accessible.
+
+    *   **Dependency Management:**
+        *   I need to assume the environment has the required packages.
+        *   I will write the code assuming they are installed.
+
+    *   **SQLite Setup:**
+        *   Need to ensure the database file exists in the current working directory.
+
+    *   **Async Handling:**
+        *   FastAPI uses `async def`. DB connection needs to be async (`aiosqlite` or `sqlalchemy` async).
+        *   Since I can't install `aiosqlite` or `asyncpg` (they aren't standard), I should check if `sqlalchemy` can do sync within async context or use `asyncio`.
+        *   Actually, using `sqlalchemy`'s `async_sessionmaker` is the way to go for async FastAPI. It requires `sqlalchemy` and `asyncpg` is not needed for SQLite.
+        *   Wait, `sqlalchemy` is allowed. `aiosqlite` is not explicitly allowed in the "allowed dependencies" list, but `sqlite3` is stdlib.
+        *   If I use `sqlalchemy` with `sqlite` dialect, I need to ensure it uses the async engine. `sqlalchemy` has `create_async_engine`.
+        *   Wait, is `sqlalchemy` installed? The prompt says "Allowed dependencies...". I must use it.
+        *   To avoid external async SQLite dependencies, I could use `sqlalchemy`'s sync engine with `ThreadPoolExecutor` or `ProcessPoolExecutor`? No, FastAPI prefers async.
+        *   Actually, many FastAPI examples use `sqlalchemy`'s `create_engine` which is sync but `Session` works in `Depends`.
+        *   However, strictly speaking, `sqlalchemy`'s async support is best.
+        *   Wait, if I use standard `sqlite3` module, I can wrap it in a class that handles async.
+        *   Let's try to use `sqlalchemy` because it's more robust for the schema defined.
+        *   But I need to import `sqlalchemy`.
+        *   Let's use `sqlalchemy` + `async_sessionmaker`.
+
+    *   **Structure:**
+        1.  Imports.
+        2.  Pydantic Models (Request, Response).
+        3.  SQLAlchemy Models (`Base`, `Task`).
+        4.  DB initialization function (creates DB/table if missing).
+        5.  Dependency `get_db`.
+        6.  API Routers/Endpoints.
+        7.  Main execution block.
+
+    *   **Validation:**
+        *   Use `validator` or Pydantic `Field`.
+        *   `title`: `min_length=1`, `max_length=200`.
+        *   `priority`: `Field(..., pattern=r"^(low|medium|high)$")` or use `Enum` if possible, but strict string matching is requested.
+        *   `page`, `page_size` query params.
+
+    *   **Pagination:**
+        *   Need to count total items matching filters before slicing. `db.query(Task).filter(...).count()`.
+
+    *   **Code Organization:**
+        *   Must fit in one file.
+        *   `main.app` needs to be the object returned at the end.
+        *   Must initialize DB on startup.
+
+    *   **Refinement on DB:**
+        *   If I use `sqlalchemy`'s `create_engine` with `sqlite` and `file='tasks.db'`, I need to ensure `pool_recycle=0` or similar for persistent connection if running long, but standard session creation is fine.
+        *   Since `main.py` imports `fastapi` and `uvicorn`, I need `from fastapi import FastAPI`.
+
+    *   **Refinement on `main.app`:**
+        *   I'll define `app = FastAPI(...)`.
+        *   Then at the end of the file, I can't just `main.app` unless I assign it.
+        *   Wait, the prompt says "The FastAPI app instance must be importable as `main.app`".
+        *   Usually, in a script, I do `if __name__ == "__main__": app.run()`. But the variable itself must be named `app`. So `main.app` will be the instance.
+        *   I need to make sure the variable name is `app`, but the prompt asks for `main.app` importability.
+        *   If the file is `main.py`, then inside the file, I should define `app`. If someone imports `from main import app`, they get it.
+        *   Wait, usually `from main import app` works if the file is `main.py`.
+        *   However, Python naming convention suggests if I'm inside the file, I should probably use `from . import ...` if it's a package, but here it's a single file.
+        *   The instruction says "importable as `main.app`". If I write `from main import app` inside the code block (assuming `main.py` is the source), that's recursive or confusing.
+        *   Standard interpretation: The variable name inside the file should be `app`. When the user imports the file `import main`, they get `main.app` (if I do `main = importlib.import_module('main')`... no).
+        *   Actually, if the file is named `main.py`, importing it gives the namespace `main`. If I define `app = FastAPI()`, then `import main` gives `main.app`.
+        *   So I must define the variable as `app` at the module level.
+
+    *   **Constraints Check:**
+        *   "Entrypoint file: `main.py`" -> I will write the code assuming it is saved as `main.py`.
+        *   "Output ONLY the full contents of a single file...".
+        *   "No explanation before or after the code block."
+
+    *   **Validation Details:**
+        *   `title` trim: Pydantic `strip()` isn't default. I can use `Field` `min_length` after `.title()`? No, client sends string.
+        *   The spec says "non-empty after trim". I should handle this in the validation logic or the body parsing. Pydantic `model_dump`?
+        *   Better to create a helper function or use `Field` constraints.
+        *   "non-empty after trim" implies I should check `len(title.strip()) > 0`.
+        *   "priority" not one of `low`, `medium`, `high`.
+        *   `page` >= 1.
+        *   `page_size` 1-100.
+
+    *   **Drafting the Code:**
+        *   Imports: `from fastapi import FastAPI, Depends, HTTPException, Query`, `from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text, Select`, `from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker`, `from sqlalchemy.orm import sessionmaker, declarative_base`, `from datetime import datetime, timezone`, `from pydantic import BaseModel, Field, field_validator`.
+        *   Wait, `pydantic` is allowed. `fastapi` is allowed.
+        *   Using `sqlalchemy` requires `sqlalchemy` to be installed.
+        *   `datetime` needs to be ISO 8601. `datetime.now(timezone.utc)`.
+        *   `Base` class.
+        *   `engine` and `Session`.
+        *   `DB` dependency.
+        *   Endpoints.
+        *   Ensure `app` is defined at module level.
+
+    *   **SQLite Engine:**
+        *   `engine = create_async_engine("sqlite:///tasks.db", echo=False)`.
+        *   `AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)`.
+
+    *   **Endpoints Logic:**
+        *   `POST`: Create task. Use DB session. `insert`. `commit`.
+        *   `GET` (list): Use DB session. `select`. `order_by`. `count`.
+        *   `GET` (one): `get`.
+        *   `PUT`: `get`, check, update, `commit`, `return`.
+        *   `DELETE`: `get`, check, `delete`, `commit`.
+
+    *   **Validation Logic:**
+        *   Since I'm using FastAPI, I can use `validator` on Pydantic models.
+        *   For `priority`, it's optional but must be one of the allowed if provided.
+        *   `title` is required.
+        *   `description` is optional.
+        *   `completed` defaults to False (stored in DB).
+        *   Wait, Pydantic `model_config`?
+        *   I can use `Field(default=False)` on the model.
+        *   For `PUT`, if `priority` is provided, it must be valid. If not, keep existing.
+        *   Validation on PUT needs to check if the field provided is valid.
+        *   I can use a custom `Depends` or check inside the function.
+        *   Easiest: Create a validation helper function that checks the value.
+
+    *   **Pagination:**
+        *   `page` is `int >= 1`.
+        *   `page_size` is `int` 1-100.
+        *   Need to calculate `offset` and `limit`.
+        *   `count` needs to happen before slicing.
+
+    *   **Imports:**
+        *   I need to ensure `sqlalchemy` is compatible.
+        *   Since I'm writing a specific implementation, I will use standard imports.
+
+    *   **Final Check:**
+        *   Output ONLY `python` code block.
+        *   File name `main.py`.
+        *   Variable name `app`.
+
+    *   **Wait, one nuance:**
+        *   "The FastAPI app instance must be importable as `main.app`".
+        *   This implies that if the file is named `main.py`, and I run `import main`, `main.app` should exist.
+        *   So inside the file, I define `app = FastAPI(...)`.
+        *   If I run `import main`, `main` is the module namespace. `app` is inside it. So `main.app` works.
+        *   I need to make sure `if __name__ == "__main__":` doesn't shadow `app`.
+        *   Actually, usually `app.run()` is called inside `__main__`, but I shouldn't execute logic that breaks the importability if I'm just running it.
+        *   I'll put `if __name__ == "__main__":` logic at the end.
+
+    *   **Wait, `page_size` default:**
+        *   Spec says default `10`.
+        *   Must be 1-100.
+    *   **Priority values:** `low`, `medium`, `high`.
+    *   **Validation:**
+        *   `title` missing or empty after trim.
+        *   `priority` not allowed.
+
+    *   **Code Structure Plan:**
+        1.  Imports.
+        2.  Constants/Config.
+        3.  Database Setup (create DB, create tables).
+        4.  Pydantic Models (Task, TaskResponse, TaskCreate, TaskUpdate).
+        5.  SQLAlchemy Base/Models (Base, Task).
+        6.  FastAPI App & Routers.
+        7.  Endpoints.
+        8.  `if __name__ == "__main__":` block (optional, but good practice, though prompt asks for `main.app` to be importable).
+        *   Wait, if I put `app.run()` inside the block, it's fine.
+        *   The constraint is just that `main.app` is accessible.
+        *   So just defining `app = FastAPI(...)` is enough.
+
+    *   **One detail:**
+        *   `sqlalchemy` requires specific version or import paths.
+        *   I will use `sqlalchemy` and `pydantic` as standard.
+        *   Since I can't install packages during generation, I assume they are present in the runtime environment of the user.
+        *   I will use `sqlalchemy` for DB handling.
+
+    *   **Wait, `created_at`:**
+        *   Spec: "set by the server on creation, never client-supplied".
+        *   Pydantic model: `created_at: Optional[datetime] = None` -> `Field(default_factory=lambda: datetime.now(timezone.utc))`.
+        *   On `GET`, return it as ISO 8601 string.
+
+    *   **Validation Logic in Code:**
+        *   I'll create a helper function `_validate_priority` and use it inside the API handlers for `PUT` and `POST`.
+        *   For `title`, I'll do `title.strip()`.
+
+    *   **Wait, `page` validation:**
+        *   `422` if `page` < 1.
+        *   `422` if `page_size` outside 1-100.
+        *   `422` if `priority` invalid.
+
+    *   **Response Objects:**
+        *   `Task` (dict-like or model). FastAPI converts model to dict automatically.
+        *   `TaskResponse` structure: `{ items: [...], total: int, page: int, page_size: int }`.
+
+    *   **Imports:**
+        *   `from fastapi import FastAPI, Depends, Query, HTTPException, status`
+        *   `from pydantic import BaseModel, Field`
+        *   `from sqlalchemy import create_async_engine, Column, Integer, String, DateTime, Boolean, Text`
+        *   `from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine`
+        *   `from sqlalchemy.orm import declarative_base, Session`
+        *   `from datetime import datetime, timezone`
+
+    *   **DB File:**
+        *   `tasks.db`.
+
+    *   **Wait, one constraint:** "Output ONLY the full contents of a single file named main.py".
+    *   So I will generate the code.
+
+    *   **Refinement on `main.app`:**
+        *   The user wants to import it.
+        *   I will put `app = FastAPI(...)` at the top level.
+        *   I will ensure no `main` import inside the code that conflicts.
+
+    *   **Wait, `pydantic` vs `pydantic-core`**: `pydantic` is listed.
+    *   **Wait, `sqlalchemy`**:
+        *   `from sqlalchemy import create_async_engine, Column, Integer, String, DateTime, Boolean, Text, create_engine`
+        *   `from sqlalchemy.orm import DeclarativeBase, sessionmaker`
+        *   `from sqlalchemy.ext.asyncio import async_sessionmaker`
+        *   Wait, I can use `AsyncSession`.
+
+    *   **Implementation Details:**
+        *   Ensure `Base` inherits from `DeclarativeBase` (in newer SQLAlchemy).
+        *   In older versions, `Base` is explicit.
+        *   I'll use `sqlalchemy.orm.declarative_base` and `Base` usually.
+        *   Actually, `sqlalchemy`'s `DeclarativeBase` is available.
+        *   Wait, `AsyncSession` requires `asyncio`.
+        *   I'll use `sqlalchemy`'s `async_sessionmaker`.
+
+    *   **Wait, `datetime` import:** `datetime.now(timezone.utc)`.
+    *   **Wait, `page`**: If `page` is 1, `offset=0`.
+    *   **Wait, `total`**: `session.query(Task).filter(...).count()`.
+
+    *   **Wait, `title` validation**:
+        *   `title.strip()`.
+        *   If `not title.strip()`, error.
+        *   `1 <= len(title.strip()) <= 200`.
+
+    *   **Wait, `priority` validation**:
+        *   In `POST`: If not provided, default `medium`. If provided, check.
+        *   In `PUT`: If provided, check.
+        *   So I need a helper.
+
+    *   **Wait, `created_at`**:
+        *   In `Task` model, `created_at: DateTime`.
+        *   Pydantic: `Field(default_factory=datetime.utcnow)`.
+        *   Wait, ISO 8601 string is better for JSON. `datetime` type handles that.
+        *   The DB stores it as ISO 8601. FastAPI converts to JSON string automatically if configured.
+        *   Default is to return as Python datetime. FastAPI configures this.
+        *   Actually, Pydantic will serialize it.
+        *   I will ensure the model returns it as a string if necessary?
+        *   FastAPI automatically serializes `datetime` to string by default in JSON.
+        *   "created_at (ISO 8601 string)" implies the serialization format.
+        *   I'll let Pydantic handle it.
+
+    *   **Final Code Structure:**
+        *   Imports.
+        *   DB Config.
+        *   Models (DB & Pydantic).
+        *   Init function.
+        *   Endpoints.
+        *   Main block.
+
+    *   **Wait, one more check on "main.app"**:
+        *   I'll just define `app = FastAPI(...)`.
+        *   If I import `from main import app`, it works.
+
+    *   **Wait, `sqlite3` vs `sqlalchemy`**:
+        *   I'll use `sqlalchemy` because it handles transactions and async better in FastAPI.
+        *   I need to ensure I import the necessary async components from SQLAlchemy.
+        *   `from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker`.
+        *   `from sqlalchemy.orm import Session`.
+
+    *   **Wait, `Base` definition**:
+        *   `Base = declarative_base()`
+
+    *   **Wait, `Task` table**:
+        *   `id` is primary key. `id` is `Integer`.
+
+    *   **Wait, `GET /tasks/{id}`**:
+        *   FastAPI path parameter handling.
+        *   `Path` in `Query`.
+
+    *   **Wait, `PUT /tasks/{id}`**:
+        *   `request` is `TaskUpdate` (dict).
+        *   Need to validate fields provided.
+
+    *   **Wait, `page_size` validation**:
+        *   `1 <= page_size <= 100`.
+
+    *   **Wait, `created_at`**:
+        *   If `created_at` is a field, it's part of the model.
+        *   It must be set on creation.
+        *   It is never client-supplied.
+        *   So in Pydantic model, it has default.
+
+    *   **Let's write the code.**
+
+```python
+import os
+import json
+import sys
+from datetime import datetime, timezone
+from typing import Optional, List, Any, Dict
+from fastapi import FastAPI, Depends, Query, HTTPException, status
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import create_async_engine, Column, Integer, String, DateTime, Boolean, Text
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from contextlib import asynccontextmanager
+
+# Configure SQLite DB
+DATABASE_URL = "sqlite:///./tasks.db"
+engine = create_async_engine(DATABASE_URL, echo=False)
+Base = declarative_base()
+
+# Pydantic Models
+class TaskBase(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    completed = Column(Boolean, default=False)
+    priority = Column(String(10), default="medium")
+    created_at = Column(DateTime(timezone=True))
+
+# FastAPI App
+app = FastAPI()
+
+# Database Setup
+async def get_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    # This returns the session if we wrap it, but we need a session dependency for DB access inside endpoints
+    # Correct approach for SQLAlchemy in FastAPI:
+    # Create a session dependency
+    pass
+
+# Re-approach DB Dependency for SQLAlchemy
+# Using async_sessionmaker
+SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+
+async def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Ensure table creation on startup
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+# Task Pydantic Models
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    completed: bool
+    priority: str
+    created_at: str
+
+class TaskCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    priority: str = Field(default="medium", pattern=r"^(low|medium|high)$")
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(None, max_length=200)
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[str] = Field(default=None, pattern=r"^(low|medium|high)$")
+
+# Helper for validation
+VALID_PRIORITY = {"low", "medium", "high"}
+
+@field_validator('title', mode='before')
+@classmethod
+def validate_title(cls, v):
+    return v.strip()
+
+def validate_title_input(v: str):
+    if not v.strip():
+        raise HTTPException(status_code=422, detail="Title is required and cannot be empty")
+    if len(v.strip()) > 200:
+        raise HTTPException(status_code=422, detail="Title must be between 1 and 200 characters")
+    return v.strip()
+
+def validate_priority_input(v: str):
+    if v and v not in VALID_PRIORITY:
+        raise HTTPException(status_code=422, detail="Priority must be low, medium, or high")
+
+# Endpoints
+@app.post("/tasks", response_model=TaskResponse)
+async def create_task(db: Session = Depends(get_db), task: TaskCreate = None):
+    if task is None:
+        task = TaskCreate(title="") # Wait, need to validate title before creation
+    # Actually, FastAPI doesn't run validators on the whole payload by default unless configured.
+    # But I need to ensure 'title' is present.
+    # If title is missing in request, it errors.
+    # Let's ensure validation logic.
+    
+    # Re-think: Pydantic validators run on Pydantic objects.
+    # So TaskCreate model needs validators.
+    # But I used `validate_title_input` which is custom.
+    # Let's fix TaskCreate model.
+    pass
+```
+
+    *   **Correction:** I need to handle the `main.app` variable assignment cleanly.
+    *   **Correction:** I need to handle the DB table creation.
+    *   **Correction:** `TaskCreate` validation logic needs to be robust.
+    *   **Correction:** I will use `field_validator` in Pydantic for the `title` field to trigger validation automatically on `TaskCreate`.
+    *   **Wait:** `field_validator` for `title` in `TaskCreate` needs to be `min_length=1`.
+    *   **Wait:** `title` in `TaskCreate` is `str`. `title` in `TaskUpdate` is `Optional[str]`.
+    *   **Wait:** `priority` in `TaskCreate` is `str` with `default="medium"`. It can be omitted. If provided, validated.
+    *   **Wait:** `page` query param `int >= 1`.
+    *   **Wait:** `page_size` query param `int` 1-100.
+
+    *   **Wait:** `TaskUpdate` in `PUT`.
+    *   If a field is omitted, keep existing.
+    *   If present, validate.
+
+    *   **Wait:** `created_at` serialization. `datetime` to ISO string is automatic.
+
+    *   **Wait:** `init_db` should run before first request? FastAPI startup.
+    *   I should call `init_db()` inside `@app.on_event` or just rely on `get_db` creating table if I use `engine.begin()` to create all? No, `Base.metadata.create_all` needs a session.
+    *   Standard pattern: `@app.on_event("startup")` or just call it in the dependency or before app creation?
+    *   Since I cannot rely on `uvicorn` startup events being triggered before the module import in some testing, I'll put it in `main` block.
+
+    *   **Wait:** "Create the DB/table automatically on startup".
+    *   I will put the init code at the bottom, guarded by `if __name__ == "__main__":`.
+    *   Wait, the prompt says "The FastAPI app instance must be importable as `main.app`".
+    *   If I put code in `__main__` block, it's fine.
+
+    *   **Wait:** `page_size`: default 10.
+    *   **Wait:** `priority`: `422` if not valid.
+
+    *   **Refined Plan:**
+        1.  Imports.
+        2.  DB Engine & Base.
+        3.  Pydantic Models (with validators).
+        4.  Dependency `get_db`.
+        5.  Routers.
+        6.  Main block to create DB and run.
+
+    *   **One critical detail:**
+        *   `title` validation: "required, 1–200 chars (non-empty after trim)".
+        *   `Priority` validation: "one of `low`, `medium`, `high`".
+        *   In `TaskCreate`, `priority` defaults to `medium`, but if user provides it, it must be valid.
+        *   I'll add a validator on `TaskCreate` for `priority` if not default? Or just a generic check.
+        *   Actually, if `priority` is not provided, it uses default. If provided, it validates.
+        *   I can't easily do `Field(default=...)` with conditional validation in Pydantic without `pydantic` v2 `validate_assignment` or similar.
+        *   Easier: `field_validator` checks if not default.
+        *   Or just manually validate inside the function.
+        *   I'll manually validate inside the function to be safe and explicit.
+
+    *   **Wait:** `TaskResponse` in `GET`.
+    *   `items`, `total`, `page`, `page_size`.
+
+    *   **Wait:** `DELETE`: `204` status.
+    *   **Wait:** `PUT`: `200`.
+
+    *   **Wait:** `sqlite` file path.
+    *   "file named `tasks.db` in the working directory".
+    *   `DATABASE_URL = "sqlite:///./tasks.db"` uses the current working directory relative to script.
+
+    *   **Wait:** `Base.metadata.create_all`.
+    *   Needs to happen in an async context. `get_db` provides session.
+    *   Or just call it in `@app.on_event` or startup function.
+    *   I'll add a startup function `init_db()` that creates the table.
+
+    *   **Wait:** `from sqlalchemy.ext.asyncio import create_async_engine`.
+    *   `create_async_engine("sqlite://...", echo=False)`.
+
+    *   **Wait:** `SQLAlchemy` `async_sessionmaker` vs `sessionmaker`.
+    *   I need `AsyncSession`.
+    *   I'll use `async_sessionmaker` for the dependency.
+
+    *   **Wait:** `page_size`: "1–100 inclusive".
+    *   `int` range validation.
+
+    *   **Final check on imports:**
+        *   I need to make sure all imports are standard for `fastapi` + `sqlalchemy` + `pydantic`.
+        *   `from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker`.
+        *   `from sqlalchemy import create_async_engine`.
+        *   `from sqlalchemy.orm import sessionmaker`.
+
+    *   **Wait:** `get_db` dependency.
+    *   `db = SessionLocal()`.
+    *   I need to yield it.
+    *   `async def get_db(): db = SessionLocal(); yield db; db.close()`.
+    *   Wait, `SessionLocal` closes on context exit.
+    *   Better: `db = SessionLocal()` inside `get_db` is fine.
+    *   Wait, `yield db`. `db.close()` is called in `finally`.
+
+    *   **Wait:** `create_all` should happen during startup.
+    *   I'll use `@app.on_event("startup")`.
+    *   But `main.py` doesn't guarantee that event runs if imported?
+    *   For "importable as main.app", the `if __name__ == "__main__":` block shouldn't block the importability of `app` variable.
+    *   So I'll just define `app` and `init_db` logic.
+    *   To ensure table creation on startup (implying when the app runs), I'll put it in the `main` block or a function called in `main`.
+    *   Since `app` is defined at top level, `main.app` is valid.
+    *   I will add `if __name__ == "__main__":` to handle the server run.
+
+    *   **Wait:** `pydantic` version. `BaseModel`, `Field`, `field_validator`.
+
+    *   **Wait:** `total` in `GET`.
+    *   `db.query(Task).filter(...).count()`.
+    *   `page_size` is the `page_size`.
+    *   `page` is the `page`.
+
+    *   **Wait:** `Task` in `GET`.
+    *   `Order by id`.
+    *   `Task` model in DB is sorted by id?
+    *   `order_by(Task.id)` in query.
+    *   `page` is 1-based index. `offset = (page - 1) * page_size`.
+
+    *   **Wait:** `Task` in `GET` response.
+    *   `items` list.
+
+    *   **Wait:** `Task` in `PUT` update.
+    *   `TaskUpdate`.
+
+    *   **Wait:** `priority` in `TaskUpdate`.
+    *   `priority` is optional.
+    *   If not provided, keep.
+    *   If provided, validate.
+
+    *   **Wait:** `priority` default in `POST` is `medium`.
+    *   `Field(default="medium")`.
+    *   But if not provided in request, it defaults.
+    *   Validation needs to happen *if* it is provided.
+    *   Since `pydantic` validates the request payload, `priority` default is set by pydantic if not sent.
+    *   If sent, it's the value sent.
+    *   So I can check the value in `TaskCreate` or inside the function.
+    *   Since `priority` is a field, `Field(default="medium")` makes it optional to send? No, it makes it optional to send in JSON (if `extra='ignore'` or default).
+    *   If I omit it, it uses `medium`.
+    *   If I include it, it uses the value.
+    *   I should add a validator that checks if the value is provided, and if so, validates it.
+    *   Or just check `task.priority` before creating.
+    *   I will check inside the endpoint to handle the default correctly without relying on validator logic that might throw if default is provided (which doesn't exist).
+    *   Wait, if default is set, the model receives it. If I send `{"priority": "invalid"}`, model gets "invalid".
+    *   So I need to validate the value regardless.
+    *   But `title` is required. `priority` is optional (default exists).
+    *   So I should check `if task.priority not in VALID_PRIORITY` inside `create_task` if provided.
+    *   Wait, `task.priority` will be `medium` if not sent.
+    *   So I only check if sent?
+    *   The spec says "422 if `priority` not one of the allowed values".
+    *   Does this mean if I don't send it? No, if I don't send it, it defaults to `medium`, which is allowed.
+    *   So validation only applies if explicitly sent and invalid.
+    *   This is tricky with Pydantic defaults.
+    *   Simplest way: In the endpoint logic, if `priority` is in the request body (and not just the default), check it.
+    *   But `task.priority` holds the value.
+    *   If I send `{"priority": "bad"}`, `task.priority` becomes `"bad"`.
+    *   So checking `task.priority` against list is correct?
+    *   But if I default to `medium`, it's valid.
+    *   So, I can check: `if task.priority and task.priority not in VALID_PRIORITY: raise 422`.
+    *   Wait, what if `priority` is explicitly `"medium"`? It is valid.
+    *   So `if task.priority in VALID_PRIORITY`? No, if it's missing (default), it's `medium`.
+    *   So `if task.priority and task.priority not in VALID_PRIORITY`.
+    *   This works because if it's default, it's valid.
+    *   Wait, if I send `{"priority": ""}`, `task.priority` is `""`.
+    *   So `if task.priority not in VALID_PRIORITY` covers it (since `""` not in list).
+    *   So just `if task.priority not in VALID_PRIORITY` works?
+    *   Yes, if `task.priority` is `medium`, it passes.
+    *   If `""`, fails.
+    *   If `"low"`, passes.
+    *   If `"invalid"`, fails.
+    *   But what if default is `medium` and I send it? It passes.
+    *   So simple check is fine.
+
+    *   **Wait:** `title` validation.
+    *   `task.title.strip()` check.
+    *   `if not task.title.strip() or len(task.title.strip()) > 200`.
+
+    *   **Wait:** `TaskCreate` model:
+        *   `title`: str.
+        *   I should use a validator to strip it to avoid length issues.
+        *   `@field_validator('title')` -> `strip`.
+
+    *   **Wait:** `page`, `page_size`.
+    *   `Query` defaults are handled by FastAPI.
+    *   I need to validate the query params inside the endpoint if they fail constraints (e.g. `page < 1`).
+    *   `422` if `page` < 1.
+    *   `422` if `page_size` not 1-100.
+    *   I can use `Depends` or just validate in endpoint.
+    *   FastAPI `Query` allows validation via `Field`.
+    *   `page: int = Field(..., gt=0)`.
+    *   `page_size: int = Field(default=10, ge=1, le=100)`.
+    *   This handles `422` automatically for missing/invalid params.
+    *   `page_size` default is 10.
+    *   If `page_size` not provided, default 10 is used. 10 is valid.
+    *   If `page_size` provided, `ge=1, le=100` triggers `422` if invalid.
+    *   Same for `page`. `gt=0` triggers `422` if < 1.
+
+    *   **Wait:** `Priority` in Query.
+    *   If provided, check if valid.
+    *   `priority: Optional[str] = Field(default=None)`.
+    *   I can use `field_validator` on the query param? No, Query params are `Query` objects.
+    *   I'll handle it inside the function.
+    *   `if priority and priority not in VALID_PRIORITY: raise 422`.
+
+    *   **Wait:** `TaskUpdate` in `PUT`.
+    *   Fields are optional.
+    *   I need to validate them if present.
+    *   I'll do that inside the function.
+
+    *   **Wait:** `db` dependency.
+    *   `sessionmaker` vs `AsyncSession`.
+    *   I'll use `AsyncSession` from `sqlalchemy.ext.asyncio`.
+
+    *   **Final check:** "Output ONLY the full contents of a single file".
+    *   I must ensure no markdown text before or after.
+
+    *   **One detail:**
+        *   "No manual migration step".
+        *   My `create_all` handles this.
+
+    *   **Wait:** `sqlite` file path.
+        *   `DATABASE_URL = "sqlite:///./tasks.db"`
+        *   This works in working directory.
+
+    *   **Wait:** `main.py` importability.
+        *   `app = FastAPI(...)` is at module level.
+
+    *   **Wait:** `if __name__ == "__main__":`
+        *   I'll put `init_db()` call and `uvicorn.run(app, ...)` here.
+        *   This ensures the DB is created when running.
+        *   But `get_db` creates tables? `get_db` yields session, `get_db` should be used.
+        *   Better to call `init_db()` in `__main__` block.
+
+    *   **Wait:** `page_size` default.
+        *   `10`.
+
+    *   **Wait:** `page` default.
+        *   `1`.
+
+    *   **Wait:** `task` model in `GET /tasks`.
+        *   `Task` model has `created_at` which is `datetime`.
+        *   Pydantic converts to ISO string.
+
+    *   **Wait:** `created_at` in `TaskResponse`.
+        *   It is `datetime` in DB.
+        *   It must be string in response.
+        *   Pydantic `datetime` -> `str`.
+        *   I need to ensure `TaskResponse` uses `datetime` type or `str`.
+        *   `datetime` works best for serialization.
+
+    *   **Wait:** `Task` in `GET /tasks` response.
+        *   It is `Task` model.
+        *   `Task` model has `created_at: datetime`.
+        *   FastAPI returns `Task`.
+        *   `TaskResponse` needs to match fields.
+        *   Wait, `Task` in `GET /tasks` response is full Task object.
+        *   It's a Pydantic model `TaskResponse`.
+        *   I'll use the same structure for response as `Task` model.
+
+    *   **Wait:** `TaskUpdate` validation for `priority` pattern.
+        *   `r"^(low|medium|high)$"`.
+
+=== answer ===

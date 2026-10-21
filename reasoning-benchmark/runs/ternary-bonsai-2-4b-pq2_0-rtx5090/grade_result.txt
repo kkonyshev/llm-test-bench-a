@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40  2. **Problem 2 Solution:** Let $B$ be Ben's age and $C$ be Cara
+[PASS] Q2: 19  3. **Problem 3 Solution:** Clues: (c) Ben drinks juice. (d) Cleo d
+[PASS] Q3: Cleo owns the dog, Ben owns the fish  4. **Problem 4 Solution:** The s
+[PASS] Q4: 42  5. **Problem 5 Solution:** The farmer has 17 sheep. "All but 9 die
+[PASS] Q5: 9  6. **Problem 6 Solution:** Pipe A fills 1 tank in 6 hours ($1/6$ ra
+[PASS] Q6: 2  7. **Problem 7 Solution:** 1 kilogram is approximately 2.2 pounds. 
+[PASS] Q7: A kilogram of feathers  8. **Problem 8 Solution:** Cost is $C$. Retail
+[PASS] Q8: 100%  9. **Problem 9 Solution:** X says "At least one of us is a liar.
+[PASS] Q9: X is a truth-teller, Y is a liar  10. **Problem 10 Solution:** $3x + 7
+[PASS] Q10: 8  11. **Problem 11 Solution:** Choose 3 people from 5: $\binom{5}{3} 
+[PASS] Q11: 10  12. **Problem 12 Solution:** Dan > Farah (from Farah < Dan). Farah
+[PASS] Q12: Dan is the tallest, Ellie is the shortest
+
+12/12 correct

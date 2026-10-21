@@ -1,0 +1,2 @@
+wall_clock_seconds=3
+pytest_exit_code=1

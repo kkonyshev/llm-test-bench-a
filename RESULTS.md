@@ -791,3 +791,41 @@ Everything is GPU-resident; unlike Strata it needs almost no RAM or CPU.
 Split over two cards, each GPU idles half the time (layer split runs the
 cards in turn), so one 5090 is ~20% faster than both together.
 Raw samples: `ternary-bonsai-2-27b-pq2_0*_resources.csv`.
+
+### Smaller Ternary Bonsai 2 sizes: 9B, 4B, 2B (each GPU alone)
+
+Same server binary and flags as the 27B (`-c 131072`, `temp 1.0`, thinking on,
+Q8_0 mmproj loaded), our own `llama-server` on :8092 pinned with
+`CUDA_VISIBLE_DEVICES`; all three fit either card at the full 131K context.
+Scripts: `run_bonsai_9b.sh`, `run_bonsai_9b_retry.sh`, `run_bonsai_size.sh 4B 2B`
+(the latter retries a 0/23 coding run once). Coding shows attempt 1 → attempt 2
+where attempt 1 was 0/23.
+
+| Model (file size) | GPU | Coding | Reasoning | Speed (reasoning / coding) |
+|---|---|---|---|---|
+| 9B (2.4 GB) | 5090 | 0/23 → 12/23 | 11/12 | 348 / 335-349 tok/s |
+| 9B | 5070 Ti | 0/23 → 5/23 | 10/12 by grader, 11/12 on review | 237 / 232-234 tok/s |
+| 4B (1.1 GB) | 5090 | 9/23 | **12/12** | 467 / 474 tok/s |
+| 4B | 5070 Ti | 0/23 → 5/23 | **12/12** | 351 / 353-355 tok/s |
+| 2B (0.5 GB) | 5090 | 0/23 → 0/23 | 6/12 | 726 / 752 tok/s |
+| 2B | 5070 Ti | 0/23 → 0/23 | 9/12 | 599 / 613-616 tok/s |
+
+- Reasoning misses: 9B Q5 ("all but 9 die" → 8) on both cards; 9B on the 5070
+  Ti also answered Q3 as "Cleo, Fish" (wrong pairing) and Q12 "Dan, Ellie"
+  (correct, grader false negative). 2B misses arithmetic and trick questions
+  (Q2, Q4, Q5, Q6, Q7, Q10) and gets Q12 wrong ("Farah" shortest).
+- Coding at 9B/4B: code runs but breaks the spec (wrong status codes 200/405/422
+  instead of 201, missing validation) or uses wrong APIs
+  (`from sqlalchemy import create_async_engine`, Pydantic v1 `validator(mode=)`,
+  `main.app` missing). 2B never produced importable code (syntax errors,
+  `APIRouter.register`).
+- The 4B is the surprise: perfect reasoning on both cards at 350-470 tok/s
+  from a 1.1 GB file, but it is not a coder. Only the 27B wrote a fully
+  correct `main.py` (once in four runs).
+
+| Resources while generating | 9B | 4B | 2B |
+|---|---|---|---|
+| VRAM at 131K context (5090 / 5070 Ti) | 8.2 / 7.9 GB | 6.9 / 6.5 GB | 3.6 / 3.2 GB |
+| GPU util | 94-96% | 92-94% | 88-90% |
+| GPU power, avg (5090 / 5070 Ti) | 389 / 246 W | 292 / 182 W | 265 / 152 W |
+| `llama-server` CPU / RSS | ~1 core / 1.6 GB | ~1 core / 1.5 GB | ~1 core / 1.3 GB |

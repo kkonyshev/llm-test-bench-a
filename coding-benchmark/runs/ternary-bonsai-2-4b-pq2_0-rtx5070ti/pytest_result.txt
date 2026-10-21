@@ -1,0 +1,1512 @@
+FF.F.FFFFFFF.F..FFFFFFF                                                  [100%]
+=================================== FAILURES ===================================
+___________________________ test_create_task_minimal ___________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cdb9dd30>
+
+    def test_create_task_minimal(client):
+        r = create_task(client)
+>       assert r.status_code == 201
+E       assert 200 == 201
+E        +  where 200 = <Response [200 OK]>.status_code
+
+test_tasks.py:36: AssertionError
+____________________________ test_create_task_full _____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cd867250>
+
+    def test_create_task_full(client):
+        r = create_task(client, title="Buy milk", description="2%", priority="high")
+>       assert r.status_code == 201
+E       assert 200 == 201
+E        +  where 200 = <Response [200 OK]>.status_code
+
+test_tasks.py:48: AssertionError
+_________________________ test_create_task_empty_title _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cd6928b0>
+
+    def test_create_task_empty_title(client):
+>       r = create_task(client, title="")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_tasks.py:29: in create_task
+    return client.post("/tasks", json=body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:556: in post
+    return super().post(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+main.py:66: in create_task
+    validate_title(task.title)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+title = ''
+
+    def validate_title(title: str):
+        if not title or len(title) > 200:
+>           raise ValueError("Title must be 1-200 characters and not empty")
+E           ValueError: Title must be 1-200 characters and not empty
+
+main.py:62: ValueError
+_______________________ test_create_task_title_too_long ________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cd84e210>
+
+    def test_create_task_title_too_long(client):
+>       r = create_task(client, title="x" * 201)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+test_tasks.py:29: in create_task
+    return client.post("/tasks", json=body)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:556: in post
+    return super().post(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+main.py:66: in create_task
+    validate_title(task.title)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+title = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
+    def validate_title(title: str):
+        if not title or len(title) > 200:
+>           raise ValueError("Title must be 1-200 characters and not empty")
+E           ValueError: Title must be 1-200 characters and not empty
+
+main.py:62: ValueError
+_____________________________ test_get_task_found ______________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cd6a27a0>
+
+    def test_get_task_found(client):
+        created = create_task(client, title="Findme").json()
+>       r = client.get(f"/tasks/{created['id']}")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:483: in get
+    return super().get(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1053: in get
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 1
+
+    @app.get("/tasks/{id}")
+    def get_task(id: int):
+        cursor = get_db_connection()
+        cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+>       task = cursor.fetchone()
+               ^^^^^^^^^^^^^^^
+E       AttributeError: 'sqlite3.Connection' object has no attribute 'fetchone'
+
+main.py:169: AttributeError
+___________________________ test_get_task_not_found ____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7c29ae0>
+
+    def test_get_task_not_found(client):
+>       r = client.get("/tasks/99999")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:85: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:483: in get
+    return super().get(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1053: in get
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 99999
+
+    @app.get("/tasks/{id}")
+    def get_task(id: int):
+        cursor = get_db_connection()
+        cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+>       task = cursor.fetchone()
+               ^^^^^^^^^^^^^^^
+E       AttributeError: 'sqlite3.Connection' object has no attribute 'fetchone'
+
+main.py:169: AttributeError
+_______________________________ test_list_empty ________________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7b51150>
+
+    def test_list_empty(client):
+        r = client.get("/tasks")
+>       assert r.status_code == 200
+E       assert 422 == 200
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+test_tasks.py:93: AssertionError
+______________________ test_list_returns_all_and_ordered _______________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7b53bd0>
+
+    def test_list_returns_all_and_ordered(client):
+        ids = [create_task(client, title=f"t{i}").json()["id"] for i in range(3)]
+        r = client.get("/tasks")
+        data = r.json()
+>       assert data["total"] == 3
+               ^^^^^^^^^^^^^
+E       KeyError: 'total'
+
+test_tasks.py:105: KeyError
+________________________ test_list_filter_by_completed _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7c21ae0>
+
+    def test_list_filter_by_completed(client):
+        a = create_task(client, title="a").json()
+        create_task(client, title="b")
+>       client.put(f"/tasks/{a['id']}", json={"completed": True})
+
+test_tasks.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:587: in put
+    return super().put(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1181: in put
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 1
+task_update = TaskUpdate(title=None, description=None, completed=True, priority=None)
+
+    @app.put("/tasks/{id}")
+    def update_task(id: int, task_update: TaskUpdate):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+    
+        try:
+            # Update only provided fields
+            fields = []
+            params = []
+    
+            if task_update.title is not None:
+                fields.append("title")
+                params.append(task_update.title)
+    
+            if task_update.description is not None:
+                fields.append("description")
+                params.append(task_update.description)
+    
+            if task_update.completed is not None:
+                fields.append("completed")
+                params.append(1 if task_update.completed else 0)
+    
+            if task_update.priority is not None:
+                fields.append("priority")
+                params.append(task_update.priority)
+    
+            if not fields:
+                raise HTTPException(status_code=400, detail="At least one field must be updated")
+    
+            where_clause = "id = ?"
+            params.append(id)
+            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {where_clause}"
+    
+>           cursor.execute(query, params)
+E           sqlite3.OperationalError: near "WHERE": syntax error
+
+main.py:218: OperationalError
+_________________________ test_list_filter_by_priority _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7c239b0>
+
+    def test_list_filter_by_priority(client):
+        create_task(client, title="a", priority="low")
+        create_task(client, title="b", priority="high")
+>       r = client.get("/tasks", params={"priority": "high"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:483: in get
+    return super().get(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1053: in get
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+completed = None, priority = 'high', page = 1, page_size = 10
+
+    @app.get("/tasks")
+    def list_tasks(
+        completed: Optional[bool] = None,
+        priority: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 10
+    ):
+        # Validate page and page_size
+        if page < 1:
+            raise HTTPException(status_code=422, detail="Page must be >= 1")
+        if page_size < 1 or page_size > 100:
+            raise HTTPException(status_code=422, detail="Page size must be 1-100")
+        if priority not in VALID_PRIORITIES:
+            raise HTTPException(status_code=422, detail="Priority must be one of 'low', 'medium', 'high'")
+    
+        # Build query
+        where_clause = "1"
+        params = []
+    
+        if completed is not None:
+            where_clause += " AND completed = ?"
+            params.append(completed)
+    
+        if priority is not None:
+            where_clause += " AND priority = ?"
+            params.append(priority)
+    
+        cursor = get_db_connection()
+>       conn = conn
+               ^^^^
+E       UnboundLocalError: cannot access local variable 'conn' where it is not associated with a value
+
+main.py:132: UnboundLocalError
+_____________________________ test_list_pagination _____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7b51ae0>
+
+    def test_list_pagination(client):
+        for i in range(15):
+            create_task(client, title=f"t{i}")
+    
+        r = client.get("/tasks", params={"page": 1, "page_size": 10})
+        data = r.json()
+>       assert len(data["items"]) == 10
+                   ^^^^^^^^^^^^^
+E       KeyError: 'items'
+
+test_tasks.py:143: KeyError
+__________________________ test_update_partial_field ___________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7c298c0>
+
+    def test_update_partial_field(client):
+        created = create_task(client, title="orig", description="d", priority="low").json()
+>       r = client.put(f"/tasks/{created['id']}", json={"completed": True})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:587: in put
+    return super().put(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1181: in put
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 1
+task_update = TaskUpdate(title=None, description=None, completed=True, priority=None)
+
+    @app.put("/tasks/{id}")
+    def update_task(id: int, task_update: TaskUpdate):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+    
+        try:
+            # Update only provided fields
+            fields = []
+            params = []
+    
+            if task_update.title is not None:
+                fields.append("title")
+                params.append(task_update.title)
+    
+            if task_update.description is not None:
+                fields.append("description")
+                params.append(task_update.description)
+    
+            if task_update.completed is not None:
+                fields.append("completed")
+                params.append(1 if task_update.completed else 0)
+    
+            if task_update.priority is not None:
+                fields.append("priority")
+                params.append(task_update.priority)
+    
+            if not fields:
+                raise HTTPException(status_code=400, detail="At least one field must be updated")
+    
+            where_clause = "id = ?"
+            params.append(id)
+            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {where_clause}"
+    
+>           cursor.execute(query, params)
+E           sqlite3.OperationalError: near "WHERE": syntax error
+
+main.py:218: OperationalError
+_________________________ test_update_multiple_fields __________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cd81a580>
+
+    def test_update_multiple_fields(client):
+        created = create_task(client).json()
+>       r = client.put(
+            f"/tasks/{created['id']}",
+            json={"title": "new title", "priority": "high"},
+        )
+
+test_tasks.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:587: in put
+    return super().put(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1181: in put
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 1
+task_update = TaskUpdate(title='new title', description=None, completed=None, priority='high')
+
+    @app.put("/tasks/{id}")
+    def update_task(id: int, task_update: TaskUpdate):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+    
+        try:
+            # Update only provided fields
+            fields = []
+            params = []
+    
+            if task_update.title is not None:
+                fields.append("title")
+                params.append(task_update.title)
+    
+            if task_update.description is not None:
+                fields.append("description")
+                params.append(task_update.description)
+    
+            if task_update.completed is not None:
+                fields.append("completed")
+                params.append(1 if task_update.completed else 0)
+    
+            if task_update.priority is not None:
+                fields.append("priority")
+                params.append(task_update.priority)
+    
+            if not fields:
+                raise HTTPException(status_code=400, detail="At least one field must be updated")
+    
+            where_clause = "id = ?"
+            params.append(id)
+            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {where_clause}"
+    
+>           cursor.execute(query, params)
+E           sqlite3.OperationalError: near ",": syntax error
+
+main.py:218: OperationalError
+____________________________ test_update_not_found _____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cc592360>
+
+    def test_update_not_found(client):
+>       r = client.put("/tasks/99999", json={"completed": True})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:587: in put
+    return super().put(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1181: in put
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 99999
+task_update = TaskUpdate(title=None, description=None, completed=True, priority=None)
+
+    @app.put("/tasks/{id}")
+    def update_task(id: int, task_update: TaskUpdate):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+    
+        try:
+            # Update only provided fields
+            fields = []
+            params = []
+    
+            if task_update.title is not None:
+                fields.append("title")
+                params.append(task_update.title)
+    
+            if task_update.description is not None:
+                fields.append("description")
+                params.append(task_update.description)
+    
+            if task_update.completed is not None:
+                fields.append("completed")
+                params.append(1 if task_update.completed else 0)
+    
+            if task_update.priority is not None:
+                fields.append("priority")
+                params.append(task_update.priority)
+    
+            if not fields:
+                raise HTTPException(status_code=400, detail="At least one field must be updated")
+    
+            where_clause = "id = ?"
+            params.append(id)
+            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {where_clause}"
+    
+>           cursor.execute(query, params)
+E           sqlite3.OperationalError: near "WHERE": syntax error
+
+main.py:218: OperationalError
+_________________________ test_update_invalid_priority _________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cd6a1f20>
+
+    def test_update_invalid_priority(client):
+        created = create_task(client).json()
+>       r = client.put(f"/tasks/{created['id']}", json={"priority": "urgent"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:587: in put
+    return super().put(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1181: in put
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 1
+task_update = TaskUpdate(title=None, description=None, completed=None, priority='urgent')
+
+    @app.put("/tasks/{id}")
+    def update_task(id: int, task_update: TaskUpdate):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+    
+        try:
+            # Update only provided fields
+            fields = []
+            params = []
+    
+            if task_update.title is not None:
+                fields.append("title")
+                params.append(task_update.title)
+    
+            if task_update.description is not None:
+                fields.append("description")
+                params.append(task_update.description)
+    
+            if task_update.completed is not None:
+                fields.append("completed")
+                params.append(1 if task_update.completed else 0)
+    
+            if task_update.priority is not None:
+                fields.append("priority")
+                params.append(task_update.priority)
+    
+            if not fields:
+                raise HTTPException(status_code=400, detail="At least one field must be updated")
+    
+            where_clause = "id = ?"
+            params.append(id)
+            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {where_clause}"
+    
+>           cursor.execute(query, params)
+E           sqlite3.OperationalError: near "WHERE": syntax error
+
+main.py:218: OperationalError
+___________________________ test_update_empty_title ____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25c7c286b0>
+
+    def test_update_empty_title(client):
+        created = create_task(client).json()
+>       r = client.put(f"/tasks/{created['id']}", json={"title": ""})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_tasks.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:587: in put
+    return super().put(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1181: in put
+    return self.request(
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:455: in request
+    return super().request(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:454: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib64/python3.14/concurrent/futures/_base.py:396: in __get_result
+    raise self._exception
+../../../.venv/lib64/python3.14/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../../../.venv/lib64/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:1281: in handle
+    await super().handle(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/routing.py:280: in handle
+    await self.app(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../../../.venv/lib64/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+../../../.venv/lib64/python3.14/site-packages/fastapi/routing.py:354: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:2706: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+../../../.venv/lib64/python3.14/site-packages/anyio/_backends/_asyncio.py:1100: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+id = 1
+task_update = TaskUpdate(title='', description=None, completed=None, priority=None)
+
+    @app.put("/tasks/{id}")
+    def update_task(id: int, task_update: TaskUpdate):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+    
+        try:
+            # Update only provided fields
+            fields = []
+            params = []
+    
+            if task_update.title is not None:
+                fields.append("title")
+                params.append(task_update.title)
+    
+            if task_update.description is not None:
+                fields.append("description")
+                params.append(task_update.description)
+    
+            if task_update.completed is not None:
+                fields.append("completed")
+                params.append(1 if task_update.completed else 0)
+    
+            if task_update.priority is not None:
+                fields.append("priority")
+                params.append(task_update.priority)
+    
+            if not fields:
+                raise HTTPException(status_code=400, detail="At least one field must be updated")
+    
+            where_clause = "id = ?"
+            params.append(id)
+            query = f"UPDATE tasks SET {', '.join(fields)} WHERE {where_clause}"
+    
+>           cursor.execute(query, params)
+E           sqlite3.OperationalError: near "WHERE": syntax error
+
+main.py:218: OperationalError
+______________________________ test_delete_found _______________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cf675bf0>
+
+    def test_delete_found(client):
+        created = create_task(client).json()
+        r = client.delete(f"/tasks/{created['id']}")
+>       assert r.status_code == 204
+E       assert 200 == 204
+E        +  where 200 = <Response [200 OK]>.status_code
+
+test_tasks.py:211: AssertionError
+____________________________ test_delete_not_found _____________________________
+
+client = <starlette.testclient.TestClient object at 0x7f25cc663680>
+
+    def test_delete_not_found(client):
+        r = client.delete("/tasks/99999")
+>       assert r.status_code == 404
+E       assert 200 == 404
+E        +  where 200 = <Response [200 OK]>.status_code
+
+test_tasks.py:218: AssertionError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-4b-pq2_0-rtx5070ti/main.py:33: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+test_tasks.py: 24 warnings
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/applications.py:4681: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)  # ty: ignore[deprecated]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED test_tasks.py::test_create_task_minimal - assert 200 == 201
+FAILED test_tasks.py::test_create_task_full - assert 200 == 201
+FAILED test_tasks.py::test_create_task_empty_title - ValueError: Title must b...
+FAILED test_tasks.py::test_create_task_title_too_long - ValueError: Title mus...
+FAILED test_tasks.py::test_get_task_found - AttributeError: 'sqlite3.Connecti...
+FAILED test_tasks.py::test_get_task_not_found - AttributeError: 'sqlite3.Conn...
+FAILED test_tasks.py::test_list_empty - assert 422 == 200
+FAILED test_tasks.py::test_list_returns_all_and_ordered - KeyError: 'total'
+FAILED test_tasks.py::test_list_filter_by_completed - sqlite3.OperationalErro...
+FAILED test_tasks.py::test_list_filter_by_priority - UnboundLocalError: canno...
+FAILED test_tasks.py::test_list_pagination - KeyError: 'items'
+FAILED test_tasks.py::test_update_partial_field - sqlite3.OperationalError: n...
+FAILED test_tasks.py::test_update_multiple_fields - sqlite3.OperationalError:...
+FAILED test_tasks.py::test_update_not_found - sqlite3.OperationalError: near ...
+FAILED test_tasks.py::test_update_invalid_priority - sqlite3.OperationalError...
+FAILED test_tasks.py::test_update_empty_title - sqlite3.OperationalError: nea...
+FAILED test_tasks.py::test_delete_found - assert 200 == 204
+FAILED test_tasks.py::test_delete_not_found - assert 200 == 404
+18 failed, 5 passed, 50 warnings in 2.58s

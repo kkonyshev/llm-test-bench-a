@@ -1,0 +1,14 @@
+[PASS] Q1: 41.4
+[FAIL] Q2: 7
+[PASS] Q3: Cleo owns the dog, and Ben owns the fish.
+[FAIL] Q4: 40
+[FAIL] Q5: 8
+[FAIL] Q6: 1.2
+[PASS] Q7: The kilogram of feathers is heavier.
+[PASS] Q8: 100%
+[PASS] Q9: X is a liar, Y is a truth-teller
+[FAIL] Q10: 4
+[PASS] Q11: 10
+[FAIL] Q12: Dan is the tallest, Farah is the shortest.
+
+6/12 correct
