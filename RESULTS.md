@@ -1,5 +1,7 @@
 # Results
 
+Rankings, takeaways and picks in Russian: [`CHAMPIONS.md`](CHAMPIONS.md).
+
 Two machines' results are recorded here — see `HARDWARE.md` for exact specs
 and `MODELS.md` for exact model files. Single run per model per benchmark
 on both machines (no repeated trials) — treat scores within 1-2 tests of
