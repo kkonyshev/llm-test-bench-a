@@ -524,3 +524,61 @@ New, found while re-running on Machine 3 (dual-GPU):
     identically both times for the same root cause (Pydantic v1 `regex=`
     kwarg against an installed Pydantic v2) — that's the one worth trusting
     as a real, stable finding rather than noise.
+
+---
+
+# Results — workstation1, dual-GPU, October 2026 new models
+
+Same machine, scripts and settings as the Machine 3 run above (native Ollama
+on `:11434`, `num_ctx=32768`, single run per model). Script:
+`run_oct2026_models.sh`. ComfyUI, Strata and the GPU miner were stopped, so
+nothing else held VRAM. Both models were already pulled as Ollama tags.
+
+| Model | Ollama tag | Quant / size | Where it ran |
+|---|---|---|---|
+| NVIDIA Nemotron 3.5 Bolt 74B-A9B (MoE, 9B active, vision) | `nemotron-3.5-bolt:74b-a9b` | IQ2_XXS, 23.8 GB | 100% GPU, RTX 5090 alone |
+| InternScience Sage-A1.5 (qwen35moe, 35.5B, 8 of 256 experts) | `sage-a1.5:q4_k_m` | Q4_K_M, 21.7 GB | 100% GPU, RTX 5090 alone |
+| InternScience Sage-A1.5 | `sage-a1.5:q8_0` | Q8_0, 37.8 GB | 100% GPU, split 5090 + 5070 Ti |
+
+## Coding benchmark (23 tests)
+
+| Model | Tests passed | Time | Tokens | Speed |
+|---|---|---|---|---|
+| **Nemotron 3.5 Bolt 74B-A9B (IQ2)** | **23/23** | 1m 42s | 15,588 | 160.3 tok/s |
+| Sage-A1.5 Q4_K_M, `num_ctx=65536` (attempt 2) | 13/23 | 2m 42s | 38,579 | 244.0 tok/s |
+| Sage-A1.5 Q8_0 | 7/23 | 2m 15s | 23,428 | 182.2 tok/s |
+| Sage-A1.5 Q4_K_M, `num_ctx=32768` (attempt 1) | 0/23 | 2m 15s | 31,914 | 245.7 tok/s |
+
+- **Bolt**: no failures. Thinks a lot before answering (15.6K tokens vs.
+  ~1.5K for Qwen3-Coder-30B-A3B), so wall-clock is ~9x Qwen3-Coder's despite
+  a respectable token rate. Notable that a 2-bit quant scores perfectly.
+- **Sage Q4_K_M, attempt 1**: not a code bug. The response hit the context
+  limit (854 prompt + 31,914 generated = exactly 32,768). Sage reasons in
+  plain text inside the answer, so the code block was never finished and
+  only 204 chars were extracted. Re-run with `num_ctx=65536`
+  (`runs/sage-a1.5:q4_k_m`; the first attempt is kept as `-attempt1`):
+  finished at 38.6K tokens, 13/23. GET/PATCH/DELETE by id return 404 and
+  list endpoints return empty results for tasks it just created.
+- **Sage Q8_0**: finished within 32K. 7/23: opens SQLite without
+  `check_same_thread=False`, so every test that touches the DB from FastAPI's
+  threadpool fails with `sqlite3.ProgrammingError`.
+
+## Reasoning benchmark (12 puzzles)
+
+| Model | Correct | Time | Tokens | Speed |
+|---|---|---|---|---|
+| **Nemotron 3.5 Bolt 74B-A9B (IQ2)** | **12/12** | 38s | 5,995 | 160.5 tok/s |
+| **Sage-A1.5 Q4_K_M** | **12/12** | 33s | 8,329 | 252.3 tok/s |
+| **Sage-A1.5 Q8_0** | **12/12** | 36s | 6,637 | 185.3 tok/s |
+
+## Combined picture (October 2026 models)
+
+| Model | Coding | Reasoning | Practical read |
+|---|---|---|---|
+| Nemotron 3.5 Bolt 74B-A9B (IQ2) | 23/23 | 12/12 | Joins Qwen3-Coder-30B-A3B and Qwen3.8-27B as the only perfect scorers; fits one 32 GB card. Slower wall-clock than Qwen3-Coder because of long thinking. |
+| Sage-A1.5 (Q4_K_M / Q8_0) | 13/23 / 7/23 | 12/12 | Fast and a strong puzzle solver, but weak at spec-following code here, and its verbose in-answer reasoning needs a 64K context for a task this size. |
+
+Methodology note 16: **a 0/N can be a context-window cutoff, not a bug.**
+Check `prompt_eval_count + eval_count` against `num_ctx` before treating a
+0/23 as a model failure; Sage Q4's first attempt used exactly the whole
+32,768-token window.

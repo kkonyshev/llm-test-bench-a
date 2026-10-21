@@ -1,0 +1,2 @@
+NAME                         ID              SIZE     PROCESSOR    CONTEXT    RUNNER      UNTIL              
+nemotron-3.5-bolt:74b-a9b    70b825ae8bd6    22 GB    100% GPU     32768      llamacpp    4 minutes from now    

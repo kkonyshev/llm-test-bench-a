@@ -1,0 +1,2 @@
+NAME                ID              SIZE     PROCESSOR    CONTEXT    RUNNER      UNTIL              
+sage-a1.5:q4_k_m    9dd4e76b23f8    21 GB    100% GPU     32768      llamacpp    4 minutes from now    
