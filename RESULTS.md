@@ -631,3 +631,38 @@ RAM and VRAM stay flat for the whole run (everything is loaded up front). With
 ~60 GB pinned by Strata, a second Strata instance or another RAM-heavy job
 (e.g. ComfyUI's Wan 14B offload) would not fit next to it.
 Raw samples: `strata_uncensored_resources_attempt{1,2}.csv`.
+
+## Same engine, original weights: Qwen3.8-Flash-Next GSQ-RCO IQ3_S (RTX 5070 Ti)
+
+The second Strata install (`/data/apps/Strata`, engine 0.1.44, its own
+`run-iq3_s.sh` and `strata-iq3_s.json`, unchanged) runs the original
+Qwen3.8-Flash-Next weights compressed by ISTA-DASLab (GSQ-RCO IQ3_S), 65,536
+context, vision encoder on the GPU, no control vector. Its config pins it to
+the RTX 5070 Ti too (`"gpu": 1`), so the hardware matches the uncensored run
+exactly. Strata rejects `prompt + max_tokens` above the context window, so
+`BENCH_MAX_TOKENS=64000` here (vs. 100,000 for the 524K uncensored config).
+Script: `run_strata_iq3s.sh`.
+
+| Benchmark | Result | Time | Tokens | Speed |
+|---|---|---|---|---|
+| Reasoning | 11/12 by `grade.py`, **12/12 on review** | 56s | 4,472 | 81.3 tok/s |
+| Coding | **23/23** (first attempt) | 9m 37s | 49,933 | 86.7 tok/s |
+
+- The one reasoning "fail" is a grader false negative: Q12's answer line is
+  `ANSWER 12: Dan; Ellie` (tallest; shortest — correct, and its working says
+  `Dan > Farah > Ellie`), but `grade.py` requires the words "tallest" and
+  "shortest" in the answer.
+- Coding passed on the first try with 50K tokens of reasoning, inside the 64K
+  cap.
+
+| | IQ3_S, original (0.1.44) | IQ3_XXS Orca Uncensored (0.1.45) |
+|---|---|---|
+| Coding | 23/23, 1st attempt, 9m 37s, 50K tokens | 23/23 on 2nd attempt, 14m 46s, 78K tokens (1st: loop, no answer) |
+| Reasoning | 12/12 (11/12 by grader) | 12/12 |
+| Decode speed | 81-87 tok/s | 88-92 tok/s |
+| `strata` RSS | **50.7 GB** | 59.5 GB |
+| System RAM available while running | 65.1 GB | 55.6 GB |
+| CPU | avg 799%, max 808% (~8 cores), load ~7.7 | avg 785%, max 808%, load ~8 |
+| RTX 5070 Ti | 15.7 GB, 99% util, max 196 W | 15.7 GB, 97% util, max 192 W |
+
+Raw samples: `strata_iq3s_resources.csv`.
