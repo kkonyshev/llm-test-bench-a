@@ -666,3 +666,29 @@ Script: `run_strata_iq3s.sh`.
 | RTX 5070 Ti | 15.7 GB, 99% util, max 196 W | 15.7 GB, 97% util, max 192 W |
 
 Raw samples: `strata_iq3s_resources.csv`.
+
+### IQ3_S moved to the RTX 5090
+
+Same install and settings, with only the config's `"gpu"` changed to `0` by the
+owner (RTX 5090, 32 GB). Run directories carry a `-5090` suffix
+(`BENCH_LABEL=qwen3.8-flash-next-iq3_s-5090 ./run_strata_iq3s.sh`; Strata
+serves any model name, so the label only names the directory).
+
+| Benchmark | RTX 5070 Ti (16 GB) | RTX 5090 (32 GB) | Speed-up |
+|---|---|---|---|
+| Reasoning | 12/12*, 56s, 81.3 tok/s | **12/12**, 17s, 171.3 tok/s | 2.1x |
+| Coding | 23/23, 9m 37s, 86.7 tok/s | **23/23**, 5m 23s, 160.8 tok/s | 1.9x |
+
+\* 11/12 by `grade.py`, see the Q12 note above; on the 5090 the grader counts 12/12.
+
+| Resources while generating | RTX 5070 Ti | RTX 5090 |
+|---|---|---|
+| GPU memory | 15.7 GB | 32.0 GB (the expert cache fills the card) |
+| GPU util / power | 99%, avg 168 W, max 196 W | 99%, avg 371 W, max 470 W |
+| `strata` CPU | avg 799% | avg 775% |
+| `strata` RSS / RAM available | 50.7 GB / 65.1 GB | 50.7 GB / 65.0 GB |
+
+On the 5090 the decode expert cache hit rate was 95.9%: twice the VRAM keeps
+most of the experts a token needs on the card, so less is computed on the CPU
+and generation roughly doubles. RAM use is unchanged (all experts stay in RAM
+either way). Raw samples: `strata_iq3s_resources_5090.csv`.

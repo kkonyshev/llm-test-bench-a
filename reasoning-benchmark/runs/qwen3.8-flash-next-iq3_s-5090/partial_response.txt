@@ -1,0 +1,62 @@
+We need answer 12 problems. Need include work maybe. Final answers exact lines at very end one per problem in order. Need solve carefully.
+
+Let's analyze each.
+
+1. Notebooks $4 *7=28. Pens $1.50*12=18. Total 46. 10% discount -> pay 90% = 41.4. Dollars maybe $41.40. Answer: 41.40 or $41.40? Need format ANSWER 1: <your answer>. Probably include 41.40? It says in dollars. Use 41.40. Could use $41.40. Need exact line. 
+
+2. Ben in 4 years =30 => Ben now 26. "Ben is twice as old as Cara was 6 years ago." Let C now. Cara 6 years ago C-6. 26 = 2(C-6)=2C-12 => 2C=38 => C=19. Cara now 19.
+
+3. Logic puzzle. Alice, Ben, Cleo. Pets cat,dog,fish. Drinks tea,coffee,juice. Clues: Alice not fish. Dog owner drinks coffee. Ben drinks juice. Cleo does not drink tea. Need who owns dog, what pet Ben owns.
+Ben drinks juice. Dog owner drinks coffee => Ben not dog owner. Cleo does not drink tea. Cleo can't tea; can coffee or juice. But Ben drinks juice unique drinks? "each prefer one drink (tea, coffee, or juice)" likely one each distinct. So Cleo cannot tea and cannot juice (Ben juice), so Cleo drinks coffee. Then dog owner drinks coffee => Cleo owns dog. Alice not fish, Cleo dog => Alice cat or fish? Alice not fish => cat. Then Ben fish. Answer: Cleo owns dog, Ben owns fish.
+
+4 Sequence 2,6,12,20,30,... Differences 4,6,8,10; next diff 12 => 42. Or n(n+1): n=1 2, 2 6, 3 12, 4 20,5 30,6 42. Answer 42.
+
+5 trick: 17 sheep, all but 9 die => 9 left.
+
+6 Pipe A 1/6, B 1/3 per hour. Together 1/6+1/3=1/6+2/6=3/6=1/2 per hour -> 2 hours. Answer 2.
+
+7 Which heavier: a kilogram of feathers or a pound of steel. Need compare kg vs pound. 1 kg = 2.20462 pounds > 1 pound. Feathers kilogram heavier. Answer kilogram of feathers. Need maybe "a kilogram of feathers". 
+
+8 Cost C. Retail = 1.25C. Sale discount 20% => 0.8*1.25C=1.0C. Sale price = 100% of original cost. Answer 100%.
+
+9 Knights/liars. X says "At least one of us is a liar." Determine X truth-teller? If X truth-teller, statement true => at least one liar. Since X not liar, Y liar. Consistent? Y liar no statement, okay. If X liar, statement false => "At least one of us is a liar" false => neither liar => both truth-tellers, but X liar contradiction. So X truth-teller, Y liar. Wait if X truth-teller Y liar then at least one liar true. Yes. Answer X truth-teller, Y liar.
+
+10 3x+7=2x+15 => x=8.
+
+11 C(5,3)=10.
+
+12 Dan > Ellie. Ellie < Farah. Farah < Dan. Combine Dan > Farah > Ellie? "Ellie is shorter than Farah" => Ellie < Farah. Farah shorter than Dan => Dan > Farah. Dan taller than Ellie redundant. Tallest Dan, shortest Ellie. Answer Dan, Ellie.
+
+Need final with work and answers at very end exactly format. User says finish with a line exactly format one per problem at very end. We can show work before. Ensure the last 12 lines exactly:
+ANSWER 1: $41.40? The exact line includes prefix then <your answer>. It's okay if answer contains $? Format line: ANSWER 1: $41.40. They specified one per problem. Maybe no extra after. We can choose $41.40. Is $ in answer okay? yes. Could use 41.40 to avoid ambiguity. They ask in dollars. I'll use 41.40 maybe line: ANSWER 1: 41.40. But maybe include dollar sign? The format <your answer> not strict. We can use $41.40. The exact prefix required. For problem 7 answer phrase: a kilogram of feathers. Problem 8: 100%. Need line not extra. 
+
+Need make sure no trailing explanation after answer lines. Include maybe numbered solutions before. Since desired oververbosity 9, show work. But ensure at very end. Could have final section. Need be careful that "finish with a line in EXACTLY this format" means the very last lines are the answer lines. So no conclusion after. We can present work then blank then answer lines. Ensure each line exactly starts ANSWER n:. Could use colon and space. 
+
+Let's craft final: 
+
+1. 7*4=28, 12*1.50=18, total 46, 10% discount => 46*0.9=41.4 -> $41.40
+...
+
+12 Dan > Farah > Ellie; Dan tallest Ellie shortest.
+
+Answer lines:
+ANSWER 1: $41.40
+ANSWER 2: 19
+ANSWER 3: Cleo owns the dog; Ben owns the fish
+ANSWER 4: 42
+ANSWER 5: 9
+ANSWER 6: 2
+ANSWER 7: a kilogram of feathers
+ANSWER 8: 100%
+ANSWER 9: X is a truth-teller; Y is a liar
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan is the tallest; Ellie is the shortest
+
+Need consider problem 3 "Who owns the dog, and what pet does Ben own?" Could answer Cleo; fish. Use concise. Fine.
+
+Double-check problem 9: If X truth teller Y liar is possible. If X liar contradiction as above. Good.
+
+Potential nuance: Problem 7 "heavier: kilogram of feathers, or a pound of steel" a kilogram heavier than
+
+=== answer ===

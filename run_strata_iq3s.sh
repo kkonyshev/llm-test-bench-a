@@ -7,9 +7,9 @@ export BENCH_OPENAI_URL=http://localhost:8081
 # the IQ3_S config has a 65,536-token context; Strata rejects max_tokens beyond it
 export BENCH_MAX_TOKENS=64000
 export BENCH_API_KEY=$(python3 -c "import json;print(json.load(open(\"/data/apps/Strata/strata-iq3_s.json\")).get(\"api_key\",\"\"))")
-M="qwen3.8-flash-next-iq3_s"
+M="${BENCH_LABEL:-qwen3.8-flash-next-iq3_s}"   # Strata serves any model name; the label only names the run directory
 GPU=$(python3 -c "import json;print(json.load(open(\"/data/apps/Strata/strata-iq3_s.json\"))[\"gpu\"])")
-CSV=strata_iq3s_resources.csv
+CSV=strata_iq3s_resources${BENCH_LABEL:+_${BENCH_LABEL#qwen3.8-flash-next-iq3_s-}}.csv
 echo "time,strata_cpu_pct,strata_rss_gb,ram_used_gb,ram_avail_gb,swap_used_gb,load1,gpu_util,gpu_mem_mib,gpu_w" > $CSV
 (
   while sleep 5; do
