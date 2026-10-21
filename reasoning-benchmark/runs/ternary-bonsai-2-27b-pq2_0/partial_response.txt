@@ -1,0 +1,53 @@
+We need answer 12 problems with final ANSWER lines exactly format. We need solve carefully. Let's analyze each.
+
+1. Notebooks $4 each, pens $1.50. 7 notebooks =28. 12 pens=18. total=46. 10% discount => pay 41.4. dollars: 41.40 maybe. Need answer concise.
+
+2. Ben in 4 years 30 => Ben now 26. Ben twice as old as Cara was 6 years ago. Cara was 6 years ago =13. Now Cara=19.
+
+3. Logic. Alice, Ben, Cleo pets cat dog fish; drinks tea coffee juice. Clues: a Alice not fish. b Dog owner drinks coffee. c Ben drinks juice. d Cleo does not drink tea.
+Need who owns dog, what pet Ben owns.
+Since Ben drinks juice, cannot dog (coffee). Dog owner is Alice or Cleo. Cleo not tea, could coffee/juice? But Ben juice so Cleo not juice, thus Cleo coffee. Then Cleo dog. Then Alice drinks tea (remaining). Ben fish? Pets remaining cat fish. Alice not fish, so Alice cat, Ben fish. Answer: Cleo owns dog; Ben owns fish.
+
+4. Sequence 2,6,12,20,30,? Differences 4,6,8,10 next +12 =42. Also n(n+1)? 1*2,2*3,3*4,4*5,5*6 next 6*7=42.
+
+5. 17 sheep all but 9 die => 9 left.
+
+6. A rate 1/6 tank/hr, B 1/3. together 1/2 => 2 hours.
+
+7. A kilogram of feathers vs a pound of steel. Which heavier? 1 kg = 2.20462 lbs, pound = 0.453592 kg, so kilogram heavier. Need answer: kilogram of feathers.
+
+8. Cost C. Markup 25% retail 1.25C. Discount 20% sale =0.8*1.25C=1.0C. 100% original cost.
+
+9. Knights/knaves: X says "At least one of us is a liar." If X truth-teller, statement true, so at least one liar, thus Y liar. Consistent: X truth, Y liar. If X liar, statement false => at least one of us is liar is false => both truth-tellers, contradiction X liar. So X truth-teller, Y liar. Need answer X truth-teller, Y liar.
+
+10. 3x+7=2x+15 => x=8.
+
+11. Choose 3 from 5 = C(5,3)=10.
+
+12. Dan taller than Ellie. Ellie shorter than Farah => Farah taller than Ellie. Farah shorter than Dan => Dan tallest. Ellie shortest? Let's order: Dan > Farah > Ellie. Yes Ellie shortest.
+
+Need final answer with work if want, but for each problem finish with line exactly format at very end. User says solve all 12 problems below. Show work if you want, but for EACH problem, finish with a line in EXACTLY this format (one per problem, in order, at the very end of your response). Means final lines at very end, each exact "ANSWER n: <answer>". Could include work before. Must ensure final lines are the last things in response, no extra after. We can include explanations before. Need maybe format exactly. Each answer line one per problem. Ensure no trailing spaces? Fine.
+
+Need be careful with problem 7 answer: "a kilogram of feathers" maybe. For 1: "41.40" or "$41.40"? User asks how much does she pay, in dollars. ANSWER 1: 41.40 or 41.4. I can write 41.40. The line exact format doesn't forbid $ maybe. To be safe "41.40" or "41.4". Since in dollars, maybe "41.40". 
+
+Problem 3: "Who owns the dog, and what pet does Ben own?" answer "Cleo owns the dog; Ben owns the fish".
+
+Problem 9: answer "X is a truth-teller and Y is a liar." Good.
+
+Need maybe final only? Could provide short work. But desired oververbose 9, maybe include detailed work. However must ensure final lines at very end. I can include all solutions then final block.
+
+Double-check no issue with problem 2: "Ben is twice as old as Cara was 6 years ago. In 4 years, Ben will be 30. How old is Cara now?" Ben now 26. Cara 6 years ago 13. Now 19.
+
+Problem 4: next 42.
+
+Problem 5: all but 9 die -> 9.
+
+Problem 6: 2.
+
+Problem 8: 100%.
+
+Problem 10: x=8.
+
+Problem 11: 10.
+
+=== answer ===

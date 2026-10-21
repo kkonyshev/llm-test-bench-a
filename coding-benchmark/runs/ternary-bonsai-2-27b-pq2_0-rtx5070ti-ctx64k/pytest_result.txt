@@ -1,0 +1,313 @@
+EEEEEEEEEEEEEEEEEEEEEEE                                                  [100%]
+==================================== ERRORS ====================================
+__________________ ERROR at setup of test_create_task_minimal __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+___________________ ERROR at setup of test_create_task_full ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_______________ ERROR at setup of test_create_task_missing_title _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+________________ ERROR at setup of test_create_task_empty_title ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_____________ ERROR at setup of test_create_task_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+______________ ERROR at setup of test_create_task_title_too_long _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+____________________ ERROR at setup of test_get_task_found _____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+__________________ ERROR at setup of test_get_task_not_found ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+______________________ ERROR at setup of test_list_empty _______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_____________ ERROR at setup of test_list_returns_all_and_ordered ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_______________ ERROR at setup of test_list_filter_by_completed ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+________________ ERROR at setup of test_list_filter_by_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_____________ ERROR at setup of test_list_filter_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+____________________ ERROR at setup of test_list_pagination ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+___________________ ERROR at setup of test_list_invalid_page ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+________________ ERROR at setup of test_list_invalid_page_size _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_________________ ERROR at setup of test_update_partial_field __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+________________ ERROR at setup of test_update_multiple_fields _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+___________________ ERROR at setup of test_update_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+________________ ERROR at setup of test_update_invalid_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+__________________ ERROR at setup of test_update_empty_title ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+_____________________ ERROR at setup of test_delete_found ______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+___________________ ERROR at setup of test_delete_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+E         File "/data/remote-agent/local-llm-bench/coding-benchmark/runs/ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k/main.py", line 38
+E           raw = await request.body()
+E                 ^^^^^^^^^^^^^^^^^^^^
+E       SyntaxError: 'await' outside async function
+
+test_tasks.py:20: SyntaxError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR test_tasks.py::test_create_task_minimal -   File "/data/remote-agent/lo...
+ERROR test_tasks.py::test_create_task_full -   File "/data/remote-agent/local...
+ERROR test_tasks.py::test_create_task_missing_title -   File "/data/remote-ag...
+ERROR test_tasks.py::test_create_task_empty_title -   File "/data/remote-agen...
+ERROR test_tasks.py::test_create_task_invalid_priority -   File "/data/remote...
+ERROR test_tasks.py::test_create_task_title_too_long -   File "/data/remote-a...
+ERROR test_tasks.py::test_get_task_found -   File "/data/remote-agent/local-l...
+ERROR test_tasks.py::test_get_task_not_found -   File "/data/remote-agent/loc...
+ERROR test_tasks.py::test_list_empty -   File "/data/remote-agent/local-llm-b...
+ERROR test_tasks.py::test_list_returns_all_and_ordered -   File "/data/remote...
+ERROR test_tasks.py::test_list_filter_by_completed -   File "/data/remote-age...
+ERROR test_tasks.py::test_list_filter_by_priority -   File "/data/remote-agen...
+ERROR test_tasks.py::test_list_filter_invalid_priority -   File "/data/remote...
+ERROR test_tasks.py::test_list_pagination -   File "/data/remote-agent/local-...
+ERROR test_tasks.py::test_list_invalid_page -   File "/data/remote-agent/loca...
+ERROR test_tasks.py::test_list_invalid_page_size -   File "/data/remote-agent...
+ERROR test_tasks.py::test_update_partial_field -   File "/data/remote-agent/l...
+ERROR test_tasks.py::test_update_multiple_fields -   File "/data/remote-agent...
+ERROR test_tasks.py::test_update_not_found -   File "/data/remote-agent/local...
+ERROR test_tasks.py::test_update_invalid_priority -   File "/data/remote-agen...
+ERROR test_tasks.py::test_update_empty_title -   File "/data/remote-agent/loc...
+ERROR test_tasks.py::test_delete_found -   File "/data/remote-agent/local-llm...
+ERROR test_tasks.py::test_delete_not_found -   File "/data/remote-agent/local...
+2 warnings, 23 errors in 0.18s

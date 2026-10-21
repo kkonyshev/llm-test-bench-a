@@ -742,3 +742,52 @@ The fastest model tested in this repo by a wide margin, and a perfect score
 on both. It thinks a fair amount (12.5K tokens on the coding task vs. ~1.5K
 for Qwen3-Coder-30B-A3B), but at ~470 tok/s the coding run still finishes in
 27s, second only to Qwen3-Coder's 11s among the perfect scorers.
+
+---
+
+# Results — Ternary Bonsai 2 27B (PrismML, PQ2_0 ternary GGUF)
+
+Weights `Ternary-Bonsai-2-27B-PQ2_0.gguf` (7.2 GB for 27B params) plus the
+Q8_0 mmproj, served by the `llama-server` shipped in `Bonsai-demo/bin/cuda`
+(PrismML's llama.cpp fork; stock llama.cpp does not run PQ2_0) with the flags
+`scripts/start_llama_server.sh` uses: `-ngl 99 -fa on -c 131072 --temp 1.0
+--top-p 0.95 --top-k 20 --min-p 0.05 --jinja`, thinking on, no reasoning
+budget. Benchmarked through its OpenAI API (`run_openai_model.sh`,
+`max_tokens` 100,000). Dual-GPU: the owner's server on :8081 (both cards
+visible). Single-GPU: our own server on :8092 started by
+`run_bonsai_per_gpu.sh` / `run_bonsai_followup.sh` with
+`CUDA_VISIBLE_DEVICES`; on the 5070 Ti `-c 131072` does not fit (cudaMalloc
+out of memory, ~18.7 GB needed), so it ran with `-c 65536` and
+`max_tokens` 64,000.
+
+| Setup | Coding | Reasoning | Coding time | Speed (coding / reasoning) |
+|---|---|---|---|---|
+| 5090 + 5070 Ti (12.6 + 6.1 GB) | **23/23** | **12/12** | 5m 43s, 36K tokens | 105.9 / 117.9 tok/s |
+| RTX 5090 alone (17.2 GB), attempt 1 | 0/23 | **12/12** | 4m 0s, 31K tokens | 128.8 / 140.9 tok/s |
+| RTX 5090 alone, attempt 2 | 11/23 | — | 4m 14s, 33K tokens | 128.5 tok/s |
+| RTX 5070 Ti alone, `-c 65536` (12.7 GB) | 0/23 | **12/12** | 4m 21s, 21K tokens | 81.8 / 88.0 tok/s |
+
+Coding failures, each different:
+- 5090 attempt 1: `sqlite3.connect(..., row_factory=...)` (no such argument),
+  so every DB call raises `TypeError`.
+- 5090 attempt 2: `datetime.iso` instead of `.isoformat()` in the response
+  builder, 12 tests fail.
+- 5070 Ti: `await request.body()` inside a non-`async` function, a
+  `SyntaxError` at import.
+
+Same weights and server flags in every run, so the spread is the model's
+run-to-run variance at its recommended `temperature 1.0`, not the GPU. One
+perfect run out of four makes it a GLM-like "volatile" coder; reasoning was
+perfect every time.
+
+| Resources while generating | Dual-GPU | 5090 alone | 5070 Ti alone |
+|---|---|---|---|
+| `llama-server` CPU | ~104% (1 core) | ~103% | ~102% |
+| `llama-server` RSS | 3.0 GB | 2.5 GB | 2.3 GB |
+| GPU util | 53% + 44% | 97% | 98% |
+| GPU power | ~310 W + ~145 W | ~492 W | ~250 W |
+
+Everything is GPU-resident; unlike Strata it needs almost no RAM or CPU.
+Split over two cards, each GPU idles half the time (layer split runs the
+cards in turn), so one 5090 is ~20% faster than both together.
+Raw samples: `ternary-bonsai-2-27b-pq2_0*_resources.csv`.
