@@ -692,3 +692,34 @@ On the 5090 the decode expert cache hit rate was 95.9%: twice the VRAM keeps
 most of the experts a token needs on the card, so less is computed on the CPU
 and generation roughly doubles. RAM use is unchanged (all experts stay in RAM
 either way). Raw samples: `strata_iq3s_resources_5090.csv`.
+
+---
+
+# Results — GLM-4.7-Flash Q8_0 (dual-GPU)
+
+`glm-4.7-flash:q8_0` (29.9B MoE, 34 GB loaded at `num_ctx=32768`) does not fit
+the 5090 alone; Ollama split it 23.1 GB on the RTX 5090 + 10.6 GB on the RTX
+5070 Ti, 100% GPU. Every other Ollama model was unloaded first, the miner was
+stopped. Script: `run_glm_q8.sh`. Compared with the Q4_K_M rows from the
+Machine 3 run above (same tag family, same settings).
+
+| | Q4_K_M (Machine 3 run) | **Q8_0** |
+|---|---|---|
+| Coding | 10/23 (attempt 1: 0/23) | 11/23 (attempt 1: 0/23) |
+| Reasoning | 12/12 | 11/12 by `grade.py`, **12/12 on review** |
+| Coding speed | 186.6 tok/s | 166.5 tok/s |
+| Reasoning speed | 189.6 tok/s | 166.9 tok/s |
+
+- **Coding attempt 1 (0/23)**: Pydantic v1 API (`Field(regex=...)`, `const=`)
+  against the installed Pydantic v2, so `main.py` fails at import. The same
+  root cause as Qwen2.5-72B's stable 0/23.
+- **Coding attempt 2 (11/23)**: Pydantic v2 API this time, but it passes
+  `sqlite3.Row` objects straight into the response model without converting
+  them to a dict, so every endpoint that returns a task fails validation
+  (`TaskResponse: id Field required, input_type=Row`).
+- **Reasoning**: the Q12 answer `Dan, Ellie` is correct; `grade.py` wants the
+  words "tallest"/"shortest" (same false negative as Strata IQ3_S on the
+  5070 Ti).
+- Q8 does not fix GLM's coding: it is still the most run-to-run volatile model
+  here and makes a different framework-API mistake each time. Q8 costs ~11%
+  speed and the second GPU.

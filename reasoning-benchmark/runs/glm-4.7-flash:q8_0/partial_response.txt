@@ -1,0 +1,17 @@
+**Problem 1**  
+Maria buys 7 notebooks at $4 each → $28, and 12 pens at $1.50 each → $18. Total = $46. 10% discount = $4.60. Amount paid = $46 - $4.60 = $41.40.
+
+**Problem 2**  
+Let Cara’s age = \(C\). Ben’s age = \(B\).  
+\(B = 2(C - 6)\). In 4 years, \(B + 4 = 30\) → \(B = 26\).  
+Then \(26 = 2(C - 6)\) → \(C - 6 = 13\) → \(C = 19\).
+
+**Problem 3**  
+- Ben drinks juice (clue c).  
+- Cleo does not drink tea (d) → Cleo drinks coffee (since juice is taken).  
+- Dog owner drinks coffee (b) → Cleo owns the dog.  
+- Alice does not own fish (a) → Alice owns cat (dog is taken).  
+Thus Ben owns the fish.  
+
+**Problem 4**  
+Differences: 4, 6, 8, 10 → next difference 12 → 30 +

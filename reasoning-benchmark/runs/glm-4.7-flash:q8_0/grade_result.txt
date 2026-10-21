@@ -1,0 +1,14 @@
+[PASS] Q1: 41.40
+[PASS] Q2: 19
+[PASS] Q3: Cleo owns the dog; Ben owns the fish.
+[PASS] Q4: 42
+[PASS] Q5: 9
+[PASS] Q6: 2
+[PASS] Q7: A kilogram of feathers
+[PASS] Q8: 100%
+[PASS] Q9: X is a truth-teller; Y is a liar.
+[PASS] Q10: 8
+[PASS] Q11: 10
+[FAIL] Q12: Dan, Ellie
+
+11/12 correct

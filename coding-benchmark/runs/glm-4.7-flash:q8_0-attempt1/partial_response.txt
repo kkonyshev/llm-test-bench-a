@@ -1,0 +1,118 @@
+```python
+from typing import List, Optional
+from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+import sqlite3
+from contextlib import contextmanager
+from datetime import datetime
+import uvicorn
+
+app = FastAPI()
+
+# -----------------------------------------------------------------------------
+# Configuration
+# -----------------------------------------------------------------------------
+DB_FILE = "tasks.db"
+VALID_PRIORITIES = ["low", "medium", "high"]
+
+# -----------------------------------------------------------------------------
+# Pydantic Models
+# -----------------------------------------------------------------------------
+
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    priority: Optional[str] = Field(default="medium", regex="^(low|medium|high)$")
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(default=None, min_length=1, max_length=200)
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[str] = Field(default=None, regex="^(low|medium|high)$")
+
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    completed: bool
+    priority: str
+    created_at: str
+
+class TaskListResponse(BaseModel):
+    items: List[TaskResponse]
+    total: int
+    page: int
+    page_size: int
+
+# -----------------------------------------------------------------------------
+# Database Helper
+# -----------------------------------------------------------------------------
+
+@contextmanager
+def get_db():
+    """Context manager to handle SQLite connections."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+def init_db():
+    """Initialize the database schema on startup."""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL CHECK(length(trim(title)) > 0),
+            description TEXT,
+            completed INTEGER DEFAULT 0,
+            priority TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high')),
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        conn.commit()
+
+# -----------------------------------------------------------------------------
+# Startup Event
+# -----------------------------------------------------------------------------
+
+@app.on_event("startup")
+def startup_event():
+    init_db()
+
+# -----------------------------------------------------------------------------
+# Utility: Convert Row to Model
+# -----------------------------------------------------------------------------
+
+def _row_to_task(row: sqlite3.Row) -> TaskResponse:
+    return TaskResponse(
+        id=row["id"],
+        title=row["title"],
+        description=row["description"],
+        completed=bool(row["completed"]),
+        priority=row["priority"],
+        created_at=row["created_at"]
+    )
+
+# -----------------------------------------------------------------------------
+# Endpoints
+# -----------------------------------------------------------------------------
+
+# POST /tasks
+@app.post("/tasks", response_model=TaskResponse, status_code=201)
+def create_task(task: TaskCreate):
+    """Create a new task."""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO tasks (title, description, priority) VALUES (?, ?, ?)",
+            (task.title, task.description, task.priority)
+        )
+        conn.commit()
+        task_id = cursor.lastrowid
+
+        cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+        new

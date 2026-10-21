@@ -1,0 +1,2 @@
+NAME                  ID              SIZE     PROCESSOR    CONTEXT    RUNNER      UNTIL              
+glm-4.7-flash:q8_0    4420340fd319    34 GB    100% GPU     32768      llamacpp    4 minutes from now    
