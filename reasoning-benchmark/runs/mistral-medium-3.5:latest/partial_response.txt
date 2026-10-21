@@ -1,0 +1,87 @@
+Let's solve each problem one by one.
+
+---
+
+**1. Shop Purchase Calculation**
+- Notebooks: 7 × $4 = $28
+- Pens: 12 × $1.50 = $18
+- Total before discount: $28 + $18 = $46
+- Discount: 10% of $46 = $4.60
+- Final payment: $46 - $4.60 = **$41.40**
+
+---
+
+**2. Age Problem**
+- Let Ben's current age = B, Cara's current age = C.
+- In 4 years, Ben will be 30: B + 4 = 30 → B = 26.
+- Ben is twice as old as Cara was 6 years ago: 26 = 2 × (C - 6) → C - 6 = 13 → C = **19**.
+
+---
+**3. Logic Puzzle (Pets and Drinks)**
+- From (c): Ben drinks juice.
+- From (b): Dog owner drinks coffee → Ben does **not** own the dog (since he drinks juice).
+- From (d): Cleo does not drink tea → Cleo drinks coffee or juice. But Ben drinks juice, so Cleo drinks coffee.
+- From (b): Cleo drinks coffee → Cleo owns the dog.
+- From (a): Alice does not own the fish → Alice owns the cat.
+- Remaining: Ben must own the **fish**.
+- **Answer**: Cleo owns the dog, Ben owns the fish.
+
+---
+**4. Sequence**
+- Pattern: 2 = 1×2, 6 = 2×3, 12 = 3×4, 20 = 4×5, 30 = 5×6 → Next: 6×7 = **42**.
+
+---
+**5. Sheep Problem**
+- "All but 9 die" means 9 survive. **Answer: 9**.
+
+---
+**6. Pipe Problem**
+- Pipe A rate: 1/6 tank/hour.
+- Pipe B rate: 1/3 tank/hour.
+- Combined rate: 1/6 + 1/3 = 1/2 tank/hour.
+- Time to fill: 1 / (1/2) = **2 hours**.
+
+---
+**7. Weight Comparison**
+- 1 kg feathers = 1000 g.
+- 1 pound steel ≈ 453.59 g.
+- **Answer**: A kilogram of feathers is heavier.
+
+---
+**8. Markup and Discount**
+- Let original cost = C.
+- Retail price = 1.25C.
+- Sale price = 0.80 × 1.25C = 1.00C = **100%** of original cost.
+
+---
+**9. Truth-Tellers and Liars**
+- If X is a truth-teller, then "at least one is a liar" is true → Y must be a liar.
+- If X is a liar, then "at least one is a liar" is false → Both are truth-tellers (contradiction, since X would be lying).
+- **Answer**: X is a truth-teller, Y is a liar.
+
+---
+**10. Linear Equation**
+- 3x + 7 = 2x + 15 → x = **8**.
+
+---
+**11. Combinations**
+- Number of ways to choose 3 from 5: C(5,3) = **10**.
+
+---
+**12. Height Order**
+- Dan > Ellie, Farah > Ellie, Dan > Farah → Order: Dan > Farah > Ellie.
+- **Answer**: Dan is tallest, Ellie is shortest.
+
+---
+ANSWER 1: 41.40
+ANSWER 2: 19
+ANSWER 3: Cleo owns the dog, Ben owns the fish
+ANSWER 4: 42
+ANSWER 5: 9
+ANSWER 6: 2
+ANSWER 7: a kilogram of feathers
+ANSWER 8: 100%
+ANSWER 9: X is a truth-teller, Y is a liar
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan

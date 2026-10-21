@@ -1,0 +1,180 @@
+```python
+from datetime import datetime
+from typing import Optional, List
+from fastapi import FastAPI, HTTPException, Query, status
+from fastapi.responses import Response
+from pydantic import BaseModel, Field, validator
+import sqlite3
+from contextlib import contextmanager
+
+app = FastAPI()
+
+PRIORITIES = {"low", "medium", "high"}
+
+@contextmanager
+def get_db():
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+def init_db():
+    with get_db() as conn:
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            completed BOOLEAN NOT NULL DEFAULT 0,
+            priority TEXT NOT NULL DEFAULT 'medium',
+            created_at TEXT NOT NULL
+        )
+        """)
+        conn.commit()
+
+init_db()
+
+class TaskCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    priority: Optional[str] = "medium"
+
+    @validator("title")
+    def trim_title(cls, v):
+        return v.strip()
+
+    @validator("priority")
+    def validate_priority(cls, v):
+        if v and v not in PRIORITIES:
+            raise ValueError("priority must be one of: low, medium, high")
+        return v
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    priority: Optional[str] = None
+
+    @validator("title")
+    def trim_title(cls, v):
+        if v is not None:
+            return v.strip()
+        return v
+
+    @validator("priority")
+    def validate_priority(cls, v):
+        if v and v not in PRIORITIES:
+            raise ValueError("priority must be one of: low, medium, high")
+        return v
+
+class TaskResponse(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    completed: bool
+    priority: str
+    created_at: str
+
+def row_to_task(row):
+    return TaskResponse(
+        id=row["id"],
+        title=row["title"],
+        description=row["description"],
+        completed=bool(row["completed"]),
+        priority=row["priority"],
+        created_at=row["created_at"]
+    )
+
+@app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+def create_task(task: TaskCreate):
+    now = datetime.utcnow().isoformat()
+    with get_db() as conn:
+        cursor = conn.execute(
+            "INSERT INTO tasks (title, description, priority, created_at) VALUES (?, ?, ?, ?)",
+            (task.title, task.description, task.priority, now)
+        )
+        conn.commit()
+        task_id = cursor.lastrowid
+        row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+        return row_to_task(row)
+
+@app.get("/tasks", response_model=dict)
+def list_tasks(
+    completed: Optional[bool] = None,
+    priority: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100)
+):
+    if priority and priority not in PRIORITIES:
+        raise HTTPException(status_code=422, detail="Invalid priority value")
+
+    filters = []
+    params = []
+    if completed is not None:
+        filters.append("completed = ?")
+        params.append(1 if completed else 0)
+    if priority:
+        filters.append("priority = ?")
+        params.append(priority)
+
+    where_clause = " AND ".join(filters) if filters else "1=1"
+    count_query = f"SELECT COUNT(*) FROM tasks WHERE {where_clause}"
+    select_query = f"SELECT * FROM tasks WHERE {where_clause} ORDER BY id ASC LIMIT ? OFFSET ?"
+
+    offset = (page - 1) * page_size
+    with get_db() as conn:
+        total = conn.execute(count_query, params).fetchone()[0]
+        rows = conn.execute(select_query, (*params, page_size, offset)).fetchall()
+        items = [row_to_task(row) for row in rows]
+        return {
+            "items": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size
+        }
+
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
+def get_task(task_id: int):
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Task not found")
+        return row_to_task(row)
+
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task: TaskUpdate):
+    existing = get_task(task_id)
+    updates = {}
+    if task.title is not None:
+        updates["title"] = task.title
+    if task.description is not None:
+        updates["description"] = task.description
+    if task.completed is not None:
+        updates["completed"] = task.completed
+    if task.priority is not None:
+        updates["priority"] = task.priority
+
+    if not updates:
+        return existing
+
+    set_clause = ", ".join(f"{k} = ?" for k in updates.keys())
+    values = list(updates.values())
+    values.append(task_id)
+
+    with get_db() as conn:
+        conn.execute(f"UPDATE tasks SET {set_clause} WHERE id = ?", values)
+        conn.commit()
+        row = conn.execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+        return row_to_task(row)
+
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int):
+    with get_db() as conn:
+        cursor = conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Task not found")
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+```

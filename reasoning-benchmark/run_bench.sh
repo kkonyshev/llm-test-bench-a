@@ -4,7 +4,7 @@ set -uo pipefail
 
 MODEL="$1"
 BASE="$(cd "$(dirname "$0")" && pwd)"
-OUT="$BASE/runs/$MODEL"
+OUT="$BASE/runs/$MODEL${BENCH_RUN_SUFFIX:-}"
 mkdir -p "$OUT"
 
 echo "=== $MODEL ==="

@@ -853,3 +853,45 @@ RTX 5090 alone (19 GB at `num_ctx=32768`).
 - Mistral Small 3.2's first coding attempt called Pydantic `Field()` with
   positional arguments (v2 takes at most one), failing at import; the retry
   passed everything.
+
+### Mistral Medium 3.5 (128B dense), run 1 of 3
+
+`mistral-medium-3.5:latest` (127.7B dense, Q4_K_M, 39 GB loaded at 32K context): Ollama placed 77% on the GPUs and 23% on the CPU, which leaves the cards mostly waiting (0.9 tok/s, ~780% CPU, 78 GB RSS). **12/12 reasoning** (955 tokens, 18m 13s) and **23/23 coding** (1,401 tokens, 25m 48s) on the first run. Runs 2-3 follow (`repeat_runs.sh`).
+
+---
+
+# Efficiency: tokens per solved test
+
+A second axis next to score and speed: how many tokens a model generates to get
+there (reasoning included). Full per-run tables, regenerated from the run
+directories by `python3 efficiency.py`: [`EFFICIENCY.md`](EFFICIENCY.md). Run
+names there are the run directories, so older rows (`*-bench`, plain tags) come
+from the earlier machines described above.
+
+Perfect coding runs (23/23), by tokens:
+
+| Model | Coding tokens | Tok/solved test | Wall-clock |
+|---|---|---|---|
+| Mistral Medium 3.5 (128B dense) | 1,401 | 61 | 25m 48s (0.9 tok/s) |
+| Devstral Small 2 | 1,486 | 65 | 16s |
+| Qwen3-Coder-30B-A3B | 1,676 | 73 | 11s |
+| Mistral Small 3.2 | 1,726 | 75 | 23s |
+| Qwen3.8-27B (dual-GPU run) | 3,097 | 135 | 59s |
+| Gemma4-26B (5070 Ti run) | 8,126 | 353 | 1m 59s |
+| Nemotron 3.5 Lightning | 12,532 | 545 | 27s |
+| Nemotron 3.5 Bolt | 15,588 | 678 | 1m 42s |
+| Qwen3.8-27B (5070 Ti run) | 25,541 | 1,110 | 39m 30s |
+| Ternary Bonsai 2 27B | 36,252 | 1,576 | 5m 43s |
+| Strata IQ3_S | 49,933-50,340 | 2,171-2,189 | 5m 23s-9m 37s |
+| Strata Orca Uncensored | 78,261 | 3,403 | 14m 46s |
+
+- Two styles: models that answer directly (Mistral, Devstral, Qwen3-Coder)
+  need ~1.4-1.7K tokens for the whole task; thinking models need 8-50x more.
+- More tokens do not buy correctness: Sage-A1.5 Q4 used 38.6K for 13/23 and
+  Bonsai 27B 21-36K for anything from 0 to 23/23.
+- Token count decides wall-clock only together with speed: Lightning spends 7.5x
+  Qwen3-Coder's tokens but finishes in 27s at ~470 tok/s, while Mistral Medium
+  3.5 is the most token-efficient model tested and still the slowest to answer on
+  this hardware (0.9 tok/s).
+- The same model can vary a lot between runs: Qwen3.8-27B used 25.5K tokens on
+  the 5070 Ti box and 3.1K on the dual-GPU box, both 23/23.

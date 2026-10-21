@@ -20,9 +20,9 @@ if [ ! -d "$BENCH" ]; then
   exit 1
 fi
 
-rm -rf "$BENCH/runs/$MODEL"
+rm -rf "$BENCH/runs/$MODEL${BENCH_RUN_SUFFIX:-}"   # BENCH_RUN_SUFFIX (e.g. -run2): repeat runs get their own directory
 cd "$BENCH"
-LOG="runs_${MODEL}.log"
+LOG="runs_${MODEL}${BENCH_RUN_SUFFIX:-}.log"
 nohup ./run_bench.sh "$MODEL" > "$LOG" 2>&1 &
 PID=$!
 disown
