@@ -1,0 +1,313 @@
+EEEEEEEEEEEEEEEEEEEEEEE                                                  [100%]
+==================================== ERRORS ====================================
+__________________ ERROR at setup of test_create_task_minimal __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+___________________ ERROR at setup of test_create_task_full ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_______________ ERROR at setup of test_create_task_missing_title _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+________________ ERROR at setup of test_create_task_empty_title ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_____________ ERROR at setup of test_create_task_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+______________ ERROR at setup of test_create_task_title_too_long _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+____________________ ERROR at setup of test_get_task_found _____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+__________________ ERROR at setup of test_get_task_not_found ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+______________________ ERROR at setup of test_list_empty _______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_____________ ERROR at setup of test_list_returns_all_and_ordered ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_______________ ERROR at setup of test_list_filter_by_completed ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+________________ ERROR at setup of test_list_filter_by_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_____________ ERROR at setup of test_list_filter_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+____________________ ERROR at setup of test_list_pagination ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+___________________ ERROR at setup of test_list_invalid_page ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+________________ ERROR at setup of test_list_invalid_page_size _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_________________ ERROR at setup of test_update_partial_field __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+________________ ERROR at setup of test_update_multiple_fields _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+___________________ ERROR at setup of test_update_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+________________ ERROR at setup of test_update_invalid_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+__________________ ERROR at setup of test_update_empty_title ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+_____________________ ERROR at setup of test_delete_found ______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+___________________ ERROR at setup of test_delete_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+        import main
+        importlib.reload(main)
+>       with TestClient(main.app) as c:
+                        ^^^^^^^^
+E       AttributeError: module 'main' has no attribute 'app'
+
+test_tasks.py:22: AttributeError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR test_tasks.py::test_create_task_minimal - AttributeError: module 'main'...
+ERROR test_tasks.py::test_create_task_full - AttributeError: module 'main' ha...
+ERROR test_tasks.py::test_create_task_missing_title - AttributeError: module ...
+ERROR test_tasks.py::test_create_task_empty_title - AttributeError: module 'm...
+ERROR test_tasks.py::test_create_task_invalid_priority - AttributeError: modu...
+ERROR test_tasks.py::test_create_task_title_too_long - AttributeError: module...
+ERROR test_tasks.py::test_get_task_found - AttributeError: module 'main' has ...
+ERROR test_tasks.py::test_get_task_not_found - AttributeError: module 'main' ...
+ERROR test_tasks.py::test_list_empty - AttributeError: module 'main' has no a...
+ERROR test_tasks.py::test_list_returns_all_and_ordered - AttributeError: modu...
+ERROR test_tasks.py::test_list_filter_by_completed - AttributeError: module '...
+ERROR test_tasks.py::test_list_filter_by_priority - AttributeError: module 'm...
+ERROR test_tasks.py::test_list_filter_invalid_priority - AttributeError: modu...
+ERROR test_tasks.py::test_list_pagination - AttributeError: module 'main' has...
+ERROR test_tasks.py::test_list_invalid_page - AttributeError: module 'main' h...
+ERROR test_tasks.py::test_list_invalid_page_size - AttributeError: module 'ma...
+ERROR test_tasks.py::test_update_partial_field - AttributeError: module 'main...
+ERROR test_tasks.py::test_update_multiple_fields - AttributeError: module 'ma...
+ERROR test_tasks.py::test_update_not_found - AttributeError: module 'main' ha...
+ERROR test_tasks.py::test_update_invalid_priority - AttributeError: module 'm...
+ERROR test_tasks.py::test_update_empty_title - AttributeError: module 'main' ...
+ERROR test_tasks.py::test_delete_found - AttributeError: module 'main' has no...
+ERROR test_tasks.py::test_delete_not_found - AttributeError: module 'main' ha...
+2 warnings, 23 errors in 0.19s

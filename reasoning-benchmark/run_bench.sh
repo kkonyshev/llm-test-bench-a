@@ -13,6 +13,10 @@ ollama ps > "$OUT/ollama_ps_before.txt" 2>&1
 
 START_EPOCH=$(date +%s)
 
+# BENCH_OPENAI_URL set: an OpenAI-compatible server (e.g. Strata) instead of Ollama
+if [ -n "${BENCH_OPENAI_URL:-}" ]; then
+  python3 "$BASE/../openai_generate.py" "$BENCH_OPENAI_URL" "$MODEL" "$BASE/puzzles.md" "$OUT/raw_response.json"
+else
 python3 - "$MODEL" "$BASE/puzzles.md" "$OUT/raw_response.json" <<'PYEOF'
 import json, sys, time, urllib.request
 
@@ -53,6 +57,7 @@ with urllib.request.urlopen(req, timeout=21600) as resp:
 final["response"] = "".join(full_text)
 open(out_path, "w").write(json.dumps(final))
 PYEOF
+fi
 
 END_EPOCH=$(date +%s)
 echo "wall_clock_seconds=$((END_EPOCH - START_EPOCH))" > "$OUT/wall_clock.txt"

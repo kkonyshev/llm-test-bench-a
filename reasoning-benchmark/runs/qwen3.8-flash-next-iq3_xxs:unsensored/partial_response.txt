@@ -1,0 +1,51 @@
+We need solve 12 problems. Need final with exactly ANSWER lines. Let's solve each carefully.
+
+1. Shop notebooks $4 each, pens $1.50 each. Maria buys 7 notebooks and 12 pens, then 10% discount. Cost before discount = 7*4 + 12*1.5 = 28 + 18 = 46. 10% discount: pay 0.9*46 = 41.4. Answer dollars? 41.40? Format <answer> likely 41.4 or $41.40. Need consistent. The problem asks how much does she pay, in dollars. So 41.4 or 41.40. I'll answer maybe 41.40. But exact line? "ANSWER 1: 41.40". Should be fine. Maybe dollars no $ sign? Could include? They ask format, probably no extra? Use numbers. I'll use 41.40.
+
+2. Ben is twice as old as Cara was 6 years ago. In 4 years, Ben will be 30. Ben now 26. Ben now = twice Cara 6 years ago => 26 = 2*(Cara_now - 6) => Cara_now - 6 = 13 => Cara_now=19. Check: 6 years ago Cara=13, twice=26, yes.
+
+3. Three friends each one pet and one drink. Clues: (a) Alice does not fish. (b) dog owner drinks coffee. (c) Ben drinks juice. (d) Cleo does not drink tea. Need who owns dog and what pet Ben owns. Let's solve. There are 3 people Alice, Ben, Cleo; pets cat,dog,fish; drinks tea,coffee,juice.
+Constraints: Ben drinks juice. Cleo not tea. (b) dog owner drinks coffee. So dog owner drinks coffee. Since Ben drinks juice, Ben is not dog owner. Cleo cannot be dog owner? If Cleo drinks coffee possible because not tea and coffee allowed. If Cleo dog owner and drinks coffee. Then Alice not fish, remaining? Let's infer uniquely? We only have constraints: Alice not fish. Dog owner drinks coffee. Ben drinks juice. Cleo not tea.
+Since Ben drinks juice, not coffee, not dog. Dog owner could be Cleo or Alice, but drinks coffee. Since Cleo not tea; if not dog (coffee), she would cat or fish. Alice not fish. Let's see possible assignments? The puzzle likely wants identify dog owner and Ben's pet. Is it unique? Let's enumerate constraints. Drinks: Ben=juice. Dog owner=coffee. Cleo≠tea. There are two remaining drinks coffee, tea. Since Ben juice, dog owner must be one of Alice/Cleo. Cleo cannot tea, but could coffee? If Cleo is dog owner/coffee, Alice drinks tea or maybe fish/cat? If Alice is not dog, Alice could tea or coffee? Since Cleo coffee, Alice tea. Alice cannot fish. With Cleo dog, remaining cats for Alice? Alice cat. Ben fish. This works: Alice cat tea, Ben fish juice, Cleo dog coffee.
+If Alice dog/coffee, then Cleo cannot coffee nor tea => cannot? With Alice coffee, Cleo can't tea, so Cleo must? only juice but Ben juice, impossible (each drink distinct? It says each prefer one drink tea, coffee, juice likely bijection). So Cleo impossible. Thus Alice cannot be dog owner. Therefore Cleo dog. Ben not dog, not coffee; he drinks juice. What pet? Remaining after Cleo dog: Alice not fish, so Alice cat, Ben fish. So Ben owns fish. That yields answer Cleo owns dog, Ben owns fish. Need answer both? It asks "Who owns the dog, and what pet does Ben own?" Final line maybe "Cleo; fish"? Need maybe just values. I can give one line? Need final with 12 answers. For each problem answer likely a string. For 3: "Cleo owns the dog, and Ben owns the fish". Maybe concise. Need final lines exactly? We can put "Cleo; fish"? But final line is not constrained exact except start with ANSWER 3: <your answer>. I'll do readable: "Cleo; fish". Hmm if grader expects text. Maybe "Cleo, fish". I'll use "Cleo; fish"? It asks who owns dog and what pet Ben. So final answer should indicate both: "Cleo owns the dog; Ben owns the fish". I'll use that.
+
+4. Sequence 2,6,12,20,30,? Differences: 4,6,8,10 -> next 12. So 42. Pattern n(n+1)? 2=1*2? 6=2*3? Actually terms n=1? 2,6,12,20,30 = n(n+1)? for n=1 gives 2, n=2 6, n=3 12, n=4 20, n=5 30. Next n=6 => 42. Answer 42.
+
+5. Farmer has 17 sheep. All but 9 die. Means 9 remain alive. "How many sheep does farmer have left?" 9. Answer 9.
+
+6. Pipe A fills 1/6 tank/h, B 1/3 = 2/3, combined 1/6+1/3=1/2 per hour. Time=2 hours. Answer 2.
+
+7. Which is heavier: kg feathers or pound steel? kilogram is 1000g ≈ 2.2046 lb. pound=453.592 g. kg heavier than pound. Since unit mass; "kilogram of feathers" heavier than "pound of steel". Answer: a kilogram of feathers. Need maybe because kg > pound. So final: "a kilogram of feathers".
+
+8. Markup 25% then discount 20%. Sale price as percentage original cost: 1.25*0.8 = 1.0 => 100%. Answer 100%.
+
+9. Two islanders. X says: "At least one of us is a liar." Determine X truth teller? Let's use consistency. If X is truth teller, statement true: at least one liar. Since X not liar, Y liar. Works (Y lies? statement of Y no content? Y as a person is liar but doesn't state anything; consistent). If X is liar, statement false: no one of us is a liar, i.e., both truth-tellers. But if X is liar, statement says at least one liar (itself) but false means neither is liar, contradiction (X is liar). Thus X cannot be liar. So X truth-teller, Y liar. Answer: X truth-teller, Y liar.
+
+10. 3x+7=2x+15 => x=8. Answer 8.
+
+11. Committee of 3 from 5 candidates: combinations 5 choose 3 = 10. Answer 10.
+
+12. Dan taller than Ellie. Ellie shorter than Farah. Farah shorter than Dan. Relationships: D > E, F > E, D > F. So D tallest among these three? We have Dan > Farah > Ellie, since D > F and F > E. Dan tallest, Ellie shortest. Answer Dan, Ellie.
+
+Need final answer. Need show work if want but final at very end exactly with 12 ANSWER lines. Since user says Show your work if you want, but for EACH problem finish line exactly. We can include explanations? Maybe final just lines. Desired oververbosity 9, but problem asks final exact lines. We can include concise work then answers? They specifically want finish with line format. To be safe final response just 12 lines only? Could include minimal? "finish with a line in exactly this format". We can do only those lines. Need not include markdown? We can put code block? They likely expect raw lines. I'll output:
+ANSWER 1: 41.40
+...
+ANSWER 12: Dan is the tallest, and Ellie is the shortest
+
+Need ensure 4? Sequence next 42. 8 sale price as percentage original cost = 100%. 9 answer exact. 7 answer. Should we include dollar sign? "in dollars" but format doesn't prohibit. I will use "41.40" (decimal). Could maybe 41.4 but 41.40 more currency. For 3 answer line: "Cleo; fish" maybe ambiguous. I can use "Cleo; fish". Hmm "Who owns the dog, and what pet does Ben own?" If I output "Cleo, fish", it's okay. For 12, two answers. Could "Dan; Ellie" but might be unclear. Use "Dan is tallest, Ellie shortest". For 7 "a kilogram of feathers". For 3: "Cleo owns the dog, Ben owns the fish". That's fine. Need all exact lines. For 9: "X truth-teller, Y liar". For 12: "Dan, Ellie" maybe enough. But final can be natural. No extra explanation outside? Could final only lines. Need ensure final has newline? okay.
+
+Double-check 1: total: 28+18=46. Discount 10%. Pay $41.40. Yes.
+
+Double-check 2: If Ben in 4 years 30, Ben now 26. Twice Cara 6 years ago => 13. Cara now 19. Yes.
+
+3: Are there other possibilities? We assumed each person gets unique drink and pet? The puzzle says each own exactly one pet and each prefer one drink. It doesn't explicitly say all three pets are unique? "each own exactly one pet (cat, dog, or fish)" and "each prefer one drink" implies each pet type appears once? In such puzzles, yes. If not unique, there could be multiple. The clues require each? Usually all one pet and one drink. Let's examine if uniqueness of drinks/pets is required? It says each prefer one drink (tea, coffee, or juice). Could imply all three drinks assigned exactly once? Not strictly but puzzles do. Without unique assignments, under constraints: Ben drinks juice. Cleo not tea. Dog owner drinks coffee. If duplicate drinks allowed, dog owner could be Cleo or Alice. If multiple assignments allowed and duplicate drinks, could be nonunique: Alice could own dog and drink coffee, Ben juice, Cleo coffee? (dog owner drinks coffee but others could also drink coffee? But each prefer one drink from set? If duplicates allowed then yes many). Thus likely unique bijection. Our solution unique under bijection. Good.
+
+Wait clue (a) Alice does not fish. If we assign Cleo dog coffee, Alice tea cat, Ben juice fish. Yes. If Cleo not dog, then dog owner must be Alice (since Ben juice), but then Cleo not tea and remaining? Let's check: Alice coffee dog; Ben juice (some pet); Cleo cannot tea; only coffee, tea, juice left? Since Alice coffee, Ben juice, Cleo tea; contradicts Cleo not tea. So impossible. So unique. Good.
+
+4 sequence 42. Could also be n(n+1). Yes.
+
+5 all but 9 die: 9 remain alive, but "has left" includes dead? Wording tricky: "All but 9 die. How many sheep does the farmer have left?" Usually answer 9 alive. Could "left" mean alive? If all but 9 die, 9 survive. The farmer "has left" could mean remaining alive; yes 9. Could be trick: he has 17 dead plus 2 alive? Actually "all but 9 die" means 9 survive. "left" could mean surviving? yes 9.
+
+7: kilogram is heavier than pound. A kg of feathers vs pound of steel. Mass kg > pound. However "heavier" in common usage: pounds? A pound is 454 g. So kg heavier.
+
+=== answer ===

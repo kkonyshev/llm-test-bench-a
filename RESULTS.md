@@ -582,3 +582,52 @@ Methodology note 16: **a 0/N can be a context-window cutoff, not a bug.**
 Check `prompt_eval_count + eval_count` against `num_ctx` before treating a
 0/23 as a model failure; Sage Q4's first attempt used exactly the whole
 32,768-token window.
+
+---
+
+# Results — Strata: Qwen3.8-Flash-Next Orca Uncensored IQ3_XXS (RTX 5070 Ti)
+
+Not Ollama: this model runs on the Strata engine (`/data/apps/Strata-unsensored`,
+its own `run-iq3_xxs.sh`, unchanged), which keeps the hot experts on the GPU and
+the rest in RAM, computed on the CPU. The model is
+`orcarouter/Qwen3.8-Flash-Next-Uncensored-GGUF` IQ3_XXS (125B MoE), served with
+the vision projector and the config's "experimental speed projection" control
+vector, 524K max context, on the RTX 5070 Ti alone (5090 idle).
+
+The benchmark talks to Strata's OpenAI-compatible API on `:8081` through
+`openai_generate.py` (set `BENCH_OPENAI_URL`; `run_bench.sh` is otherwise
+unchanged, and Ollama is still the default). `max_tokens` 100,000; Strata's
+default reasoning settings. The model's separate `reasoning_content` is not part
+of the graded answer, like a `<think>` block. Script: `run_strata_uncensored.sh`.
+
+| Benchmark | Result | Time | Tokens | Speed |
+|---|---|---|---|---|
+| Reasoning | **12/12** | 38s | 3,352 | 90.9 tok/s |
+| Coding, attempt 2 | **23/23** | 14m 46s | 78,261 | 88.3 tok/s |
+| Coding, attempt 1 | 0/23 | 3m 35s | 19,591 | 91.9 tok/s |
+
+- **Attempt 1** produced no answer at all: 19.6K tokens of reasoning that ended
+  in a loop printing `1000000…`, which Strata's repeated-token guard (#606)
+  cut off (`finish_reason=length`, empty `content`). Kept as `-attempt1`.
+- **Attempt 2** reasoned for 78K tokens (drafted `main.py` about two dozen
+  times inside its reasoning, re-checking the spec line by line) and then
+  answered with a clean 12.7K-char `main.py` that passes everything.
+- So: correct when it finishes, but the slowest perfect coding score in this
+  repo by wall-clock (vs. 59s for Qwen3.8-27B and 11s for Qwen3-Coder on the
+  5090), and one of two runs did not finish at all.
+
+## Resources during the runs (sampled every 5s)
+
+| | Attempt 1 | Attempt 2 |
+|---|---|---|
+| `strata` CPU | avg 757%, max 808% (~8 cores) | avg 785%, max 808% |
+| `strata` RSS | 59.5 GB | 59.5 GB |
+| System RAM used / available | 67.7 / 55.7 GB | 67.8 / 55.6 GB |
+| Swap used | 4.4 GB (flat, pre-existing) | 4.0-4.4 GB |
+| Load average (1 min) | avg 8.0, max 9.6 | avg 8.1, max 8.8 |
+| RTX 5070 Ti | 15.7 GB, avg 94% util, max 192 W | 15.7 GB, avg 97% util, max 192 W |
+
+RAM and VRAM stay flat for the whole run (everything is loaded up front). With
+~60 GB pinned by Strata, a second Strata instance or another RAM-heavy job
+(e.g. ComfyUI's Wan 14B offload) would not fit next to it.
+Raw samples: `strata_uncensored_resources_attempt{1,2}.csv`.
