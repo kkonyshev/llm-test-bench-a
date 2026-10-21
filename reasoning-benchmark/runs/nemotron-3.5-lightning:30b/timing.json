@@ -1,0 +1,9 @@
+{
+  "total_duration_s": 17.075,
+  "load_duration_s": 5.804,
+  "prompt_eval_count": 578,
+  "prompt_eval_duration_s": 3.85,
+  "eval_count": 3717,
+  "eval_duration_s": 7.42,
+  "eval_tokens_per_s": 500.94
+}

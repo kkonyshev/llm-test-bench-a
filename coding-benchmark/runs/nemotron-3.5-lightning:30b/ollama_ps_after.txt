@@ -1,0 +1,2 @@
+NAME                          ID              SIZE     PROCESSOR    CONTEXT    RUNNER      UNTIL              
+nemotron-3.5-lightning:30b    e6905fffe2e2    25 GB    100% GPU     32768      llamacpp    4 minutes from now    

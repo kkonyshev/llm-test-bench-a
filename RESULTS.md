@@ -723,3 +723,22 @@ Machine 3 run above (same tag family, same settings).
 - Q8 does not fix GLM's coding: it is still the most run-to-run volatile model
   here and makes a different framework-API mistake each time. Q8 costs ~11%
   speed and the second GPU.
+
+---
+
+# Results — NVIDIA Nemotron 3.5 Lightning 30B-A3B (RTX 5090)
+
+`nemotron-3.5-lightning:30b` (MoE, 30B total / 3B active, Ollama's default
+Q4_K_M, 25.4 GB) ran 100% on the RTX 5090 alone (25.2 GB at `num_ctx=32768`;
+5070 Ti idle, other Ollama models unloaded). Script:
+`run_ollama_model.sh nemotron-3.5-lightning:30b` (generic single-model runner).
+
+| Benchmark | Result | Time | Tokens | Speed |
+|---|---|---|---|---|
+| Reasoning | **12/12** | 18s | 3,717 | 500.9 tok/s |
+| Coding | **23/23** (first attempt) | 27s | 12,532 | 469.3 tok/s |
+
+The fastest model tested in this repo by a wide margin, and a perfect score
+on both. It thinks a fair amount (12.5K tokens on the coding task vs. ~1.5K
+for Qwen3-Coder-30B-A3B), but at ~470 tok/s the coding run still finishes in
+27s, second only to Qwen3-Coder's 11s among the perfect scorers.
