@@ -829,3 +829,27 @@ where attempt 1 was 0/23.
 | GPU util | 94-96% | 92-94% | 88-90% |
 | GPU power, avg (5090 / 5070 Ti) | 389 / 246 W | 292 / 182 W | 265 / 152 W |
 | `llama-server` CPU / RSS | ~1 core / 1.6 GB | ~1 core / 1.5 GB | ~1 core / 1.3 GB |
+
+---
+
+# Results — Mistral AI: Devstral Small 2 and Mistral Small 3.2 (24B, RTX 5090)
+
+Benchmarked by `run_queue.sh` (watches Ollama for new Mistral-family tags and
+runs `run_ollama_model.sh` on each, one at a time, with resource sampling;
+`retry_coding.sh` gives a 0/23 coding run its one retry). Both ran 100% on the
+RTX 5090 alone (19 GB at `num_ctx=32768`).
+
+| Model | Coding | Reasoning | Coding time | Speed |
+|---|---|---|---|---|
+| **Devstral Small 2** (`devstral-small-2:latest`, 24B, vision) | **23/23** (first attempt) | 10/12 | 16s, 1,486 tokens | 95 tok/s |
+| **Mistral Small 3.2** (`mistral-small3.2:latest`, 24B, vision) | 0/23 → **23/23** | **12/12** | 23s, 1,726 tokens (attempt 2) | 97-99 tok/s |
+
+- Both answer directly with almost no reasoning (~1.5-1.7K tokens for the
+  coding task), so despite a modest ~95 tok/s (dense 24B) the coding run takes
+  16-23s, in the same league as Qwen3-Coder-30B-A3B (11s) and Nemotron 3.5
+  Lightning (27s).
+- Devstral's reasoning misses are real: Q5 ("all but 9 die" → 8) and Q7
+  ("a kilogram of feathers or a pound of steel" → "they weigh the same").
+- Mistral Small 3.2's first coding attempt called Pydantic `Field()` with
+  positional arguments (v2 takes at most one), failing at import; the retry
+  passed everything.

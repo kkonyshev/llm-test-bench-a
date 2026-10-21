@@ -1,0 +1,14 @@
+[PASS] Q1: $41.40  ### Problem 2: Let Cara's current age be C. Ben is twice as ol
+[PASS] Q2: 19  ### Problem 3: From the clues: - Alice does not own the fish (so A
+[PASS] Q3: Cleo owns the dog, Ben owns the fish  ### Problem 4: The sequence is: 
+[PASS] Q4: 42  ### Problem 5: All but 9 sheep die: 17 - 9 = 8 sheep left.
+[FAIL] Q5: 8  ### Problem 6: Pipe A fills the tank in 6 hours, so rate = 1/6 tank
+[PASS] Q6: 2  ### Problem 7: A kilogram of feathers and a pound of steel are both
+[FAIL] Q7: They weigh the same  ### Problem 8: Let original cost be C. Retail pri
+[PASS] Q8: 100%  ### Problem 9: X says: "At least one of us is a liar." - If X is
+[PASS] Q9: X is a truth-teller, Y is a liar  ### Problem 10: 3x + 7 = 2x + 15 3x 
+[PASS] Q10: 8  ### Problem 11: Number of ways to choose 3 people from 5 is C(5, 3)
+[PASS] Q11: 10  ### Problem 12: Dan is taller than Ellie. Ellie is shorter than Fa
+[PASS] Q12: Dan is the tallest, Ellie is the shortest
+
+10/12 correct

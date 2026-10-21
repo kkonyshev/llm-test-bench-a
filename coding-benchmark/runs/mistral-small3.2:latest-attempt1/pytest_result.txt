@@ -1,0 +1,566 @@
+EEEEEEEEEEEEEEEEEEEEEEE                                                  [100%]
+==================================== ERRORS ====================================
+__________________ ERROR at setup of test_create_task_minimal __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+___________________ ERROR at setup of test_create_task_full ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_______________ ERROR at setup of test_create_task_missing_title _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+________________ ERROR at setup of test_create_task_empty_title ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_____________ ERROR at setup of test_create_task_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+______________ ERROR at setup of test_create_task_title_too_long _______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+____________________ ERROR at setup of test_get_task_found _____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+__________________ ERROR at setup of test_get_task_not_found ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+______________________ ERROR at setup of test_list_empty _______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_____________ ERROR at setup of test_list_returns_all_and_ordered ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_______________ ERROR at setup of test_list_filter_by_completed ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+________________ ERROR at setup of test_list_filter_by_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_____________ ERROR at setup of test_list_filter_invalid_priority ______________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+____________________ ERROR at setup of test_list_pagination ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+___________________ ERROR at setup of test_list_invalid_page ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+________________ ERROR at setup of test_list_invalid_page_size _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_________________ ERROR at setup of test_update_partial_field __________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+________________ ERROR at setup of test_update_multiple_fields _________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+___________________ ERROR at setup of test_update_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+________________ ERROR at setup of test_update_invalid_priority ________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+__________________ ERROR at setup of test_update_empty_title ___________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+_____________________ ERROR at setup of test_delete_found ______________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+___________________ ERROR at setup of test_delete_not_found ____________________
+
+    @pytest.fixture
+    def client():
+        import importlib
+>       import main
+
+test_tasks.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+main.py:14: in <module>
+    class Task(BaseModel):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    class Task(BaseModel):
+        id: int
+        title: str = Field(..., min_length=1, max_length=200)
+        description: Optional[str] = None
+        completed: bool = False
+>       priority: str = Field("medium", constr(to_lower=True))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Field() takes from 0 to 1 positional arguments but 2 were given
+
+main.py:19: TypeError
+=============================== warnings summary ===============================
+../../../.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../../../.venv/lib64/python3.14/site-packages/starlette/testclient.py:53
+  /data/remote-agent/local-llm-bench/.venv/lib64/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR test_tasks.py::test_create_task_minimal - TypeError: Field() takes from...
+ERROR test_tasks.py::test_create_task_full - TypeError: Field() takes from 0 ...
+ERROR test_tasks.py::test_create_task_missing_title - TypeError: Field() take...
+ERROR test_tasks.py::test_create_task_empty_title - TypeError: Field() takes ...
+ERROR test_tasks.py::test_create_task_invalid_priority - TypeError: Field() t...
+ERROR test_tasks.py::test_create_task_title_too_long - TypeError: Field() tak...
+ERROR test_tasks.py::test_get_task_found - TypeError: Field() takes from 0 to...
+ERROR test_tasks.py::test_get_task_not_found - TypeError: Field() takes from ...
+ERROR test_tasks.py::test_list_empty - TypeError: Field() takes from 0 to 1 p...
+ERROR test_tasks.py::test_list_returns_all_and_ordered - TypeError: Field() t...
+ERROR test_tasks.py::test_list_filter_by_completed - TypeError: Field() takes...
+ERROR test_tasks.py::test_list_filter_by_priority - TypeError: Field() takes ...
+ERROR test_tasks.py::test_list_filter_invalid_priority - TypeError: Field() t...
+ERROR test_tasks.py::test_list_pagination - TypeError: Field() takes from 0 t...
+ERROR test_tasks.py::test_list_invalid_page - TypeError: Field() takes from 0...
+ERROR test_tasks.py::test_list_invalid_page_size - TypeError: Field() takes f...
+ERROR test_tasks.py::test_update_partial_field - TypeError: Field() takes fro...
+ERROR test_tasks.py::test_update_multiple_fields - TypeError: Field() takes f...
+ERROR test_tasks.py::test_update_not_found - TypeError: Field() takes from 0 ...
+ERROR test_tasks.py::test_update_invalid_priority - TypeError: Field() takes ...
+ERROR test_tasks.py::test_update_empty_title - TypeError: Field() takes from ...
+ERROR test_tasks.py::test_delete_found - TypeError: Field() takes from 0 to 1...
+ERROR test_tasks.py::test_delete_not_found - TypeError: Field() takes from 0 ...
+2 warnings, 23 errors in 0.24s

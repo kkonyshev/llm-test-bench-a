@@ -1,0 +1,46 @@
+Let's solve each problem one by one.
+
+### Problem 1:
+Maria buys 7 notebooks at $4 each and 12 pens at $1.50 each. The total cost before discount is:
+\[ 7 \times 4 + 12 \times 1.50 = 28 + 18 = 46 \text{ dollars} \]
+With a 10% discount, the amount she pays is:
+\[ 46 \times 0.90 = 41.4 \text{ dollars} \]
+
+ANSWER 1: 41.4
+
+### Problem 2:
+Let Cara's current age be \( C \). Ben is twice as old as Cara was 6 years ago, so Ben's current age is \( 2(C - 6) \). In 4 years, Ben will be 30, so:
+\[ 2(C - 6) + 4 = 30 \]
+\[ 2C - 12 + 4 = 30 \]
+\[ 2C - 8 = 30 \]
+\[ 2C = 38 \]
+\[ C = 19 \]
+
+ANSWER 2: 19
+
+### Problem 3:
+Let's deduce the information step by step:
+- From clue (a): Alice does not own the fish, so Alice owns either the cat or the dog.
+- From clue (b): The dog owner drinks coffee.
+- From clue (c): Ben drinks juice.
+- From clue (d): Cleo does not drink tea, so Cleo drinks either coffee or juice. But Ben drinks juice, so Cleo drinks coffee.
+- Since Cleo drinks coffee, and the dog owner drinks coffee, Cleo owns the dog.
+- Alice does not own the fish (from clue a), so Alice owns the cat.
+- Ben owns the fish.
+
+ANSWER 3: Cleo owns the dog, and Ben owns the fish.
+
+### Problem 4:
+The sequence is: 2, 6, 12, 20, 30, ...
+The pattern is \( n(n+1) \), where \( n \) starts at 1:
+\[ 1 \times 2 = 2 \]
+\[ 2 \times 3 = 6 \]
+\[ 3 \times 4 = 12 \]
+\[ 4 \times 5 = 20 \]
+\[ 5 \times 6 = 30 \]
+The next term is \( 6 \times 7 = 42 \).
+
+ANSWER 4: 42
+
+### Problem 5:
+The farmer has 17 sheep.
