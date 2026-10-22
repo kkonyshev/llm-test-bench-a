@@ -60,8 +60,8 @@ first Machine 3 runs. These are the numbers to use when comparing against other 
 |---|---|
 | Motherboard | ASUS ProArt X870E-CREATOR WIFI |
 | CPU | AMD Ryzen 7 9800X3D, 8 cores / 16 threads, up to 5.27 GHz, 96 MB L3 (3D V-Cache) |
-| System RAM | 123 GB usable, DDR5, dual channel, 4 DIMMs (speed not readable without root) |
-| RAM bandwidth, effective | **~40 GB/s**, derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s |
+| System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel, **3600 MT/s** configured (`dmidecode`); theoretical bandwidth 57.6 GB/s. Four DIMMs run well below DDR5's rated speeds; at 4800-5600 MT/s, models spilling to RAM would gain roughly a third or more |
+| RAM bandwidth, effective | **~40 GB/s** (~70% of theoretical), derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s |
 | GPU 0 | NVIDIA GeForce RTX 5090: 32 GB GDDR7, 512-bit, **1,792 GB/s**, 21,760 CUDA cores, Blackwell (SM 12.0) |
 | GPU 1 | NVIDIA GeForce RTX 5070 Ti: 16 GB GDDR7, 256-bit, **896 GB/s**, 8,960 CUDA cores, Blackwell (SM 12.0) |
 | PCIe | 5.0, both cards at x8 (the board splits the CPU's x16 lanes x8/x8 with two cards) |
@@ -71,7 +71,8 @@ first Machine 3 runs. These are the numbers to use when comparing against other 
 | Storage | NVMe SSD, `/data` 1.7 TB |
 
 For reference, the Mac baseline (Machine 1, Apple M3 Pro) has 150 GB/s of unified-memory
-bandwidth.
+bandwidth. Apple M5 family (estimates in `CHAMPIONS.md`): M5 153 GB/s (up to 32 GB), M5 Pro
+307 GB/s (64 GB), M5 Max 460 or 614 GB/s (128 GB), M5 Ultra 1.2 TB/s (512 GB).
 
 ## Speed on other hardware: measured scaling
 
