@@ -1,6 +1,8 @@
 # Hardware — machines compared
 
-Three machines' results are recorded in `RESULTS.md`. When comparing against
+Three machines' results are recorded in `RESULTS.md`. Current state of the main
+box and how speed carries over to other hardware: see "Machine 3, October 2026
+state" and "Speed on other hardware" below. When comparing against
 further hardware, record the same fields below for the new machine.
 
 ## Machine 1: MacBook Pro M3 16, late 2023 (baseline)
@@ -48,6 +50,62 @@ comparable to Machine 2 for the shared model set.
 | Ollama version | 0.33.3 |
 | Inference backend | CUDA, via a **native** `ollama serve` install (`/usr/local/bin/ollama`, port 11434), not the Docker-GPU-passthrough setup used for Machine 2 — the original `ollama-test` container from that run no longer exists on this host. Confirmed no `CUDA_VISIBLE_DEVICES` restriction, so Ollama sees and auto-splits across both GPUs. This is a genuine backend difference from Machine 2 (native vs. containerized); noted here as a methodology caveat, not expected to materially affect tok/s given GPU passthrough overhead is negligible for compute-bound inference. |
 | Model source | All 11 models were already present as locally-pulled Ollama models on this host (different tag names than `MODELS.md`'s originals in most cases — see the "Machine 3 tag mapping" table in `RESULTS.md` — but the same underlying GGUF/quant per `MODELS.md`), so no re-downloading was needed. |
+
+## Machine 3, October 2026 state (all runs from "October 2026 new models" on)
+
+Same box as above; the software and the settings that matter for speed have moved on since the
+first Machine 3 runs. These are the numbers to use when comparing against other hardware.
+
+| Field | Value |
+|---|---|
+| Motherboard | ASUS ProArt X870E-CREATOR WIFI |
+| CPU | AMD Ryzen 7 9800X3D, 8 cores / 16 threads, up to 5.27 GHz, 96 MB L3 (3D V-Cache) |
+| System RAM | 123 GB usable, DDR5, dual channel, 4 DIMMs (speed not readable without root) |
+| RAM bandwidth, effective | **~40 GB/s**, derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s |
+| GPU 0 | NVIDIA GeForce RTX 5090: 32 GB GDDR7, 512-bit, **1,792 GB/s**, 21,760 CUDA cores, Blackwell (SM 12.0) |
+| GPU 1 | NVIDIA GeForce RTX 5070 Ti: 16 GB GDDR7, 256-bit, **896 GB/s**, 8,960 CUDA cores, Blackwell (SM 12.0) |
+| PCIe | 5.0, both cards at x8 (the board splits the CPU's x16 lanes x8/x8 with two cards) |
+| GPU driver | 615.71.09 |
+| Ollama | 0.40.5, native install, `OLLAMA_CONTEXT_LENGTH=65536`; the benchmarks pass `num_ctx=32768` |
+| Other engines | Strata 0.1.44 / 0.1.45 (Qwen3.8-Flash-Next), PrismML llama.cpp fork (Ternary Bonsai) |
+| Storage | NVMe SSD, `/data` 1.7 TB |
+
+For reference, the Mac baseline (Machine 1, Apple M3 Pro) has 150 GB/s of unified-memory
+bandwidth.
+
+## Speed on other hardware: measured scaling
+
+Single-stream generation reads every active weight once per token, so memory bandwidth is the
+first-order factor. How closely speed follows bandwidth, from runs of the same model on two
+devices:
+
+| Model (all of it in fast memory on both) | Type | Devices | Bandwidth ratio | Speed ratio |
+|---|---|---|---|---|
+| Qwen2.5-Coder-7B | dense | M3 Pro → 5070 Ti | 6.0x | 5.1x |
+| Gemma4-26B-A4B | MoE, 4B active | M3 Pro → 5070 Ti | 6.0x | 2.9x |
+| GLM-4.7-Flash | MoE | M3 Pro → 5070 Ti | 6.0x | 2.6x |
+| Qwen3-Coder-30B-A3B | MoE, 3B active | M3 Pro → 5070 Ti | 6.0x | 2.3x |
+| Strata IQ3_S (Qwen3.8-Flash-Next) | MoE, partly in RAM | 5070 Ti → 5090 | 2.0x | 1.9-2.1x |
+| Ternary Bonsai 2 27B | dense, ternary | 5070 Ti → 5090 | 2.0x | 1.6x |
+| Ternary Bonsai 2 9B / 4B / 2B | dense, ternary | 5070 Ti → 5090 | 2.0x | 1.5x / 1.3x / 1.2x |
+
+(The Mac → 5070 Ti rows also differ in software: Ollama 0.33 Metal vs. 0.33 CUDA in Docker.)
+
+Fraction of the 5090's bandwidth limit reached (tok/s ÷ (1,792 GB/s ÷ GB read per token); GB per
+token ≈ file size for dense models, file size × active/total parameters for MoE):
+
+| Model | GB per token (approx.) | Limit | Measured | Share |
+|---|---|---|---|---|
+| Devstral Small 2 24B (dense) | 15 | 119 tok/s | 95 tok/s | ~80% |
+| Mistral Small 3.2 24B (dense) | 15 | 119 tok/s | 98 tok/s | ~80% |
+| Nemotron 3.5 Lightning 30B-A3B | 2.5 | 717 tok/s | 465 tok/s | ~65% |
+| Gemma4-26B-A4B | 2.8 | 640 tok/s | 400-420 tok/s | ~65% |
+| Nemotron 3.5 Bolt 74B-A9B (IQ2) | 2.8 | 640 tok/s | 160 tok/s | ~25% |
+
+Models that do not fit in VRAM are bound by system RAM instead: on this box, seconds per token
+≈ GB of weights in RAM ÷ 40 GB/s (Devstral 2: 30 ÷ 40 = 0.75 s, measured 0.8 s). MoE models
+beat this estimate (Nemotron 3.5 Super runs at 23 tok/s), since each token touches only the
+active experts.
 
 ## Why this matters for the results
 
