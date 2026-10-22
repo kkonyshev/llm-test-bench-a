@@ -12,7 +12,9 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 | Run | Score | Tokens | Tok/solved | Wall-clock | Tok/s |
 |---|---|---|---|---|---|
 | `mistral-medium-3.5:latest` | 23/23 | 1,401 | 61 | 25m 48s | 0.9 |
+| `mistral-medium-3.5:latest-run3` | 23/23 | 1,485 | 65 | 27m 38s | 0.9 |
 | `devstral-small-2:latest` | 23/23 | 1,486 | 65 | 16s | 95.0 |
+| `mistral-medium-3.5:latest-run2` | 21/23 | 1,457 | 69 | 26m 43s | 0.9 |
 | `qwen3-coder:30b-a3b-q4_K_M` | 23/23 | 1,676 | 73 | 11s | 292.2 |
 | `qwen3-coder-30b-a3b-bench` | 21/23 | 1,532 | 73 | 22s | 107.3 |
 | `mistral-small3.2:latest` | 23/23 | 1,726 | 75 | 23s | 97.2 |
@@ -28,11 +30,14 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 | `deepseek-coder-v2:16b-lite-instruct-q4_K_M` | 8/23 | 1,525 | 191 | 13s | 246.9 |
 | `ternary-bonsai-2-9b-pq2_0-rtx5090` | 12/23 | 2,658 | 222 | 7s | 348.7 |
 | `ternary-bonsai-2-4b-pq2_0-rtx5090` | 9/23 | 2,269 | 252 | 5s | 473.9 |
+| `nemotron-3.5-super:120b` | 23/23 | 6,685 | 291 | 4m 42s | 24.3 |
 | `gemma4:26b-a4b-it-q4_K_M` | 22/23 | 6,531 | 297 | 35s | 230.2 |
 | `llama3.1:70b-dualgpu` | 3/23 | 951 | 317 | 2m 38s | 6.6 |
+| `nemotron-3.5-super:120b-run2` | 23/23 | 7,575 | 329 | 5m 33s | 23.2 |
 | `gemma4-26b-bench` | 23/23 | 8,126 | 353 | 1m 59s | 85.9 |
 | `glm-4.7-flash-bench` | 10/23 | 4,400 | 440 | 1m 02s | 77.3 |
 | `glm-4.7-flash:q8_0` | 11/23 | 5,272 | 479 | 38s | 166.5 |
+| `nemotron-3.5-super:120b-run3` | 23/23 | 11,391 | 495 | 8m 14s | 23.4 |
 | `ternary-bonsai-2-4b-pq2_0-rtx5070ti` | 5/23 | 2,682 | 536 | 8s | 352.9 |
 | `nemotron-3.5-lightning:30b` | 23/23 | 12,532 | 545 | 27s | 469.3 |
 | `nemotron-3.5-bolt:74b-a9b` | 23/23 | 15,588 | 678 | 1m 42s | 160.3 |
@@ -73,6 +78,7 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 |---|---|---|---|---|---|
 | `deepseek-coder-v2:236b-instruct-q4_K_M` | 9/12 | 148 | 16 | 1m 29s | 3.1 |
 | `deepseek-coder-v2-full-bench` | 9/12 | 154 | 17 | 4m 18s | 0.8 |
+| `mistral-medium-3.5:latest-run3` | 12/12 | 909 | 76 | 17m 15s | 0.9 |
 | `mistral-medium-3.5:latest` | 12/12 | 955 | 80 | 18m 13s | 0.9 |
 | `qwen3-coder-30b-a3b-bench` | 12/12 | 1,026 | 86 | 10s | 109.9 |
 | `llama3.1:70b` | 12/12 | 1,183 | 99 | 13m 53s | 1.4 |
@@ -83,6 +89,7 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 | `devstral-small-2:latest` | 10/12 | 1,021 | 102 | 15s | 96.1 |
 | `qwen2.5:72b-dualgpu` | 11/12 | 1,244 | 113 | 5m 03s | 4.1 |
 | `llama3.3:70b` | 12/12 | 1,542 | 128 | 52m 03s | 1.4 |
+| `mistral-medium-3.5:latest-run2` | 12/12 | 1,560 | 130 | 28m 58s | 0.9 |
 | `deepseek-coder-v2:16b-lite-instruct-q4_K_M` | 9/12 | 1,201 | 133 | 5s | 278.9 |
 | `deepseek-coder-v2-lite-bench` | 9/12 | 1,250 | 139 | 21s | 61.9 |
 | `llama3.3:70b-dualgpu` | 11/12 | 1,565 | 142 | 4m 00s | 6.5 |
@@ -93,12 +100,15 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 | `ternary-bonsai-2-27b-pq2_0-rtx5070ti-ctx64k` | 12/12 | 1,909 | 159 | 22s | 88.0 |
 | `ternary-bonsai-2-27b-pq2_0-rtx5090` | 12/12 | 2,140 | 178 | 15s | 140.9 |
 | `ternary-bonsai-2-27b-pq2_0` | 12/12 | 2,212 | 184 | 19s | 117.9 |
+| `nemotron-3.5-super:120b` | 12/12 | 2,321 | 193 | 2m 04s | 25.2 |
 | `qwen2.5-coder-7b-test-bench` | 6/12 | 1,226 | 204 | 8s | 157.9 |
+| `nemotron-3.5-super:120b-run3` | 12/12 | 2,521 | 210 | 2m 09s | 24.8 |
 | `qwen3.8-flash-next-iq3_s-5090` | 12/12 | 2,696 | 225 | 17s | 171.3 |
 | `qwen3.8-27b-bench` | 12/12 | 2,803 | 234 | 3m 56s | 11.9 |
 | `qwen3.8-flash-next-iq3_xxs:unsensored` | 12/12 | 3,352 | 279 | 38s | 90.9 |
 | `nemotron-3.5-lightning:30b` | 12/12 | 3,717 | 310 | 18s | 500.9 |
 | `ternary-bonsai-2-4b-pq2_0-rtx5070ti` | 12/12 | 3,881 | 323 | 11s | 351.3 |
+| `nemotron-3.5-super:120b-run2` | 12/12 | 4,105 | 342 | 3m 17s | 24.3 |
 | `glm-4.7-flash:q4_K_M` | 12/12 | 4,228 | 352 | 22s | 189.6 |
 | `qwen3.8-flash-next-iq3_s` | 11/12 | 4,472 | 407 | 56s | 81.2 |
 | `ternary-bonsai-2-9b-pq2_0-rtx5090` | 11/12 | 4,604 | 419 | 13s | 347.7 |

@@ -1,0 +1,2 @@
+NAME                       ID              SIZE     PROCESSOR         CONTEXT    RUNNER      UNTIL              
+nemotron-3.5-super:120b    8a58f3e60082    40 GB    2%/98% CPU/GPU    32768      llamacpp    4 minutes from now    

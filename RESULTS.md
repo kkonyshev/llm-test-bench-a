@@ -897,3 +897,48 @@ Perfect coding runs (23/23), by tokens:
   this hardware (0.9 tok/s).
 - The same model can vary a lot between runs: Qwen3.8-27B used 25.5K tokens on
   the 5070 Ti box and 3.1K on the dual-GPU box, both 23/23.
+
+---
+
+# Results — heavy models, 3 runs each: Mistral Medium 3.5 and Nemotron 3.5 Super
+
+Three full runs of both benchmarks per model (`repeat_runs.sh`; runs 2-3 live in
+`runs/<tag>-run2`, `-run3`), to tell a stable score from a lucky one. Same
+settings every run: Ollama, `num_ctx=32768`, every other model unloaded, both
+GPUs otherwise idle (miner, ComfyUI and Strata stopped). Resource samples:
+`<tag>[-runN]_resources.csv`.
+
+## Mistral Medium 3.5 (`mistral-medium-3.5:latest`, 127.7B dense, Q4_K_M, 80 GB on disk)
+
+| Run | Coding | Coding tokens / time | Reasoning | Reasoning tokens / time |
+|---|---|---|---|---|
+| 1 | 23/23 | 1,401 / 25m 48s | 12/12 | 955 / 18m 13s |
+| 2 | 21/23 | 1,457 / 26m 43s | 12/12 | 1,560 / 28m 58s |
+| 3 | 23/23 | 1,485 / 27m 38s | 12/12 | 909 / 17m 15s |
+| **Total** | **67/69** | ~1.45K per run | **36/36** | |
+
+- Run 2's two failures: the list filters by `completed` / `priority` pass one
+  SQL binding too many (`uses 3, and there are 4 supplied`).
+- Stable and the most token-efficient model tested, at 0.9 tok/s on this box:
+  ~30 GB on the 5090, 3.6 GB on the 5070 Ti, the rest on the CPU (`ollama ps`:
+  23%/77% CPU/GPU). While generating: ~780% CPU, 79 GB RSS, 5090 at 28-40%
+  util (~82 W), 5070 Ti idle. Each token passes every layer, so the dense model
+  waits on the CPU-resident layers.
+
+## Nemotron 3.5 Super (`nemotron-3.5-super:120b`, 123.6B MoE, 512 experts, Q4_K_M, 90 GB on disk)
+
+| Run | Coding | Coding tokens / time | Reasoning | Reasoning tokens / time |
+|---|---|---|---|---|
+| 1 | 23/23 | 6,685 / 4m 42s | 12/12 | 2,321 / 2m 04s |
+| 2 | 23/23 | 7,575 / 5m 33s | 12/12 | 4,105 / 3m 17s |
+| 3 | 23/23 | 11,391 / 8m 14s | 12/12 | 2,521 / 2m 09s |
+| **Total** | **69/69** | 6.7-11.4K per run | **36/36** | |
+
+- Perfect in all three runs, 23-25 tok/s, 28x Mistral Medium's speed at a
+  similar size because only ~12B parameters are active per token.
+- Placement: `ollama ps` reports "40 GB, 2%/98% CPU/GPU", but that counts only
+  the GPU-loaded part. The runner's RSS is 84 GB: ~29.6 GB on the 5090 and
+  ~9.8 GB on the 5070 Ti hold the shared layers and some experts, and the
+  remaining experts sit in RAM and are computed on the CPU (~750-780% CPU while
+  generating; both GPUs only 5-8% busy, 84 W + 57 W).
+- Token use varies run to run (coding 6.7K to 11.4K) while the score does not.

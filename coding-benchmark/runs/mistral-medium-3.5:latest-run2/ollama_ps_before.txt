@@ -1,0 +1,2 @@
+NAME                         ID              SIZE     PROCESSOR          CONTEXT    RUNNER      UNTIL              
+mistral-medium-3.5:latest    0341632adb05    39 GB    23%/77% CPU/GPU    32768      llamacpp    4 minutes from now    
