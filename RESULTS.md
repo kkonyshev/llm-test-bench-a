@@ -977,3 +977,16 @@ defaults: temperature 0.15 for Devstral 2, Devstral Small 2 and Mistral Small 3.
 value (Ollama default 0.8) for Mistral Medium 3.5 and Nemotron 3.5 Bolt. Run-to-run stability
 of the Mistral models is therefore partly the low temperature; Super's 3/3 at 1.0 is the
 stronger result.
+
+---
+
+# Image input (vision) check
+
+`vision_probe.sh <tags>` sends each Ollama model a PNG reading "Order code: 7341 / Colour: BLUE"
+and checks the answer; raw answers in `resources/vision_probe.txt`. Reads it: Nemotron 3.5 Super,
+Nemotron 3.5 Bolt, Gemma4-26B, Devstral Small 2, Mistral Small 3.2. Text only (Ollama rejects the
+image): Nemotron 3.5 Lightning, Devstral 2, GLM-4.7-Flash, Sage-A1.5 (no mmproj in the Ollama
+model). Mistral Medium 3.5 advertises vision in `ollama show`, but both attempts aborted with
+"token repeat limit reached" on Ollama 0.40.5. Strata and Bonsai were not tested live; their
+configs / docs include a vision encoder. Summary table in Russian: `CHAMPIONS.md`.
+

@@ -1,0 +1,11 @@
+nemotron-3.5-lightning:30b | NO | ERROR: Multimodal data provided, but model does not support multimodal requests.
+nemotron-3.5-bolt:74b-a9b | READS | Order code: 7341, Colour: BLUE
+gemma4:26b | READS | The order code is 7341 and the colour is BLUE.
+devstral-small-2:latest | READS | Order code: 7341, Colour: BLUE
+mistral-small3.2:latest | READS | Order code: 7341 Colour: BLUE
+glm-4.7-flash:q4_K_M | NO | ERROR: Multimodal data provided, but model does not support multimodal requests.
+sage-a1.5:q4_k_m | NO | ERROR: image input is not supported - hint: if this is unexpected, you may need to provide the mmproj
+nemotron-3.5-super:120b | READS | The order code is 7341 and the colour is BLUE.
+mistral-medium-3.5:latest | NO | ERROR: prediction aborted, token repeat limit reached
+devstral-2:latest | NO | ERROR: Multimodal data provided, but model does not support multimodal requests.
+mistral-medium-3.5:latest | NO | retry without think:false: ERROR: prediction aborted, token repeat limit reached
