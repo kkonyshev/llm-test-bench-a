@@ -62,6 +62,7 @@ first Machine 3 runs. These are the numbers to use when comparing against other 
 | CPU | AMD Ryzen 7 9800X3D, 8 cores / 16 threads, up to 5.27 GHz, 96 MB L3 (3D V-Cache) |
 | System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel, **3600 MT/s** configured (`dmidecode`); theoretical bandwidth 57.6 GB/s. Four DIMMs run well below DDR5's rated speeds; at 4800-5600 MT/s, models spilling to RAM would gain roughly a third or more |
 | RAM bandwidth, effective | **~40 GB/s** (~70% of theoretical), derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s |
+| RAM bandwidth ceiling | The 9800X3D has a single CCD; its Infinity Fabric link reads about 60-65 GB/s whatever the memory speed. EXPO at 5200-5600 MT/s would bring the effective figure close to that (+20-35% for models spilling to RAM); two DIMMs at 6000-6400 would add only ~5-10% more while halving capacity |
 | GPU 0 | NVIDIA GeForce RTX 5090: 32 GB GDDR7, 512-bit, **1,792 GB/s**, 21,760 CUDA cores, Blackwell (SM 12.0) |
 | GPU 1 | NVIDIA GeForce RTX 5070 Ti: 16 GB GDDR7, 256-bit, **896 GB/s**, 8,960 CUDA cores, Blackwell (SM 12.0) |
 | PCIe | 5.0, both cards at x8 (the board splits the CPU's x16 lanes x8/x8 with two cards) |

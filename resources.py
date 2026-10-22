@@ -114,6 +114,16 @@ def verdict(split, cpu, util):
     return "частично — CPU считает свою часть, карты заняты"
 
 
+def bottleneck(split, vram):
+    if split == STRATA:
+        return "VRAM + RAM (~40 ГБ/с)"
+    if "CPU" in (split or ""):
+        return "**RAM (~40 ГБ/с)** + CPU"
+    if vram[0] > 200 and vram[1] > 200:
+        return "VRAM обеих карт по очереди (1792 и 896 ГБ/с)"
+    return "VRAM 5090, 1792 ГБ/с" if vram[0] > 200 else "VRAM 5070 Ti, 896 ГБ/с"
+
+
 table = []
 for model, g in groups.items():
     rows = g["bench"] + g["probe"]
@@ -151,17 +161,19 @@ out = [
     "  медиана загрузки каждой используемой карты.",
     "- **Ждёт CPU** — часть весов в RAM, и карты при этом загружены слабо: каждый токен",
     "  упирается в процессор и память.",
+    "- **Упирается в** — чья пропускная способность задаёт скорость генерации: VRAM 5090",
+    "  1792 ГБ/с, 5070 Ti 896 ГБ/с, системная RAM DDR5‑3600 ~40 ГБ/с на деле (см. `HARDWARE.md`).",
     "- CPU ~450 % у моделей целиком на GPU — это потоки llama.cpp в активном ожидании, а не",
     "  вычисления; у моделей с весами на CPU ~800 % — 8 потоков, которые реально считают.",
     "",
-    "| Модель | Контекст | VRAM 5090, ГБ | VRAM 5070 Ti, ГБ | RAM своя, ГБ | Кэш файла, ГБ | Где веса | CPU | GPU 5090 / 5070 Ti | Ждёт CPU? |",
-    "|---|---|---|---|---|---|---|---|---|---|",
+    "| Модель | Контекст | VRAM 5090, ГБ | VRAM 5070 Ti, ГБ | RAM своя, ГБ | Кэш файла, ГБ | Где веса | CPU | GPU 5090 / 5070 Ti | Ждёт CPU? | Упирается в |",
+    "|---|---|---|---|---|---|---|---|---|---|---|",
 ]
 for _, model, g, vram, ram, cache, cpu, util in sorted(table, key=lambda x: (x[0], x[1])):
     u = " / ".join(f"{x:.0f} %" if x is not None else "—" for x in util)
     runs = f" ({g['runs']} прогона)" if g["runs"] > 1 else ""
     out.append(f"| {model}{runs} | {g['ctx'] // 1024}K | {gib(vram[0])} | {gib(vram[1])} | {ram} | "
-               f"{cache} | {g['split'] or '?'} | {cpu:.0f} % | {u} | {verdict(g['split'], cpu, util)} |")
+               f"{cache} | {g['split'] or '?'} | {cpu:.0f} % | {u} | {verdict(g['split'], cpu, util)} | {bottleneck(g['split'], vram)} |")
 
 with open(os.path.join(BASE, "RESOURCES.md"), "w") as f:
     f.write("\n".join(out) + "\n")
