@@ -1,0 +1,2 @@
+NAME                 ID              SIZE     PROCESSOR          CONTEXT    RUNNER      UNTIL              
+devstral-2:latest    524a6607f0f5    53 GB    13%/87% CPU/GPU    32768      llamacpp    4 minutes from now    

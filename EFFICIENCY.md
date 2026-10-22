@@ -11,10 +11,13 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 
 | Run | Score | Tokens | Tok/solved | Wall-clock | Tok/s |
 |---|---|---|---|---|---|
+| `devstral-2:latest-run3` | 23/23 | 1,371 | 60 | 18m 24s | 1.2 |
+| `devstral-2:latest` | 23/23 | 1,373 | 60 | 18m 28s | 1.2 |
 | `mistral-medium-3.5:latest` | 23/23 | 1,401 | 61 | 25m 48s | 0.9 |
 | `mistral-medium-3.5:latest-run3` | 23/23 | 1,485 | 65 | 27m 38s | 0.9 |
 | `devstral-small-2:latest` | 23/23 | 1,486 | 65 | 16s | 95.0 |
 | `mistral-medium-3.5:latest-run2` | 21/23 | 1,457 | 69 | 26m 43s | 0.9 |
+| `devstral-2:latest-run2` | 23/23 | 1,657 | 72 | 22m 17s | 1.2 |
 | `qwen3-coder:30b-a3b-q4_K_M` | 23/23 | 1,676 | 73 | 11s | 292.2 |
 | `qwen3-coder-30b-a3b-bench` | 21/23 | 1,532 | 73 | 22s | 107.3 |
 | `mistral-small3.2:latest` | 23/23 | 1,726 | 75 | 23s | 97.2 |
@@ -81,6 +84,9 @@ Runs that are still in progress (no `timing.json` yet) are left out.
 | `mistral-medium-3.5:latest-run3` | 12/12 | 909 | 76 | 17m 15s | 0.9 |
 | `mistral-medium-3.5:latest` | 12/12 | 955 | 80 | 18m 13s | 0.9 |
 | `qwen3-coder-30b-a3b-bench` | 12/12 | 1,026 | 86 | 10s | 109.9 |
+| `devstral-2:latest-run3` | 12/12 | 1,059 | 88 | 14m 23s | 1.3 |
+| `devstral-2:latest` | 12/12 | 1,068 | 89 | 14m 41s | 1.2 |
+| `devstral-2:latest-run2` | 12/12 | 1,074 | 90 | 14m 46s | 1.2 |
 | `llama3.1:70b` | 12/12 | 1,183 | 99 | 13m 53s | 1.4 |
 | `qwen3-coder:30b-a3b-q4_K_M` | 12/12 | 1,185 | 99 | 4s | 302.6 |
 | `qwen2.5:72b` | 12/12 | 1,202 | 100 | 15m 52s | 1.3 |

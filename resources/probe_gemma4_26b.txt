@@ -1,0 +1,3 @@
+tag=gemma4:26b ctx=32768
+gemma4:26b    001e5dafc3c7    1.4 GB    100% GPU     32768      llamacpp    4 minutes from now    
+tokens=3000 tok/s=403.3

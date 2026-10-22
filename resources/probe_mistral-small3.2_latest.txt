@@ -1,0 +1,3 @@
+tag=mistral-small3.2:latest ctx=32768
+mistral-small3.2:latest    5a408ab55df5    19 GB    100% GPU     32768      llamacpp    4 minutes from now    
+tokens=3000 tok/s=96.0

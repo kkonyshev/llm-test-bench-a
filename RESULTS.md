@@ -1,6 +1,7 @@
 # Results
 
-Rankings, takeaways and picks in Russian: [`CHAMPIONS.md`](CHAMPIONS.md).
+Rankings, takeaways and picks in Russian: [`CHAMPIONS.md`](CHAMPIONS.md). VRAM, RAM and CPU
+per model: [`RESOURCES.md`](RESOURCES.md).
 
 Two machines' results are recorded here — see `HARDWARE.md` for exact specs
 and `MODELS.md` for exact model files. Single run per model per benchmark
@@ -921,7 +922,7 @@ GPUs otherwise idle (miner, ComfyUI and Strata stopped). Resource samples:
   SQL binding too many (`uses 3, and there are 4 supplied`).
 - Stable and the most token-efficient model tested, at 0.9 tok/s on this box:
   ~30 GB on the 5090, 3.6 GB on the 5070 Ti, the rest on the CPU (`ollama ps`:
-  23%/77% CPU/GPU). While generating: ~780% CPU, 79 GB RSS, 5090 at 28-40%
+  23%/77% CPU/GPU). While generating: ~780% CPU, 79 GB RSS, 5090 at ~3% average
   util (~82 W), 5070 Ti idle. Each token passes every layer, so the dense model
   waits on the CPU-resident layers.
 
@@ -942,3 +943,37 @@ GPUs otherwise idle (miner, ComfyUI and Strata stopped). Resource samples:
   remaining experts sit in RAM and are computed on the CPU (~750-780% CPU while
   generating; both GPUs only 5-8% busy, 84 W + 57 W).
 - Token use varies run to run (coding 6.7K to 11.4K) while the score does not.
+
+---
+
+# Results — Devstral 2 (123B dense), 3 runs
+
+`devstral-2:latest`: Mistral's Devstral 2, `mistral3` architecture, 125.0B parameters, dense,
+Q4_K_M, 74 GB on disk. Same protocol as the other heavy models: three full runs
+(`run_queue.sh` for run 1, `repeat_runs.sh` via `repeat_when_done.sh` for runs 2-3), Ollama
+`num_ctx=32768`, model alone on idle GPUs, resource samples in
+`devstral-2_latest[-runN]_resources.csv`. Sampling is the Modelfile default,
+**temperature 0.15** (see the note on temperatures below).
+
+| Run | Coding | Coding tokens / time | Reasoning | Reasoning tokens / time |
+|---|---|---|---|---|
+| 1 | 23/23 | 1,373 / 18m 28s | 12/12 | 1,068 / 14m 41s |
+| 2 | 23/23 | 1,657 / 22m 17s | 12/12 | 1,074 / 14m 46s |
+| 3 | 23/23 | 1,371 / 18m 24s | 12/12 | 1,059 / 14m 23s |
+| **Total** | **69/69** | ~1.4-1.7K per run | **36/36** | |
+
+- Perfect in all three runs, 1.25 tok/s on every run.
+- Placement: `ollama ps` "53 GB, 13%/87% CPU/GPU": 30.2 GB on the 5090, 13.9 GB on the 5070 Ti,
+  the rest read by the CPU from the mmapped file (RssFile ~70 GB, RssAnon 5.6 GB). While
+  generating: ~800% CPU, both GPUs ~2% busy, so like Mistral Medium it waits on the CPU; it is
+  ~40% faster than Mistral Medium (0.9 tok/s) because a larger share of it sits in VRAM.
+- Full per-model memory/CPU table: [`RESOURCES.md`](RESOURCES.md).
+
+## Note on sampling temperatures
+
+The benchmarks send no sampling options, so every Ollama model runs with its Modelfile
+defaults: temperature 0.15 for Devstral 2, Devstral Small 2 and Mistral Small 3.2; 1.0 (top_p
+0.95) for Nemotron 3.5 Super and Lightning, GLM-4.7-Flash, Sage-A1.5 and Gemma4; no explicit
+value (Ollama default 0.8) for Mistral Medium 3.5 and Nemotron 3.5 Bolt. Run-to-run stability
+of the Mistral models is therefore partly the low temperature; Super's 3/3 at 1.0 is the
+stronger result.

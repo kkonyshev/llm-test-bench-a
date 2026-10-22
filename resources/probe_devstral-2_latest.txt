@@ -1,0 +1,3 @@
+tag=devstral-2:latest ctx=32768
+devstral-2:latest    524a6607f0f5    53 GB    13%/87% CPU/GPU    32768      llamacpp    4 minutes from now    
+tokens=60 tok/s=1.3

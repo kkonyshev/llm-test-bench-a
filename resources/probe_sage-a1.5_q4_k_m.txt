@@ -1,0 +1,3 @@
+tag=sage-a1.5:q4_k_m ctx=32768
+sage-a1.5:q4_k_m    9dd4e76b23f8    21 GB    100% GPU     32768      llamacpp    4 minutes from now    
+tokens=3000 tok/s=260.6

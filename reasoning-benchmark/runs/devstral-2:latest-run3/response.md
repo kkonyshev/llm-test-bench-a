@@ -1,0 +1,76 @@
+Let's solve each problem one by one.
+
+1. **Notebooks and Pens:**
+   - Cost of 7 notebooks: 7 * $4 = $28
+   - Cost of 12 pens: 12 * $1.50 = $18
+   - Total cost before discount: $28 + $18 = $46
+   - Discount: 10% of $46 = $4.60
+   - Total cost after discount: $46 - $4.60 = $41.40
+
+2. **Ben and Cara's Ages:**
+   - Let Cara's current age be C.
+   - Ben's current age: 2 * (C - 6)
+   - In 4 years, Ben will be 30: 2 * (C - 6) + 4 = 30
+   - Solving: 2C - 12 + 4 = 30 → 2C - 8 = 30 → 2C = 38 → C = 19
+
+3. **Pets and Drinks:**
+   - From clue (c), Ben drinks juice.
+   - From clue (b), the dog owner drinks coffee, so Ben does not own the dog.
+   - From clue (a), Alice does not own the fish, so Alice owns either the cat or the dog.
+   - From clue (d), Cleo does not drink tea, so Cleo drinks either coffee or juice. But Ben drinks juice, so Cleo drinks coffee.
+   - Since Cleo drinks coffee and the dog owner drinks coffee, Cleo owns the dog.
+   - Alice does not own the fish or the dog, so Alice owns the cat.
+   - Ben owns the fish.
+
+4. **Sequence:**
+   - The sequence is 2, 6, 12, 20, 30, ...
+   - The pattern is adding consecutive even numbers: 2 + 4 = 6, 6 + 6 = 12, 12 + 8 = 20, 20 + 10 = 30, so the next number is 30 + 12 = 42.
+
+5. **Sheep:**
+   - All but 9 die, so 9 sheep are left.
+
+6. **Pipes:**
+   - Pipe A fills 1/6 of the tank per hour.
+   - Pipe B fills 1/3 of the tank per hour.
+   - Together, they fill 1/6 + 1/3 = 1/2 of the tank per hour.
+   - Time to fill the tank: 1 / (1/2) = 2 hours.
+
+7. **Weight Comparison:**
+   - A kilogram of feathers is heavier than a pound of steel (1 kg ≈ 2.2 lbs).
+
+8. **Markup and Discount:**
+   - Let the original cost be C.
+   - Retail price: 1.25 * C
+   - Sale price: 0.80 * 1.25 * C = 1.00 * C = 100% of the original cost.
+
+9. **Islanders:**
+   - If X is a truth-teller, then at least one of them is a liar, which means Y is a liar.
+   - If X is a liar, then it is not true that at least one of them is a liar, which means both are truth-tellers, but this contradicts X being a liar.
+   - Therefore, X is a truth-teller and Y is a liar.
+
+10. **Equation:**
+    - 3x + 7 = 2x + 15 → 3x - 2x = 15 - 7 → x = 8
+
+11. **Committee:**
+    - Number of ways to choose 3 people from 5: C(5, 3) = 10
+
+12. **Height Comparison:**
+    - Dan is taller than Ellie.
+    - Ellie is shorter than Farah.
+    - Farah is shorter than Dan.
+    - Therefore, Dan is the tallest and Ellie is the shortest.
+
+Now, let's provide the answers in the requested format:
+
+ANSWER 1: $41.40
+ANSWER 2: 19
+ANSWER 3: Cleo owns the dog, and Ben owns the fish.
+ANSWER 4: 42
+ANSWER 5: 9
+ANSWER 6: 2
+ANSWER 7: a kilogram of feathers
+ANSWER 8: 100%
+ANSWER 9: X is a truth-teller, Y is a liar.
+ANSWER 10: 8
+ANSWER 11: 10
+ANSWER 12: Dan is the tallest, Ellie is the shortest.
