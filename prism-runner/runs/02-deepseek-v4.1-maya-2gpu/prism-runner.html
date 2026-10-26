@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>PRISM RUNNER</title>
+<style>
+  :root{--cyan:#8beeff;--mag:#ff3d8b;--ink:#04030a;--dim:#6d8ba0} *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;overscroll-behavior:none}
+  body{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#dff7ff; -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
+  #gl{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none}
+  /* CSS-only glow layers: scanlines and vignette, no postprocessing pass */ #scanlines,#vignette{position:fixed;inset:0;pointer-events:none;z-index:2}
+  #scanlines{opacity:.45;mix-blend-mode:screen; background:repeating-linear-gradient(to bottom,rgba(140,230,255,.06) 0 1px,rgba(0,0,0,0) 1px 3px)}
+  #vignette{background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,0) 42%,rgba(0,0,0,.55) 82%,rgba(0,0,0,.86) 100%)}
+  #hud{position:fixed;inset:0;z-index:3;pointer-events:none} #hud .col{position:absolute;top:max(14px,env(safe-area-inset-top))}
+  #hud .col.l{left:18px}#hud .col.r{right:18px;text-align:right} .k{font-size:10px;letter-spacing:.26em;color:var(--dim)}
+  .v{font-size:26px;line-height:1.15;font-weight:700;text-shadow:0 0 14px rgba(123,233,255,.55)} .v.small{font-size:15px;font-weight:600;color:#a9d9e8;text-shadow:none}
+  .v.mult{color:#ffd86e;text-shadow:0 0 16px rgba(255,180,60,.6)}
+  #speedbar{position:absolute;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%); width:min(260px,44vw);height:4px;border-radius:4px;background:rgba(120,190,220,.16);overflow:hidden}
+  #speedbar i{display:block;height:100%;width:100%;transform-origin:0 50%;transform:scaleX(.1); background:linear-gradient(90deg,#57e0ff,#c58bff);box-shadow:0 0 10px #57e0ff}
+  #ui{position:fixed;inset:0;z-index:4;display:grid;place-items:center;pointer-events:none;padding:16px}
+  .panel{width:min(560px,92vw);text-align:center;padding:24px 20px;border-radius:16px; background:linear-gradient(180deg,rgba(10,14,26,.84),rgba(6,8,16,.74)); border:1px solid rgba(123,233,255,.22);backdrop-filter:blur(6px); box-shadow:0 0 60px rgba(60,200,255,.14),inset 0 0 40px rgba(60,200,255,.05)}
+  .panel[hidden]{display:none}
+  h1{margin:0;font-size:clamp(30px,7vw,52px);letter-spacing:.16em;line-height:1;color:#eafcff; text-shadow:0 0 24px rgba(90,220,255,.75),0 0 60px rgba(140,80,255,.45)}
+  h1 span{display:block;font-size:.5em;letter-spacing:.4em;color:#9fd8ff;text-shadow:0 0 18px rgba(255,61,139,.6)}
+  h2{margin:0 0 10px;font-size:clamp(20px,4.6vw,30px);letter-spacing:.22em;color:#ffd9e8;text-shadow:0 0 22px rgba(255,61,139,.7)}
+  .tag{margin:10px 0 14px;font-size:11px;letter-spacing:.12em;color:var(--dim);line-height:1.8}
+  .keys{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:0 auto 14px;max-width:430px; font-size:11px;letter-spacing:.05em;color:#a9d6e6;text-align:left}
+  .keys b{color:#eafcff;font-weight:600} .cta{margin-top:12px;font-size:12px;letter-spacing:.22em;color:#bdf6ff;animation:pulse 1.6s ease-in-out infinite}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 6px}
+  .stats div{padding:8px 4px;border:1px solid rgba(123,233,255,.16);border-radius:10px} .stats span{display:block;font-size:9px;letter-spacing:.22em;color:var(--dim)}
+  .stats b{font-size:20px;color:#eafcff;text-shadow:0 0 14px rgba(123,233,255,.5)} @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+  #mute{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:5;pointer-events:auto; font-family:inherit;font-size:10px;letter-spacing:.18em;color:#a9d6e6;background:rgba(10,16,26,.62); border:1px solid rgba(123,233,255,.22);border-radius:999px;padding:7px 12px;cursor:pointer}
+  #mute[aria-pressed="true"]{color:#ffb3ce;border-color:rgba(255,61,139,.45)}
+  #flash{position:fixed;inset:0;z-index:6;display:grid;place-items:center;pointer-events:none;opacity:0; font-size:clamp(40px,15vw,130px);letter-spacing:.24em;color:#c9f6ff;text-shadow:0 0 40px rgba(90,220,255,.9)}
+  #flash.run{animation:flashRun .8s ease-out} @keyframes flashRun{0%{opacity:0;transform:scale(1.35)}22%{opacity:.95}100%{opacity:0;transform:scale(1)}}
+  #fatal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#04030a;text-align:center} #fatal[hidden]{display:none}
+  #fatal p{max-width:540px;font-size:13px;line-height:1.9;color:#9fc4d6}
+  @media (prefers-reduced-motion:reduce){.cta{animation:none;opacity:.9}#flash.run{animation:none;opacity:0}}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Prism Runner play field. Arrows or WASD to move, P to pause, R to restart, M to mute."></canvas>
+<div id="scanlines"></div><div id="vignette"></div>
+
+<div id="hud" hidden>
+  <div class="col l"><div class="k">SCORE</div><div class="v" id="v-score">0</div><div class="k" style="margin-top:6px">BEST</div><div class="v small" id="v-best">0</div></div>
+  <div class="col r"><div class="k">MULT</div><div class="v mult" id="v-mult">x1</div><div class="k" style="margin-top:6px">SHARDS</div><div class="v small" id="v-shards">0</div></div>
+  <div id="speedbar"><i id="v-speed"></i></div>
+</div>
+
+<div id="ui">
+  <div class="panel" id="panel-title">
+    <h1>PRISM<span>RUNNER</span></h1>
+    <p class="tag">ride the light &middot; collect shards &middot; never touch the wall</p>
+    <div class="keys">
+      <div><b>&larr; &rarr;</b> / <b>A D</b> switch lane</div><div><b>&uarr; W Space</b> jump</div>
+      <div><b>&darr; S</b> slide under gates</div><div>touch: swipe &middot; tap to jump</div>
+      <div><b>P</b> / <b>Esc</b> pause &middot; <b>R</b> restart</div><div><b>M</b> mute</div>
+    </div>
+    <div class="cta">PRESS ENTER OR TAP TO RUN</div>
+  </div>
+  <div class="panel" id="panel-pause" hidden>
+    <h2>PAUSED</h2>
+    <p class="tag">P or Esc to resume &middot; R to restart &middot; M to mute</p>
+  </div>
+  <div class="panel" id="panel-dead" hidden>
+    <h2>RUN TERMINATED</h2>
+    <div class="stats">
+      <div><span>SCORE</span><b id="d-score">0</b></div><div><span>DISTANCE</span><b id="d-dist">0m</b></div><div><span>SHARDS</span><b id="d-shards">0</b></div>
+    </div>
+    <p class="tag" id="d-best">BEST 0</p>
+    <div class="cta">R &middot; ENTER &middot; TAP TO RUN AGAIN</div>
+  </div>
+</div>
+
+<div id="flash"></div>
+<button id="mute" type="button" aria-pressed="false" title="Mute (M)">SOUND ON</button>
+<div id="fatal" hidden><p id="fatal-msg"></p></div>
+
+<!-- boot watchdog: explains a dead page (no WebGL2, CDN blocked) instead of a black screen -->
+<script>
+(function () {
+  var ready = false, shown = false;
+  document.addEventListener('prism-ready', function () { ready = true; }, { once: true });
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      if (ready || shown) return;
+      var fatal = document.getElementById('fatal');
+      if (!fatal.hidden) return;                 // a real error already explains it
+      shown = true;
+      document.getElementById('fatal-msg').textContent =
+        'PRISM RUNNER could not start. It needs WebGL2 and a one-time network fetch of the pinned ' +
+        'Three.js module (three@0.160.0) from unpkg.com. Serve this file over HTTP ' +
+        '(python3 -m http.server) and check that your browser allows WebGL / hardware acceleration.';
+      fatal.hidden = false;
+    }, 4000);
+  });
+})();
+</script>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* === A. TUNING =========================================================== */
+const LANE_WIDTH = 2.2, LANE_COUNT = 3, TRACK_HALF = (LANE_WIDTH * LANE_COUNT) / 2;
+
+const SPEED_START = 19;        // m/s at t = 0
+const SPEED_MAX = 44;          // m/s once fully ramped
+const SPEED_RAMP_TIME = 55;    // seconds from SPEED_START to SPEED_MAX
+const GRAVITY = 26;            // m/s^2
+const JUMP_V = 9.2;            // m/s -> 1.63 m apex, 0.71 s airtime
+const SLIDE_TIME = 0.42;       // s; body height drops for this long
+const LANE_SNAP_RATE = 22;     // exponential approach rate for lane changes
+
+const SEG_LEN = 20, SEG_COUNT = 15, SEG_RECYCLE_Z = 25;
+const CURVE_K = 0.00009;       // vertical horizon curvature (y = K * z^2)
+
+const SPAWN_AHEAD = 200;       // m of corridor kept alive in front of the player
+const DESPAWN_Z = 22;          // rows and shards recycle beyond this z
+const START_CLEAR = 62;        // m of guaranteed empty track at run start
+const MIN_REACTION = 0.9;      // s of travel strictly between row starts
+const MIN_PATTERN_GAP = 26;    // m hard floor for row spacing
+const EASE_IN_TIME = 15;       // s of gentle introduction (extra spacing)
+
+const OBSTACLE_MAX = 56, SHARD_MAX = 90, PARTICLE_MAX = 320;
+
+const BLOCK_H = 1.00, BLOCK_W = 1.70;                // ground barrier: jump it
+const GATE_Y0 = 1.22, GATE_H = 0.62, GATE_W = 1.95;  // overhead gate: slide under
+const PLAYER_HALF_X = 0.40, PLAYER_STAND_H = 1.62;
+const PLAYER_SLIDE_H = 0.62;   // < GATE_Y0, so a slide always clears a gate
+
+const MULT_PER_SHARDS = 8, MULT_MAX = 6;
+const HIT_STOP = 0.08;         // s of frozen frame on a crash
+const DEATH_HOLD = 0.55;       // s of crash animation before the panel appears
+
+const CAM_HEIGHT = 4.7, CAM_BACK = 8.6, CAM_LOOK_AHEAD = -15;
+const CAM_SPRING = 120, CAM_DAMP = 17;   // critically damped follow
+const FOV_BASE = 66, FOV_PUNCH = 11;
+
+const FIXED_DT = 1 / 120;      // fixed simulation step
+const MAX_FRAME_DT = 0.1;      // clamp long frames (tab switch, debugger)
+const BEST_KEY = 'prismrunner.best.v1', MUTE_KEY = 'prismrunner.muted.v1'; const DEBUG = new URLSearchParams(location.search).has('debug');
+
+/* === B. UTILITIES ======================================================== */
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const rndInt = (n) => (Math.random() * n) | 0;
+const trackY = (z) => CURVE_K * z * z;
+
+/* localStorage can throw (private mode, blocked cookies, file:// in some
+   browsers). Everything falls back to memory and never throws at the game. */
+const store = (() => {
+  const mem = Object.create(null); let ok = false;
+  try {
+    localStorage.setItem('__prism_probe__', '1'); localStorage.removeItem('__prism_probe__'); ok = true;
+  } catch (err) { ok = false; }
+  return {
+    get(k, dflt) {
+      try {
+        const raw = ok ? localStorage.getItem(k) : mem[k]; return raw === null || raw === undefined ? dflt : String(raw);
+      } catch (err) { return dflt; }
+    }, set(k, v) {
+      try { if (ok) localStorage.setItem(k, String(v)); else mem[k] = String(v); }
+      catch (err) { mem[k] = String(v); }
+    }
+  };
+})();
+
+const readBest = () => {
+  const n = parseFloat(store.get(BEST_KEY, '0')); return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+};
+const readMuted = () => store.get(MUTE_KEY, '0') === '1';
+
+/* Radial gradient on a canvas: the only texture in the game, made in code. */
+function makeGlowTexture(size) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size; const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0.00, 'rgba(255,255,255,1)'); g.addColorStop(0.22, 'rgba(255,255,255,0.62)');
+  g.addColorStop(0.55, 'rgba(255,255,255,0.13)'); g.addColorStop(1.00, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+}
+
+/* === C. AUDIO — synth only, unlocked by a gesture ======================== */
+const audio = (() => {
+  let ctx = null, master = null, sfx = null, music = null; let droneGain = null, droneFilter = null, noiseBuf = null;
+  let muted = readMuted(), unlocked = false;
+  function buildDrone() {
+    droneGain = ctx.createGain(); droneGain.gain.value = 0; droneFilter = ctx.createBiquadFilter();
+    droneFilter.type = 'lowpass'; droneFilter.frequency.value = 420; droneFilter.Q.value = 6; droneFilter.connect(droneGain); droneGain.connect(music);
+    [55, 82.5, 110, 165].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = i === 3 ? 'triangle' : 'sawtooth'; o.frequency.value = f * (1 + (i - 1.5) * 0.002);
+      o.detune.value = i % 2 ? 7 : -7; g.gain.value = i === 3 ? 0.16 : 0.22; o.connect(g); g.connect(droneFilter); o.start();
+    });
+    const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();  // filter breathe
+    lfo.type = 'sine'; lfo.frequency.value = 0.13; lfoGain.gain.value = 180; lfo.connect(lfoGain); lfoGain.connect(droneFilter.frequency); lfo.start();
+    const pump = ctx.createOscillator(), pumpGain = ctx.createGain(); // rhythmic bed
+    pump.type = 'sine'; pump.frequency.value = 1.15; pumpGain.gain.value = 0.2; pump.connect(pumpGain); pumpGain.connect(droneGain.gain); pump.start();
+  }
+  function ensure() {
+    if (ctx) return true; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+    try { ctx = new AC(); } catch (err) { ctx = null; return false; }
+    master = ctx.createGain(); master.gain.value = muted ? 0 : 0.85; master.connect(ctx.destination);
+    sfx = ctx.createGain(); sfx.gain.value = 0.9; sfx.connect(master); music = ctx.createGain(); music.gain.value = 0.5; music.connect(master);
+    const len = Math.floor(ctx.sampleRate * 0.6); noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate); const d = noiseBuf.getChannelData(0); let last = 0;
+    for (let i = 0; i < len; i++) {
+      last = 0.72 * last + 0.28 * (Math.random() * 2 - 1);   // pinkish, less fizzy
+      d[i] = last;
+    }
+    buildDrone(); return true;
+  }
+  function env(g, t0, peak, attack, decay) {
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(peak, t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + decay);
+  }
+  function tone(type, f0, f1, dur, peak) {
+    if (!ctx || muted) return; const t0 = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t0 + dur); env(g, t0, peak, 0.008, dur);
+    o.connect(g); g.connect(sfx); o.start(t0); o.stop(t0 + dur + 0.05);
+  }
+  function noise(dur, peak, type, f0, q, f1) {
+    if (!ctx || muted || !noiseBuf) return; const t0 = ctx.currentTime, src = ctx.createBufferSource();
+    const f = ctx.createBiquadFilter(), g = ctx.createGain(); src.buffer = noiseBuf; f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t0);
+    if (f1) f.frequency.exponentialRampToValueAtTime(f1, t0 + dur); env(g, t0, peak, 0.006, dur);
+    src.connect(f); f.connect(g); g.connect(sfx); src.start(t0); src.stop(t0 + dur + 0.05);
+  }
+  function droneLevel(level, ramp) {
+    if (!droneGain) return; const t = ctx.currentTime; droneGain.gain.cancelScheduledValues(t); droneGain.gain.setTargetAtTime(level, t, ramp);
+    droneFilter.frequency.setTargetAtTime(level > 0.2 ? 720 : 360, t, ramp);
+  }
+  return {
+    unlock() {
+      if (unlocked) return;
+      if (!ensure()) { unlocked = true; return; }   // silent game, never crash
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      unlocked = true;
+    }, get muted() { return muted; }, setMuted(m) {
+      muted = !!m; if (!master || !ctx) return; const t = ctx.currentTime;
+      master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(muted ? 0 : 0.85, t, 0.03);
+    }, beginRun() { this.unlock(); droneLevel(0.5, 0.4); }, quiet() { droneLevel(0.0, 0.4); }, start() {
+      this.unlock(); tone('triangle', 420, 900, 0.16, 0.22); tone('sine', 210, 460, 0.22, 0.16);
+    }, jump() {
+      this.unlock(); tone('sine', 300, 760, 0.16, 0.28); tone('triangle', 600, 1180, 0.10, 0.09);
+    }, lane(dir) {
+      this.unlock(); noise(0.14, 0.18, 'bandpass', 2200, 7, dir > 0 ? 900 : 3400); tone('sine', dir > 0 ? 780 : 620, dir > 0 ? 1120 : 480, 0.07, 0.08);
+    }, shard(combo) {                                  // pitch climbs a semitone per shard
+      this.unlock(); const f = 660 * Math.pow(2, Math.min(24, combo % 25) / 12); tone('square', f, f * 1.5, 0.09, 0.09);
+      tone('sine', f * 2, f * 2.6, 0.13, 0.08);
+    }, crash() {
+      this.unlock(); noise(0.55, 0.5, 'lowpass', 2600, 1, 150); tone('sawtooth', 190, 42, 0.5, 0.30); tone('square', 90, 40, 0.4, 0.16);
+    }
+  };
+})();
+
+/* === D. RENDERER / SCENE / CAMERA ======================================== */
+const canvas = document.getElementById('gl'); const fatalEl = document.getElementById('fatal'); const uiEl = document.getElementById('ui');
+const hudEl = document.getElementById('hud'); const muteBtn = document.getElementById('mute');
+
+function showFatal(msg) {
+  document.getElementById('fatal-msg').textContent = msg; fatalEl.hidden = false;
+  uiEl.style.display = 'none'; hudEl.hidden = true; muteBtn.style.display = 'none';
+}
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  if (renderer.capabilities.isWebGL2 !== true) throw new Error('webgl2-missing');
+} catch (err) {
+  showFatal('PRISM RUNNER needs WebGL2, which this browser did not provide. Use a current ' +
+    'Chrome, Firefox, Edge or Safari with hardware acceleration enabled.');
+  throw err;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.setSize(window.innerWidth, window.innerHeight, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05; renderer.setClearColor(0x04030a, 1);
+
+const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x04030a, 0.0075);
+const camera = new THREE.PerspectiveCamera(
+  FOV_BASE, Math.max(0.2, window.innerWidth / Math.max(1, window.innerHeight)), 0.1, 420);
+camera.position.set(0, CAM_HEIGHT, CAM_BACK);
+
+const glowTex = makeGlowTexture(64);
+
+/* === E. STATIC SCENE CONTENT ============================================ */
+scene.add(new THREE.HemisphereLight(0x4d7dff, 0x08030f, 0.9)); const playerLight = new THREE.PointLight(0x7be9ff, 18, 26, 2);
+playerLight.position.set(0, 2.6, 1.5); scene.add(playerLight); const rimLight = new THREE.PointLight(0xff2b6d, 50, 80, 2);
+rimLight.position.set(0, 14, -40); scene.add(rimLight);
+
+/* starfield: one Points draw, layout and colours generated once */
+{
+  const N = 560, pos = new Float32Array(N * 3), col = new Float32Array(N * 3); const c = new THREE.Color();
+  for (let i = 0; i < N; i++) {
+    const a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 240; pos[i * 3] = Math.cos(a) * r * 1.2;
+    pos[i * 3 + 1] = Math.pow(Math.random(), 0.7) * 78 + 4; pos[i * 3 + 2] = Math.sin(a) * r - 70;
+    c.setHSL(0.5 + Math.random() * 0.28, 0.85, 0.35 + Math.random() * 0.35); col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const stars = new THREE.Points(g, new THREE.PointsMaterial({
+    size: 2.0, map: glowTex, vertexColors: true, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false, fog: false, opacity: 0.75
+  }));
+  stars.frustumCulled = false; scene.add(stars);
+}
+
+/* horizon haze: two additive sprites */
+function addHaze(color, opacity, y, z, sx, sy) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTex, color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, fog: false
+  }));
+  sp.position.set(0, y, z); sp.scale.set(sx, sy, 1); scene.add(sp);
+}
+addHaze(0x8a6bff, 0.50, 34, -305, 560, 300); addHaze(0x2ec6ff, 0.32, 9, -266, 400, 150);
+
+/* Track: pooled segments. Curvature is computed per-vertex from world z, so
+   neighbouring segments meet exactly; the grid is procedural in the shader. */
+const timeU = { value: 0 }, glowU = { value: 1 };
+const TRACK_VERT = /* glsl */`
+  uniform float uSegZ;
+  varying vec2 vPlane;
+  varying float vDepth;
+  void main() {
+    float wz = uSegZ + position.z;
+    float y = ${CURVE_K.toFixed(6)} * wz * wz;
+    vec3 p = vec3(position.x, y, wz);
+    vPlane = vec2(p.x, wz);
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    vDepth = -mv.z;
+    gl_Position = projectionMatrix * mv;
+  }`;
+const TRACK_FRAG = /* glsl */`
+  uniform float uTime;
+  uniform float uGlow;
+  varying vec2 vPlane;
+  varying float vDepth;
+  void main() {
+    float ax = abs(vPlane.x);
+    float z = vPlane.y;
+    float laneLine = 1.0 - smoothstep(0.0, 0.085, abs(ax - 1.1));
+    float edgeLine = 1.0 - smoothstep(0.0, 0.30, abs(ax - ${TRACK_HALF.toFixed(2)}));
+    float dz = abs(fract(z * 0.25 + 0.5) - 0.5) * 4.0;
+    float grid = 1.0 - smoothstep(0.0, 0.18, dz);
+    float pulse = 0.55 + 0.45 * sin(z * 0.22 + uTime * 2.2);
+    float energy = 0.5 + 0.5 * sin(z * 0.6 - uTime * 7.0);
+    vec3 col = vec3(0.012, 0.014, 0.032);
+    col += vec3(0.10, 0.80, 1.00) * laneLine * 0.30;
+    col += vec3(0.15, 0.90, 1.00) * edgeLine * 1.35 * pulse * uGlow;
+    col += vec3(0.85, 0.18, 0.95) * grid * (0.10 + 0.35 * energy) * uGlow;
+    float fade = 1.0 - smoothstep(90.0, 215.0, vDepth);
+    gl_FragColor = vec4(mix(vec3(0.004, 0.0034, 0.011), col, fade), 1.0);
+  }`;
+
+const trackGeo = new THREE.PlaneGeometry(TRACK_HALF * 2, SEG_LEN, 2, 8);
+trackGeo.rotateX(-Math.PI / 2);
+const segments = [];
+for (let i = 0; i < SEG_COUNT; i++) {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: timeU, uGlow: glowU, uSegZ: { value: 0 } },
+    vertexShader: TRACK_VERT, fragmentShader: TRACK_FRAG
+  });
+  const mesh = new THREE.Mesh(trackGeo, mat);
+  mesh.frustumCulled = false;
+  scene.add(mesh);
+  segments.push({ mesh, mat, z: SEG_RECYCLE_Z - i * SEG_LEN });
+}
+
+/* Instanced pools keep the whole corridor at a handful of draw calls. */
+const AURA_SCALE = new THREE.Vector3(1.16, 1.22, 1.35);
+function instBox(w, h, d, material, count) {
+  const m = new THREE.InstancedMesh(new THREE.BoxGeometry(w, h, d), material, count);
+  m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  m.frustumCulled = false;
+  scene.add(m);
+  return m;
+}
+const addMat = (color, opacity) => new THREE.MeshBasicMaterial({
+  color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false
+});
+const surfMat = (color, emissive, intensity) => new THREE.MeshStandardMaterial({
+  color, emissive, emissiveIntensity: intensity, flatShading: true,
+  roughness: 0.4, metalness: 0.4
+});
+
+const postMesh = instBox(0.12, 1.5, 0.12, addMat(0x8beeff, 0.32), SEG_COUNT * 2);
+const blockMesh = instBox(BLOCK_W, BLOCK_H, 1.1, surfMat(0x5a0626, 0xd8184f, 0.5), OBSTACLE_MAX);
+const gateMesh = instBox(GATE_W, GATE_H, 0.9, surfMat(0x063038, 0x1fd4e6, 0.55), OBSTACLE_MAX);
+const blockAura = instBox(BLOCK_W, BLOCK_H, 1.1, addMat(0xff2f74, 0.16), OBSTACLE_MAX);
+const gateAura = instBox(GATE_W, GATE_H, 0.9, addMat(0x4ff4ff, 0.18), OBSTACLE_MAX);
+
+const shardMesh = new THREE.InstancedMesh(
+  new THREE.OctahedronGeometry(0.3, 0),
+  surfMat(0x03161c, 0x3fd8e8, 1.15), SHARD_MAX);
+shardMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+shardMesh.frustumCulled = false;
+scene.add(shardMesh);
+
+/* particles: one additive Points draw, GPU-sized */
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(PARTICLE_MAX * 3);
+const pCol = new Float32Array(PARTICLE_MAX * 3);
+const pSize = new Float32Array(PARTICLE_MAX);
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('aColor', new THREE.BufferAttribute(pCol, 3));
+pGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
+pGeo.setDrawRange(0, 0);
+const points = new THREE.Points(pGeo, new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  vertexShader: /* glsl */`
+    attribute vec3 aColor;
+    attribute float aSize;
+    varying vec3 vCol;
+    void main() {
+      vCol = aColor;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = aSize * (420.0 / max(0.6, -mv.z));
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: /* glsl */`
+    varying vec3 vCol;
+    void main() {
+      float d = smoothstep(0.5, 0.02, length(gl_PointCoord - vec2(0.5)));
+      float a = d * d;
+      gl_FragColor = vec4(vCol * (0.9 + 1.4 * a), a);
+    }`
+}));
+points.frustumCulled = false;
+scene.add(points);
+
+const pVel = new Float32Array(PARTICLE_MAX * 3);
+const pLife = new Float32Array(PARTICLE_MAX);
+const pMaxLife = new Float32Array(PARTICLE_MAX);
+const pBase = new Float32Array(PARTICLE_MAX);
+let pCount = 0;
+
+/* player: spinning icosahedron riding a magnetic hoverboard */
+const player = new THREE.Group();
+const coreGeo = new THREE.IcosahedronGeometry(0.62, 0);
+const coreMat = surfMat(0x061a24, 0x36c8f5, 0.95);
+Object.assign(coreMat, { roughness: 0.18, metalness: 0.85 });
+const core = new THREE.Mesh(coreGeo, coreMat);
+player.add(core);
+const wires = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({
+  color: 0x9ff2ff, wireframe: true, transparent: true, opacity: 0.55,
+  blending: THREE.AdditiveBlending, depthWrite: false
+}));
+wires.scale.setScalar(1.03);
+player.add(wires);
+
+const board = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.14, 6),
+  surfMat(0x14000a, 0xff2b6d, 0.85));
+board.scale.set(2.05, 1, 1.15);
+board.rotation.x = Math.PI;         // hex face down
+board.position.y = -0.62;
+player.add(board);
+
+const boardGlowMat = addMat(0xff5e9e, 0.85);
+const boardGlow = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.045, 6, 20), boardGlowMat);
+boardGlow.scale.set(1.45, 1, 1);
+boardGlow.rotation.x = Math.PI / 2;
+boardGlow.position.y = -0.70;
+player.add(boardGlow);
+
+const fieldMat = new THREE.MeshBasicMaterial({
+  color: 0x6ff0ff, transparent: true, opacity: 0.28, side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending, depthWrite: false
+});
+const field = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.72, 24), fieldMat);
+field.rotation.x = -Math.PI / 2;
+field.position.y = -0.74;
+player.add(field);
+
+const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: glowTex, color: 0x9ef4ff, transparent: true, opacity: 0.5,
+  blending: THREE.AdditiveBlending, depthWrite: false, fog: false
+}));
+halo.scale.set(3.1, 3.1, 1);
+player.add(halo);
+player.position.set(0, 0.88, 0);
+scene.add(player);
+
+/* ground marker doubles as the jump shadow */
+const shadowMat = new THREE.MeshBasicMaterial({
+  color: 0x7be9ff, transparent: true, opacity: 0.5, side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending, depthWrite: false
+});
+const shadow = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.72, 26), shadowMat);
+shadow.rotation.x = -Math.PI / 2;
+shadow.position.set(0, 0.035, 0);
+scene.add(shadow);
+
+/* === F. RUN STATE ======================================================= */
+let state = 'title';           // title | playing | paused | dying | dead
+let runTime = 0, speed = SPEED_START, distance = 0, score = 0, best = readBest();
+let shardsCollected = 0, streak = 0, multiplier = 1;
+
+let laneIndex = 1, playerX = 0, playerY = 0, vy = 0;
+let slideTimer = 0, slideBlend = 0, grounded = true;
+let travelSinceRow = 0, pendingGap = 0, prevRowHadBlock = false;
+let hitStopLeft = 0, dieTimer = 0, shake = 0, shakeT = 0, trailAcc = 0;
+let camX = 0, camY = CAM_HEIGHT, camZ = CAM_BACK;
+let camVX = 0, camVY = 0, camVZ = 0, camRoll = 0, fovCur = FOV_BASE;
+let muted = readMuted(), reduceMotion = false, worldTime = 0, flashTimer = 0;
+
+const jumpReq = { pending: false };
+const keyHeld = { left: false, right: false };
+
+/* pools: fixed size, allocated once, reused forever */
+const obstacles = [];
+for (let i = 0; i < OBSTACLE_MAX; i++) obstacles.push({ active: false, type: 0, x: 0, z: 0 });
+const shards = [];
+for (let i = 0; i < SHARD_MAX; i++) shards.push({ active: false, x: 0, z: 0, phase: 0 });
+const spawnLog = [];   // written only when ?debug is present
+
+/* reused temporaries — nothing below allocates inside the frame loop */
+const tmpMat = new THREE.Matrix4(), tmpQuat = new THREE.Quaternion();
+const tmpEuler = new THREE.Euler(), tmpVec = new THREE.Vector3();
+const tmpScale = new THREE.Vector3(1, 1, 1), tmpColor = new THREE.Color();
+const ONE = new THREE.Vector3(1, 1, 1);
+
+/* === G. RESET =========================================================== */
+const speedAt = (t) => clamp(SPEED_START + (SPEED_MAX - SPEED_START) * (t / SPEED_RAMP_TIME),
+  SPEED_START, SPEED_MAX);
+
+function currentGap() {
+  // Measured against the speed the player will have when this row is actually
+  // reached, not when it spawned, so the reaction window stays honest on the
+  // way up the ramp. Doubled at t=0, tapering to 1x over EASE_IN_TIME.
+  const arrive = Math.max(1, speedAt(runTime + SPAWN_AHEAD / Math.max(1, speed)));
+  return Math.max(MIN_PATTERN_GAP, arrive * MIN_REACTION) *
+    (2 - clamp(runTime / EASE_IN_TIME, 0, 1));
+}
+function resetGame() {
+  runTime = 0; speed = SPEED_START; distance = 0; score = 0;
+  shardsCollected = 0; streak = 0; multiplier = 1;
+  laneIndex = 1; playerX = 0; playerY = 0; vy = 0;
+  slideTimer = 0; slideBlend = 0; grounded = true;
+  jumpReq.pending = false;
+  keyHeld.left = keyHeld.right = false;
+  travelSinceRow = 0; pendingGap = 0; prevRowHadBlock = false;
+  hitStopLeft = 0; dieTimer = 0; shake = 0; shakeT = 0; trailAcc = 0;
+  camX = 0; camY = CAM_HEIGHT; camZ = CAM_BACK;
+  camVX = camVY = camVZ = 0; camRoll = 0; fovCur = FOV_BASE;
+  for (let i = 0; i < segments.length; i++) segments[i].z = SEG_RECYCLE_Z - i * SEG_LEN;
+  for (let i = 0; i < obstacles.length; i++) obstacles[i].active = false;
+  for (let i = 0; i < shards.length; i++) shards[i].active = false;
+  pCount = 0;
+  pGeo.setDrawRange(0, 0);
+  player.position.set(0, 0.88, 0);
+  player.rotation.set(0, 0, 0);
+  player.scale.set(1, 1, 1);
+  coreMat.emissiveIntensity = 0.95;
+  boardGlowMat.opacity = 0.85;
+  fieldMat.opacity = 0.28;
+  primeCorridor();
+  refreshHUD(true);
+}
+function primeCorridor() {
+  // Rows always land on the same far z during play, so priming just walks the
+  // same lattice: deepest first, stopping before START_CLEAR.
+  const gap = currentGap(), zs = [];
+  for (let z = -SPAWN_AHEAD; z <= -START_CLEAR; z += gap) zs.push(z);
+  for (let i = zs.length - 1; i >= 0; i--) spawnPattern(zs[i]);
+  travelSinceRow = 0;
+  pendingGap = gap;
+}
+
+/* === H. PATTERN GENERATION — fairness invariants ========================
+   1. A row is one read: all of its obstacles share a z.
+   2. Never three solid blocks in a row; every normal row keeps at least one
+      lane completely empty, so holding still is always a legal answer.
+   3. Full-row gates (three high gates) appear only after the ease-in and never
+      directly after a jump row. PLAYER_SLIDE_H (0.62) < GATE_Y0 (1.22), and a
+      slide while airborne dives, so a player caught mid-jump can still land.
+   4. Spacing = max(26 m, arrival speed * 0.9 s), doubled at t=0, easing to 1x
+      over EASE_IN_TIME. Ease-in also raises the odds of a single obstacle.
+   5. The first 62 m of track are empty. */
+function spawnPattern(z) {
+  const ease = clamp(runTime / EASE_IN_TIME, 0, 1);
+  if (ease > 0.55 && !prevRowHadBlock && Math.random() < 0.12) {
+    for (let lane = 0; lane < LANE_COUNT; lane++) placeObstacle(lane, z, 1);
+    spawnShardLine(1, z, 2);
+    prevRowHadBlock = false;
+    if (DEBUG) spawnLog.push({ z, kinds: 'fullgate', open: -1 });
+    return;
+  }
+  const openLane = rndInt(LANE_COUNT), candidates = [];
+  for (let lane = 0; lane < LANE_COUNT; lane++) if (lane !== openLane) candidates.push(lane);
+  if (Math.random() < 0.5) {                       // shuffle the two candidates
+    const t = candidates[0]; candidates[0] = candidates[1]; candidates[1] = t;
+  }
+  const count = Math.random() < 0.10 + 0.55 * ease ? 2 : 1;
+  let hasBlock = false;
+  for (let i = 0; i < count; i++) {
+    const type = Math.random() < 0.45 ? 1 : 0;     // 0 = block (jump), 1 = gate (slide)
+    if (type === 0) hasBlock = true;
+    placeObstacle(candidates[i], z, type);
+  }
+  prevRowHadBlock = hasBlock;
+  spawnShardLine(openLane, z, 2 + rndInt(2));
+  if (DEBUG) spawnLog.push({ z, kinds: hasBlock ? 'block' : 'gate', open: openLane });
+}
+function placeObstacle(lane, z, type) {
+  for (let i = 0; i < obstacles.length; i++) {
+    const o = obstacles[i];
+    if (o.active) continue;
+    o.active = true; o.type = type;
+    o.x = (lane - 1) * LANE_WIDTH;
+    o.z = z;
+    return;
+  }
+}
+function spawnShardLine(lane, z, count) {
+  for (let i = 0; i < count; i++) {
+    for (let s = 0; s < shards.length; s++) {
+      const sh = shards[s];
+      if (sh.active) continue;
+      sh.active = true;
+      sh.x = (lane - 1) * LANE_WIDTH;
+      sh.z = z + 3.5 + i * 3.2;      // lined up in the open lane, before the row
+      sh.phase = Math.random() * Math.PI * 2;
+      break;
+    }
+  }
+}
+
+/* === I. INPUT ============================================================ */
+function moveLane(dir) {
+  if (state !== 'playing') return;
+  const next = clamp(laneIndex + dir, 0, LANE_COUNT - 1);
+  audio.lane(dir);
+  if (next !== laneIndex) laneIndex = next;
+}
+function requestJump() { if (state === 'playing') jumpReq.pending = true; }
+
+function requestSlide() {
+  if (state !== 'playing') return;
+  slideTimer = SLIDE_TIME;
+  if (playerY > 0.02) {
+    // Air dive: cut the arc short. This is the escape hatch when a full-row
+    // gate shows up mid-jump, and it costs no new mechanic.
+    vy = Math.min(vy, -14);
+    grounded = false;
+  }
+}
+function setState(next) {
+  state = next;
+  document.getElementById('panel-title').hidden = next !== 'title';
+  document.getElementById('panel-pause').hidden = next !== 'paused';
+  document.getElementById('panel-dead').hidden = next !== 'dead';
+  hudEl.hidden = next === 'title';
+  if (next === 'dead') {
+    document.getElementById('d-score').textContent = score;
+    document.getElementById('d-dist').textContent = Math.floor(distance) + 'm';
+    document.getElementById('d-shards').textContent = shardsCollected;
+    document.getElementById('d-best').textContent = 'BEST ' + best;
+  }
+}
+function showFlash(text) {
+  const el = document.getElementById('flash');
+  el.textContent = text;
+  el.classList.remove('run');
+  void el.offsetWidth;                         // restart the CSS animation
+  el.classList.add('run');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { el.classList.remove('run'); flashTimer = 0; }, 900);
+}
+function startRun() {
+  if (state === 'playing' || state === 'dying') return;
+  resetGame();
+  setState('playing');
+  audio.beginRun();
+  audio.start();
+  showFlash('GO');
+}
+function restartRun() {
+  resetGame();
+  setState('playing');
+  audio.beginRun();
+  showFlash('GO');
+}
+function togglePause(force) {
+  if (state === 'playing') {
+    setState('paused');
+    audio.quiet();
+    jumpReq.pending = false;
+  } else if (state === 'paused' && force !== true) {
+    setState('playing');
+    audio.beginRun();
+  }
+}
+function setMuted(m) {
+  muted = !!m;
+  audio.setMuted(muted);
+  store.set(MUTE_KEY, muted ? '1' : '0');
+  muteBtn.textContent = muted ? 'MUTED' : 'SOUND ON';
+  muteBtn.setAttribute('aria-pressed', String(muted));
+}
+function onKeyDown(e) {
+  const code = e.code;
+  if (code === 'Space' || code === 'Tab' || code.startsWith('Arrow')) e.preventDefault();
+  audio.unlock();
+  if (code === 'KeyM') { setMuted(!muted); return; }
+  if (code === 'KeyR') { restartRun(); return; }
+  if (code === 'KeyP' || code === 'Escape') { togglePause(); return; }
+  const confirm = code === 'Enter' || code === 'NumpadEnter' || code === 'Space';
+  if (state === 'title') { if (confirm) startRun(); return; }
+  if (state === 'dead') { if (confirm) restartRun(); return; }
+  if (state === 'paused') { if (confirm) togglePause(); return; }
+  if (state !== 'playing' || e.repeat) return;   // one lane step per press
+
+  switch (code) {
+    case 'ArrowLeft': case 'KeyA':
+      if (!keyHeld.left) { keyHeld.left = true; moveLane(-1); }
+      break;
+    case 'ArrowRight': case 'KeyD':
+      if (!keyHeld.right) { keyHeld.right = true; moveLane(1); }
+      break;
+    case 'ArrowUp': case 'KeyW': case 'Space': requestJump(); break;
+    case 'ArrowDown': case 'KeyS': requestSlide(); break;
+  }
+}
+function onKeyUp(e) {
+  if (e.code === 'ArrowLeft' || e.code === 'KeyA') keyHeld.left = false;
+  else if (e.code === 'ArrowRight' || e.code === 'KeyD') keyHeld.right = false;
+}
+
+/* touch: swipe = action, tap = start / restart / jump */
+const gesture = { id: -1, x: 0, y: 0, t: 0, active: false };
+
+function onPointerDown(e) {
+  if (e.target && e.target.closest && e.target.closest('button')) return;
+  audio.unlock();
+  if (e.cancelable) e.preventDefault();
+  gesture.active = true;
+  gesture.id = e.pointerId;
+  gesture.x = e.clientX; gesture.y = e.clientY; gesture.t = performance.now();
+}
+function onPointerUp(e) {
+  if (!gesture.active || e.pointerId !== gesture.id) return;
+  gesture.active = false;
+  const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+  const moved = Math.hypot(dx, dy), held = performance.now() - gesture.t;
+  if (state !== 'playing' || moved < 30 || held > 650) { tapAction(); return; }
+  if (Math.abs(dx) > Math.abs(dy)) moveLane(dx > 0 ? 1 : -1);
+  else if (dy < 0) requestJump();
+  else requestSlide();
+}
+function onPointerCancel(e) { if (e.pointerId === gesture.id) gesture.active = false; }
+
+function tapAction() {
+  if (state === 'title') startRun();
+  else if (state === 'dead') restartRun();
+  else if (state === 'paused') togglePause();
+  else if (state === 'playing') requestJump();
+}
+function onBlur() { if (state === 'playing') togglePause(true); }
+function onVisibility() { if (document.hidden && state === 'playing') togglePause(true); }
+
+function onResize() {
+  const w = window.innerWidth, h = Math.max(1, window.innerHeight);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(w, h, false);
+}
+
+window.addEventListener('keydown', onKeyDown);
+window.addEventListener('keyup', onKeyUp);
+window.addEventListener('pointerdown', onPointerDown, { passive: false });
+window.addEventListener('pointerup', onPointerUp);
+window.addEventListener('pointercancel', onPointerCancel);
+window.addEventListener('blur', onBlur);
+document.addEventListener('visibilitychange', onVisibility);
+window.addEventListener('resize', onResize);
+muteBtn.addEventListener('click', () => { audio.unlock(); setMuted(!muted); });
+
+/* prefers-reduced-motion: kills shake and the FOV punch */
+try {
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  reduceMotion = mq.matches;
+  const onChange = (ev) => { reduceMotion = ev.matches; };
+  if (mq.addEventListener) mq.addEventListener('change', onChange);
+  else if (mq.addListener) mq.addListener(onChange);
+} catch (err) { reduceMotion = false; }
+
+/* === J. SIMULATION (fixed step) ========================================= */
+function scrollWorld(dz) {
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i];
+    s.z += dz;
+    if (s.z > SEG_RECYCLE_Z) s.z -= SEG_COUNT * SEG_LEN;
+  }
+  for (let i = 0; i < obstacles.length; i++) {
+    const o = obstacles[i];
+    if (!o.active) continue;
+    o.z += dz;
+    if (o.z > DESPAWN_Z) o.active = false;
+  }
+  for (let i = 0; i < shards.length; i++) {
+    const s = shards[i];
+    if (!s.active) continue;
+    s.z += dz;
+    if (s.z > DESPAWN_Z) s.active = false;
+  }
+}
+function simulate(dt) {
+  runTime += dt;
+  speed = clamp(speedAt(runTime), SPEED_START, SPEED_MAX);
+  /* lane: fast exponential approach with an exact snap on arrival */
+  const targetX = (laneIndex - 1) * LANE_WIDTH;
+  playerX += (targetX - playerX) * (1 - Math.exp(-LANE_SNAP_RATE * dt));
+  if (Math.abs(targetX - playerX) < 0.004) playerX = targetX;
+  if (jumpReq.pending) {
+    jumpReq.pending = false;
+    if (grounded) {
+      vy = JUMP_V; grounded = false; slideTimer = 0;
+      audio.jump();
+      puff(5, 0.5, 0.05, 0.9, 0x7be9ff);
+    }
+  }
+  if (!grounded) {
+    vy -= GRAVITY * dt;
+    playerY += vy * dt;
+    if (playerY <= 0) {
+      playerY = 0; vy = 0; grounded = true;
+      puff(7, 1.1, 0.1, -0.5, 0xff5e9e);
+    }
+  } else { playerY = 0; }
+  if (slideTimer > 0) {
+    slideTimer = Math.max(0, slideTimer - dt);
+    if (slideTimer === 0) puff(4, 0.6, 0.1, -0.4, 0x62f6ff);
+  }
+  slideBlend += ((slideTimer > 0 ? 1 : 0) - slideBlend) * Math.min(1, dt * 26);
+  const dz = speed * dt;
+  distance += dz;
+  score = Math.floor(distance) + shardsCollected * multiplier;
+  scrollWorld(dz);
+  /* corridor: rows always land at SPAWN_AHEAD, spaced by pendingGap */
+  travelSinceRow += dz;
+  let guard = 0;
+  while (travelSinceRow >= pendingGap && guard++ < 3) {
+    travelSinceRow -= pendingGap;
+    spawnPattern(-SPAWN_AHEAD);
+    pendingGap = currentGap();
+  }
+  /* hoverboard trail */
+  trailAcc += dt;
+  if (trailAcc > 0.035) {
+    trailAcc = 0;
+    emit(playerX + rnd(-0.35, 0.35), playerY + 0.2, rnd(-0.3, 0.2),
+      rnd(-0.4, 0.4), rnd(0.3, 1.0), rnd(1.4, 3.2),
+      rnd(0.22, 0.45), rnd(0.08, 0.16), 0.35, 0.85, 1.0);
+  }
+  collectShards();
+  checkCollisions();
+}
+function collectShards() {
+  const bodyY = playerY + 0.9;
+  for (let i = 0; i < shards.length; i++) {
+    const s = shards[i];
+    if (!s.active || s.z < -1.05 || s.z > 1.05) continue;
+    if (Math.abs(s.x - playerX) > 1.0) continue;
+    const sy = trackY(s.z) + 1.02 + Math.sin(s.phase) * 0.12;
+    if (Math.abs(sy - bodyY) > 1.1) continue;
+    s.active = false;
+    shardsCollected++; streak++;
+    multiplier = Math.min(MULT_MAX, 1 + Math.floor(streak / MULT_PER_SHARDS));
+    score = Math.floor(distance) + shardsCollected * multiplier;
+    audio.shard(streak);
+    burst(s.x, sy, s.z, 9, 0x8ffcff, 5.5, 0.8, 0.6);
+  }
+}
+
+const playerTop = () => playerY + (slideTimer > 0 ? PLAYER_SLIDE_H : PLAYER_STAND_H);
+
+function checkCollisions() {
+  const pTop = playerTop(), pBottom = playerY + 0.06;
+  for (let i = 0; i < obstacles.length; i++) {
+    const o = obstacles[i];
+    if (!o.active || o.z > 1.35 || o.z < -1.35) continue;
+    const halfW = (o.type === 1 ? GATE_W : BLOCK_W) * 0.5;
+    if (Math.abs(o.x - playerX) > PLAYER_HALF_X + halfW) continue;
+    const oy = trackY(o.z);
+    const y0 = oy + (o.type === 1 ? GATE_Y0 : 0.02);
+    const y1 = oy + (o.type === 1 ? GATE_Y0 + GATE_H : BLOCK_H);
+    if (pTop > y0 && pBottom < y1) { die(); return; }
+  }
+}
+function die() {
+  if (state !== 'playing') return;
+  state = 'dying';
+  hitStopLeft = HIT_STOP;
+  dieTimer = DEATH_HOLD;
+  shake = reduceMotion ? 0.15 : 0.85;
+  shakeT = 0;
+  streak = 0; multiplier = 1;
+  audio.crash();
+  audio.quiet();
+  burst(playerX, playerY + 0.9, 0, 30, 0xff5e9e, 9, 1.3, 1.1);
+  burst(playerX, playerY + 0.9, 0, 16, 0xd9fbff, 13, 1.0, 0.8);
+  if (score > best) { best = score; store.set(BEST_KEY, String(best)); }
+  refreshHUD(true);
+}
+
+/* === K. PARTICLES — struct-of-arrays, swap-remove ======================== */
+function emit(x, y, z, vx, vy2, vz, life, size, r, g, b) {
+  if (pCount >= PARTICLE_MAX) return;
+  const i = pCount++, i3 = i * 3;
+  pPos[i3] = x; pPos[i3 + 1] = y; pPos[i3 + 2] = z;
+  pVel[i3] = vx; pVel[i3 + 1] = vy2; pVel[i3 + 2] = vz;
+  pCol[i3] = r; pCol[i3 + 1] = g; pCol[i3 + 2] = b;
+  pSize[i] = size;
+  pLife[i] = life; pMaxLife[i] = life; pBase[i] = size;
+}
+function swapParticle(a, b) {                       // swap-remove keeps the buffer dense
+  const a3 = a * 3, b3 = b * 3;
+  for (let k = 0; k < 3; k++) {
+    pPos[a3 + k] = pPos[b3 + k]; pVel[a3 + k] = pVel[b3 + k]; pCol[a3 + k] = pCol[b3 + k];
+  }
+  pSize[a] = pSize[b]; pLife[a] = pLife[b]; pMaxLife[a] = pMaxLife[b]; pBase[a] = pBase[b];
+}
+function burst(x, y, z, count, hex, spd, spread, lifeBase) {
+  tmpColor.setHex(hex);
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const b = (Math.random() - 0.25) * Math.PI * 0.9;
+    const s = spd * (0.35 + Math.random() * 0.85);
+    emit(x + rnd(-0.1, 0.1), y + rnd(-0.1, 0.1), z + rnd(-0.1, 0.1),
+      Math.cos(a) * Math.cos(b) * s * spread,
+      Math.sin(b) * s + rnd(0.4, 2.4),
+      Math.sin(a) * Math.cos(b) * s * spread,
+      lifeBase * (0.6 + Math.random() * 0.7),
+      rnd(0.10, 0.26), tmpColor.r, tmpColor.g, tmpColor.b);
+  }
+}
+function puff(count, spd, spread, up, hex) {
+  tmpColor.setHex(hex);
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    emit(playerX, playerY + 0.14, 0.1,
+      Math.cos(a) * spd * spread, up * (0.5 + Math.random()), Math.sin(a) * spd * spread,
+      rnd(0.2, 0.45), rnd(0.08, 0.16), tmpColor.r, tmpColor.g, tmpColor.b);
+  }
+}
+function stepParticles(dt) {
+  let i = 0;
+  while (i < pCount) {
+    pLife[i] -= dt;
+    if (pLife[i] <= 0) { swapParticle(i, pCount - 1); pCount--; continue; }
+    const i3 = i * 3;
+    pVel[i3 + 1] -= 11 * dt;
+    const drag = 1 - 1.7 * dt;
+    pVel[i3] *= drag; pVel[i3 + 2] *= drag;
+    pPos[i3] += pVel[i3] * dt;
+    pPos[i3 + 1] += pVel[i3 + 1] * dt;
+    pPos[i3 + 2] += pVel[i3 + 2] * dt;
+    if (pPos[i3 + 1] < 0.03) { pPos[i3 + 1] = 0.03; pVel[i3 + 1] *= -0.3; }
+    const t = pLife[i] / Math.max(0.0001, pMaxLife[i]);
+    pSize[i] = pBase[i] * (0.3 + 0.7 * t);
+    i++;
+  }
+  pGeo.setDrawRange(0, pCount);
+  pGeo.attributes.position.needsUpdate = true;
+  pGeo.attributes.aColor.needsUpdate = true;
+  pGeo.attributes.aSize.needsUpdate = true;
+}
+
+/* === L. FIXED-STEP DISPATCH ============================================= */
+function titleDrift(dt) {
+  const dz = 9 * dt;
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i];
+    s.z += dz;
+    if (s.z > SEG_RECYCLE_Z) s.z -= SEG_COUNT * SEG_LEN;
+  }
+  playerX += (Math.sin(worldTime * 0.6) * LANE_WIDTH * 0.85 - playerX) * Math.min(1, dt * 3);
+}
+function step(dt) {
+  switch (state) {
+    case 'playing': simulate(dt); stepParticles(dt); break;
+    case 'title': titleDrift(dt); stepParticles(dt); break;
+    case 'dying':
+      if (hitStopLeft > 0) { hitStopLeft -= dt; break; }   // hit-stop: nothing moves
+      stepParticles(dt);
+      dieTimer -= dt;
+      if (dieTimer <= 0) setState('dead');
+      break;
+    case 'dead': stepParticles(dt); break;
+    default: break;                                        // paused: fully frozen
+  }
+}
+
+/* === M. VISUALS: player, camera, pools, HUD ============================= */
+const elScore = document.getElementById('v-score');
+const elBest = document.getElementById('v-best');
+const elMult = document.getElementById('v-mult');
+const elShards = document.getElementById('v-shards');
+const elSpeed = document.getElementById('v-speed');
+let hudScore = -1, hudBest = -1, hudMult = -1, hudShards = -1;
+
+function refreshHUD(force) {
+  if (force || hudScore !== score) { elScore.textContent = score; hudScore = score; }
+  if (force || hudBest !== best) { elBest.textContent = best; hudBest = best; }
+  if (force || hudMult !== multiplier) { elMult.textContent = 'x' + multiplier; hudMult = multiplier; }
+  if (force || hudShards !== shardsCollected) { elShards.textContent = shardsCollected; hudShards = shardsCollected; }
+}
+
+const targetLaneX = () => (laneIndex - 1) * LANE_WIDTH;
+
+function updatePlayer(dt) {
+  const dead = state === 'dead' || state === 'dying';
+  const squash = 1 - 0.52 * slideBlend;
+  player.position.set(playerX, playerY + 0.88 * squash + 0.02, 0);
+  player.scale.set(1 + 0.22 * slideBlend, squash, 1);
+  player.rotation.z += ((targetLaneX() - playerX) * -0.22 - player.rotation.z) * Math.min(1, dt * 10);
+  player.rotation.x += ((dead ? 1.15 : 0) - player.rotation.x) * Math.min(1, dt * 4);
+  core.rotation.y += dt * 2.6;
+  core.rotation.x += dt * 1.1;
+  wires.rotation.copy(core.rotation);
+  halo.position.y = 0.1 + Math.sin(worldTime * 3.1) * 0.06;
+  boardGlowMat.opacity += ((dead ? 0.02 : 0.85) - boardGlowMat.opacity) * Math.min(1, dt * 4);
+  fieldMat.opacity += ((dead ? 0.02 : 0.28) - fieldMat.opacity) * Math.min(1, dt * 4);
+  coreMat.emissiveIntensity += ((dead ? 0.35 : 0.95) - coreMat.emissiveIntensity) * Math.min(1, dt * 4);
+  playerLight.position.set(playerX, player.position.y + 0.9, 1.5);
+  const h = clamp(playerY / 1.7, 0, 1), ms = 1 - h * 0.45;
+  shadow.position.set(playerX, 0.035, 0);
+  shadow.scale.set(ms, ms, 1);
+  shadowMat.opacity = 0.55 * (1 - h * 0.7);
+}
+function updateCamera(dt, sp) {
+  // critically damped spring, dt-clamped so a long frame cannot blow it up
+  const cdt = Math.min(dt, 1 / 20);
+  const tx = playerX * 0.34, ty = CAM_HEIGHT + playerY * 0.22;
+  camVX += (tx - camX) * CAM_SPRING * cdt - camVX * CAM_DAMP * cdt;
+  camVY += (ty - camY) * CAM_SPRING * cdt - camVY * CAM_DAMP * cdt;
+  camVZ += (CAM_BACK - camZ) * CAM_SPRING * cdt - camVZ * CAM_DAMP * cdt;
+  camX += camVX * cdt; camY += camVY * cdt; camZ += camVZ * cdt;
+  let sx = 0, sy = 0;
+  if (shake > 0.0005) {
+    shakeT += dt;
+    const amp = shake * Math.exp(-shakeT * 7.5) * (reduceMotion ? 0.25 : 1);
+    sx = Math.sin(shakeT * 71) * amp;
+    sy = Math.cos(shakeT * 53) * amp * 0.7;
+    shake *= Math.exp(-dt * 6);
+    if (shake < 0.0005) shake = 0;
+  }
+  camera.position.set(camX + sx, camY + sy, camZ);
+  camera.lookAt(playerX * 0.55, 1.25 + playerY * 0.35, CAM_LOOK_AHEAD);
+  const dead = state === 'dead' || state === 'dying';
+  camRoll += (((targetLaneX() - playerX) * -0.055) + (dead ? 0.06 : 0) - camRoll) * Math.min(1, dt * 7);
+  camera.rotateZ(camRoll + sx * 0.04);
+  const fovTarget = FOV_BASE + sp * (reduceMotion ? 0 : FOV_PUNCH) + (playerY > 0.05 ? 2.2 : 0);
+  fovCur += (fovTarget - fovCur) * Math.min(1, dt * 4.5);
+  if (Math.abs(camera.fov - fovCur) > 0.01) {
+    camera.fov = fovCur;
+    camera.updateProjectionMatrix();
+  }
+}
+function updateTrack(cameraSp) {
+  timeU.value = worldTime;
+  glowU.value = 0.85 + 0.35 * cameraSp;
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i], y = trackY(s.z);
+    s.mat.uniforms.uSegZ.value = s.z;
+    for (let side = 0; side < 2; side++) {
+      tmpVec.set(side ? TRACK_HALF + 0.9 : -TRACK_HALF - 0.9, y + 0.75, s.z);
+      tmpMat.compose(tmpVec, tmpQuat.identity(), ONE);
+      postMesh.setMatrixAt(i * 2 + side, tmpMat);
+    }
+  }
+  postMesh.instanceMatrix.needsUpdate = true;
+}
+function updatePools(dt) {
+  /* obstacles: body plus an additive shell (fake bloom, still one pass) */
+  tmpQuat.identity();
+  let bi = 0, gi = 0;
+  for (let i = 0; i < obstacles.length; i++) {
+    const o = obstacles[i];
+    if (!o.active) continue;
+    const oy = trackY(o.z);
+    if (o.type === 1) {
+      tmpVec.set(o.x, oy + GATE_Y0 + GATE_H * 0.5, o.z);
+      gateMesh.setMatrixAt(gi, tmpMat.compose(tmpVec, tmpQuat, ONE));
+      gateAura.setMatrixAt(gi, tmpMat.compose(tmpVec, tmpQuat, AURA_SCALE));
+      gi++;
+    } else {
+      tmpVec.set(o.x, oy + BLOCK_H * 0.5, o.z);
+      blockMesh.setMatrixAt(bi, tmpMat.compose(tmpVec, tmpQuat, ONE));
+      blockAura.setMatrixAt(bi, tmpMat.compose(tmpVec, tmpQuat, AURA_SCALE));
+      bi++;
+    }
+  }
+  blockMesh.count = bi; blockMesh.instanceMatrix.needsUpdate = true;
+  blockAura.count = bi; blockAura.instanceMatrix.needsUpdate = true;
+  gateMesh.count = gi; gateMesh.instanceMatrix.needsUpdate = true;
+  gateAura.count = gi; gateAura.instanceMatrix.needsUpdate = true;
+  /* shards */
+  let si = 0;
+  for (let i = 0; i < shards.length; i++) {
+    const s = shards[i];
+    if (!s.active) continue;
+    s.phase += dt * 2.4;
+    tmpVec.set(s.x, trackY(s.z) + 1.02 + Math.sin(s.phase) * 0.12, s.z);
+    tmpEuler.set(s.phase * 0.7, s.phase * 1.3, 0);
+    tmpQuat.setFromEuler(tmpEuler);
+    const sc = 1 + Math.sin(s.phase * 2) * 0.12;
+    tmpScale.set(sc, sc, sc);
+    shardMesh.setMatrixAt(si++, tmpMat.compose(tmpVec, tmpQuat, tmpScale));
+  }
+  tmpScale.set(1, 1, 1);
+  tmpQuat.identity();
+  shardMesh.count = si;
+  shardMesh.instanceMatrix.needsUpdate = true;
+}
+function updateVisual(dt) {
+  if (state !== 'paused') worldTime += dt;
+  const sp = clamp((speed - SPEED_START) / (SPEED_MAX - SPEED_START), 0, 1);
+  updatePlayer(dt);
+  updateCamera(dt, sp);
+  updateTrack(sp);
+  updatePools(dt);
+  refreshHUD(false);
+  elSpeed.style.transform = 'scaleX(' + (0.08 + sp * 0.92).toFixed(3) + ')';
+}
+
+/* === N. MAIN LOOP — fixed timestep with clamped delta ==================== */
+let lastT = 0, acc = 0, rafId = 0;
+
+function frame(now) {
+  rafId = requestAnimationFrame(frame);
+  let dt = (now - lastT) / 1000;
+  lastT = now;
+  if (!Number.isFinite(dt) || dt < 0) dt = 0;
+  if (dt > MAX_FRAME_DT) dt = MAX_FRAME_DT;
+  acc += dt;
+  let steps = 0;
+  while (acc >= FIXED_DT && steps < 12) { step(FIXED_DT); acc -= FIXED_DT; steps++; }
+  if (acc > FIXED_DT * 4) acc = 0;      // never spiral after a long stall
+  updateVisual(dt);
+  renderer.render(scene, camera);
+}
+
+/* === O. BOOT ============================================================ */
+setMuted(readMuted());
+resetGame();
+setState('title');
+lastT = performance.now();
+rafId = requestAnimationFrame(frame);
+document.dispatchEvent(new CustomEvent('prism-ready'));
+
+/* Opt-in inspection hook (?debug): read-only counters and forced transitions. */
+if (DEBUG) {
+  const live = (pool) => pool.filter((o) => o.active);
+  window.__prism = {
+    get state() { return state; }, get score() { return score; },
+    get distance() { return distance; }, get shards() { return shardsCollected; },
+    get mult() { return multiplier; }, get speed() { return speed; },
+    get lane() { return laneIndex; }, get y() { return playerY; },
+    get grounded() { return grounded; }, get particles() { return pCount; },
+    get obstacles() { return live(obstacles).length; },
+    get shardCount() { return live(shards).length; },
+    get draws() { return renderer.info.render.calls; },
+    get tris() { return renderer.info.render.triangles; },
+    get log() { return spawnLog.slice(); },
+    clearLog() { spawnLog.length = 0; },
+    start() { startRun(); }, pause() { togglePause(true); }, kill() { die(); },
+    scan() {              // live pool snapshot for automated fairness checks
+      const lane = (x) => Math.round(x / LANE_WIDTH) + 1;
+      return {
+        obstacles: live(obstacles).map((o) => ({ type: o.type, lane: lane(o.x), z: o.z })),
+        shards: live(shards).map((s) => ({ lane: lane(s.x), z: s.z })),
+        speed, y: playerY, grounded, sliding: slideTimer > 0
+      };
+    }
+  };
+}
+
+window.addEventListener('beforeunload', () => {
+  cancelAnimationFrame(rafId);
+  window.removeEventListener('keydown', onKeyDown);
+  window.removeEventListener('keyup', onKeyUp);
+  window.removeEventListener('pointerdown', onPointerDown, { passive: false });
+  window.removeEventListener('pointerup', onPointerUp);
+  window.removeEventListener('pointercancel', onPointerCancel);
+  window.removeEventListener('blur', onBlur);
+  document.removeEventListener('visibilitychange', onVisibility);
+  window.removeEventListener('resize', onResize);
+  renderer.dispose();
+}, { once: true });
+</script>
+</body>
+</html>

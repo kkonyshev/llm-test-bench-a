@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRISM RUNNER</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --fg: #e0e0e8;
+      --muted: #6a6a7a;
+      --accent: #00f5d4;
+      --accent2: #9b59b6;
+      --lane1: #00d4ff;
+      --lane2: #ffd600;
+      --lane3: #ff6b6b;
+    }
+    
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      overflow: hidden;
+      touch-action: none;
+    }
+    
+    #game-container {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+    }
+    
+    #ui {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    
+    #title-screen {
+      position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: auto;
+    }
+    
+    #title-screen h1 {
+      font-size: 4rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      letter-spacing: 0.3em;
+    }
+    
+    #title-screen p {
+      font-size: 1.2rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    
+    #title-screen .controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    #title-screen .control-key {
+      background: var(--bg);
+      border: 1px solid var(--muted);
+      color: var(--fg);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    
+    #game-over-screen,
+    #pause-screen {
+      position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: auto;
+      background: rgba(10, 10, 15, 0.8);
+      border: 1px solid var(--muted);
+      border-radius: 8px;
+      padding: 2rem;
+      backdrop-filter: blur(5px);
+    }
+    
+    #game-over-screen h2,
+    #pause-screen h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    #game-over-screen p,
+    #pause-screen p {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    
+    #game-over-key,
+    #pause-key {
+      background: var(--bg);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin: 0.2rem;
+    }
+    
+    #score-panel {
+      position: absolute;
+      top: 2rem; left: 50%; transform: translateX(-50%);
+      background: rgba(10, 10, 15, 0.8);
+      border: 1px solid var(--muted);
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+    }
+    
+    #score-panel span {
+      font-family: 'Courier New', monospace;
+    }
+    
+    #best-score {
+      position: absolute;
+      top: 2rem; right: 2rem;
+      background: rgba(10, 10, 15, 0.8);
+      border: 1px solid var(--muted);
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+    }
+    
+    #best-score span {
+      color: var(--accent);
+    }
+    
+    #volume-control {
+      position: absolute;
+      bottom: 2rem; left: 2rem;
+      background: var(--bg);
+      border: 1px solid var(--muted);
+      color: var(--fg);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+    }
+    
+    #volume-control input {
+      width: 150px;
+    }
+    
+    .reduced-motion-banner {
+      position: fixed;
+      bottom: 2rem; left: 50%; transform: translateX(-50%);
+      background: var(--bg);
+      border: 1px solid var(--muted);
+      color: var(--accent);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+  <div id="ui">
+    <div id="title-screen">
+      <h1>PRISM RUNNER</h1>
+      <p>Third-person endless runner</p>
+      <div class="controls">
+        <div class="control-key">← / A : Left lane</div>
+        <div class="control-key">→ / D : Right lane</div>
+        <div class="control-key">↑ / W / Space : Jump</div>
+        <div class="control-key">↓ / S : Slide</div>
+        <div class="control-key">P / Esc : Pause</div>
+      </div>
+      <div class="control-key">Enter / Space : Start</div>
+    </div>
+    
+    <div id="score-panel">Score: <span id="score-value">0</span></div>
+    <div id="best-score">Best: <span id="best-value">0</span></div>
+    <div id="volume-control">
+      Volume: <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
+    </div>
+  </div>
+  <div class="reduced-motion-banner" id="reduced-motion-banner" style="display:none;">
+    Reduced motion mode active
+  </div>
+  
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  
+  <script type="module">
+  // =============================
+  // PRISM RUNNER - Single File Game
+  // =============================
+  
+  // =========================================
+  // TUNING CONSTANTS - Adjust these to change gameplay
+  // =========================================
+  const CONFIG = {
+    // Lane configuration
+    LANE_COUNT: 3,
+    LANE_WIDTH: 4.0,
+    START_LANE: 1, // 0=left, 1=center, 2=right
+    
+    // Player configuration
+    PLAYER_RADIUS: 0.8,
+    ICOSA_SUBDIVISIONS: 0,
+    
+    // Jump configuration
+    JUMP_V: 5.0,
+    JUMP_GRAVITY: 18.0,
+    JUMP_TERMINAL: 20.0,
+    
+    // Slide/dash configuration
+    SLIDE_DURATION: 0.4,
+    
+    // Speed configuration
+    SPEED_START: 15.0,
+    SPEED_MAX: 45.0,
+    SPEED_ACCEL: 0.3,
+    SPEED_INCREMENT_DISTANCE: 200.0,
+    
+    // Track configuration
+    SPAWN_AHEAD: 80.0,
+    SEGMENT_LENGTH: 20.0,
+    MIN_SEGMENTS: 3,
+    CURVATURE_RANGE: [-0.5, 0.5],
+    
+    // Obstacle configuration
+    OBSTACLE_MIN_GAP: 0.9,
+    OBSTACLE_SPAWN_CHANCE: 0.15,
+    OBSTACLE_TYPES: 4,
+    
+    // Shard configuration
+    SHARD_SPAWN_CHANCE: 0.08,
+    SHARD_VALUE: 10,
+    
+    // Physics configuration
+    GRAVITY: 25.0,
+    GROUND_Y: -1.5,
+    
+    // Visual configuration
+    FOV_START: 75,
+    FOV_MAX: 95,
+    FOV_SPEED_SCALE: 0.2,
+    SHAKE_INTENSITY: 0.5,
+    SHAKE_DECAY: 3.0,
+    HIT_STOP_MS: 80,
+    
+    // Particle configuration
+    PARTICLE_LIFETIME: 1.2,
+    PARTICLE_COUNT_SHARD: 15,
+    PARTICLE_COUNT_DEATH: 40,
+    
+    // Drone/music configuration
+    DRONE_FREQ: 120,
+    DRONE_MODULATION: 4,
+    
+    // Bloom/glow configuration
+    EMISSIVE_INTENSITY: 2.0
+  };
+  
+  // =========================================
+  // ENGINE SETUP
+  // =========================================
+  
+  import * as THREE from 'three';
+  
+  // Check for WebGL2 support
+  const hasWebGL2 = (() => {
+    try {
+      const canvas = document.createElement('canvas');
+      return canvas.getContext('webgl2') !== null;
+    } catch (e) {
+      return false;
+    }
+  })();
+  
+  if (!hasWebGL2) {
+    const warning = document.createElement('div');
+    warning.style.position = 'fixed';
+    warning.style.top: 0; left: 0; width: 100%; height: 100%;
+      background: #000; color: #f00; padding: 2rem;
+      font-family: sans-serif; pointer-events: none;
+      z-index: 9999;
+    warning.innerHTML = '<strong>WebGL2 not supported</strong><br>Please use a modern browser.';
+    document.body.appendChild(warning);
+    throw new Error('WebGL2 not supported');
+  }
+  
+  // =========================================
+  // AUDIO CONTEXT (synthesized)
+  // =========================================
+  
+  let audioContext = null;
+  let gainNode = null;
+  let muted = false;
+  let volume = 1.0;
+  
+  const initAudio = () => {
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioContext.createGain();
+      gainNode.gain.value = volume;
+      gainNode.connect(audioContext.destination);
+    } catch (e) {
+      console.warn('Audio context failed:', e);
+    }
+  };
+  
+  const playOscillator = (frequency, duration, type = 'sine', envelope = { attack: 0.01, hold: 0, decay: 0.1, sustain: 0.7 }) => {
+    if (!audioContext) return;
+    if (muted) return;
+    
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.type = type;
+    osc.frequency.value = frequency;
+    
+    gain.gain.value = 0;
+    gain.gain.setTargetAtTime(1.0, audioContext.currentTime, 0.01);
+    
+    const now = audioContext.currentTime;
+    const end = now + duration;
+    
+    // Envelope
+    gain.gain.setTargetAtTime(0.7, now + envelope.attack, envelope.hold);
+    gain.gain.setTargetAtTime(0.0, now + envelope.attack + envelope.decay, envelope.sustain);
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start(now);
+    osc.stop(end);
+  };
+  
+  const playNoise = (frequency, duration, type = 'white') => {
+    if (!audioContext) return;
+    if (muted) return;
+    
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    
+    osc.type = type;
+    osc.frequency.value = frequency;
+    osc.filter?.type = 'lowpass';
+    osc.filter.frequency.value = 200;
+    
+    gain.gain.value = 0;
+    gain.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start(audioContext.currentTime);
+    osc.stop(audioContext.currentTime + duration);
+  };
+  
+  const toggleMute = () => {
+    muted = !muted;
+    if (volumeControl) volumeControl.checked = muted ? 0 : volume;
+    return muted;
+  };
+  
+  // =========================================
+  // INPUT HANDLING
+  // =========================================
+  
+  let currentLane = CONFIG.START_LANE;
+  let isJumping = false;
+  let jumpVel = 0;
+  let isSliding = false;
+  let slideStartTime = 0;
+  let isPaused = false;
+  let isGameOver = false;
+  let canSwitchLane = true;
+  
+  const lanePositions = [
+    -CONFIG.LANE_WIDTH, // left lane (0)
+    0,                   // center lane (1)
+    CONFIG.LANE_WIDTH    // right lane (2)
+  ];
+  
+  const keyState = new Set();
+  
+  const handleKeyDown = (e) => {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS', 'Space', 'KeyP', 'Escape'].includes(e.code)) {
+      e.preventDefault();
+    }
+    keyState.add(e.code);
+    
+    if (gameState === 'title') {
+      if (e.code === 'Enter' || e.code === 'Space') {
+        startGame();
+      }
+      return;
+    }
+    
+    if (gameState === 'dead' || gameState === 'paused') {
+      if ((e.code === 'KeyR' || e.code === 'Enter' || e.code === 'Space') && gameState === 'dead') {
+        restartGame();
+      }
+      if (e.code === 'KeyP' || e.code === 'Escape') {
+        togglePause();
+      }
+      return;
+    }
+    
+    // Playing state
+    if (e.code === 'KeyP' || e.code === 'Escape') {
+      togglePause();
+      return;
+    }
+    
+    if (gameState !== 'playing') return;
+    
+    // Lane switching
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+      if (canSwitchLane) switchLane(-1);
+    }
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+      if (canSwitchLane) switchLane(1);
+    }
+    
+    // Jump
+    if ((e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') && !isJumping) {
+      startJump();
+    }
+    
+    // Slide
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+      startSlide();
+    }
+  };
+  
+  const handleKeyUp = (e) => {
+    keyState.delete(e.code);
+    
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+      isSliding = false;
+    }
+  };
+  
+  const switchLane = (direction) => {
+    const newLane = currentLane + direction;
+    if (newLane >= 0 && newLane < CONFIG.LANE_COUNT && canSwitchLane) {
+      currentLane = newLane;
+      canSwitchLane = false;
+      setTimeout(() => canSwitchLane = true, 150);
+    }
+  };
+  
+  const startJump = () => {
+    isJumping = true;
+    jumpVel = CONFIG.JUMP_V;
+    jumpMarker.visible = true;
+  };
+  
+  const startSlide = () => {
+    isSliding = true;
+    playerObject.visible = false;
+  };
+  
+  const togglePause = () => {
+    isPaused = !isPaused;
+    if (pauseScreen) pauseScreen.style.display = isPaused ? 'block' : 'none';
+  };
+  
+  const restartGame = () => {
+    gameState = 'restarting';
+    
+    currentLane = CONFIG.START_LANE;
+    score = 0;
+    multiplier = 1;
+    combo = 0;
+    speed = CONFIG.SPEED_START;
+    totalDistance = 0;
+    isGameOver = false;
+    isPaused = false;
+    
+    clearObstacles();
+    clearShards();
+    
+    playerObject.position.set(lanePositions[currentLane], CONFIG.GROUND_Y, 0);
+    playerObject.visible = true;
+    isJumping = false;
+    jumpVel = 0;
+    isSliding = false;
+    jumpMarker.visible = false;
+    
+    resetTrack();
+    
+    updateScore();
+    gameState = 'title';
+    titleScreen.style.display = 'block';
+    pauseScreen.style.display = 'none';
+  };
+  
+  const startGame = () => {
+    titleScreen.style.display = 'none';
+    gameState = 'playing';
+    lastTime = performance.now();
+    lastUpdate = performance.now();
+    
+    scorePanel.style.display = 'block';
+    bestScore.style.display = 'block';
+    
+    requestAnimationFrame(gameLoop);
+  };
+  
+  // =========================================
+  // THREE.JS SCENE SETUP
+  // =========================================
+  
+  let scene = null;
+  let camera = null;
+  let renderer = null;
+  
+  let groundMesh = null;
+  let skyBox = null;
+  
+  let playerObject = null;
+  let jumpMarker = null;
+  
+  let trackSegments = [];
+  let trackGeometry = null;
+  
+  let obstacleInstancedMesh = null;
+  let obstacleData = [];
+  const MAX_OBSTACLES = 200;
+  
+  let shardInstancedMesh = null;
+  let shardData = [];
+  const MAX_SHARDS = 200;
+  
+  let particleSystems = [];
+  const MAX_PARTICLES = 500;
+  
+  let gameState = 'title';
+  let score = 0;
+  let bestScoreVal = 0;
+  let multiplier = 1;
+  let combo = 0;
+  let speed = CONFIG.SPEED_START;
+  let totalDistance = 0;
+  
+  let lastTime = 0;
+  let lastUpdate = 0;
+  let accumulator = 0;
+  const dt = 1 / 120;
+  
+  let cameraTarget = new THREE.Vector3(0, 0, 0);
+  let cameraOffset = new THREE.Vector3(0, 0, 0);
+  let motionTime = 0;
+  let shakeIntensity = 0;
+  let hitStopRemaining = 0;
+  let reducedMotion = false;
+  
+  let laneRoll = 0;
+  let laneRollTarget = 0;
+  
+  let fov = CONFIG.FOV_START;
+  
+  // Initialize Three.js
+  const initThree = () => {
+    const container = document.getElementById('game-container');
+    
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0f);
+    scene.fog = new THREE.Fog(0x0a0a0f, 100, 300);
+    
+    // Camera
+    camera = new THREE.PerspectiveCamera(
+      CONFIG.FOV_START,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.set(0, 8, 12);
+    camera.lookAt(0, 0, 0);
+    
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+    
+    // ============= SKYBOX =============
+    const skyGeometry = new THREE.SphereGeometry(100, 32, 32);
+    skyGeometry.scale(-1, 1, 1);
+    const skyMaterial = new THREE.MeshBasicMaterial({
+      color: 0x0a0a0f,
+      side: THREE.BackSide
+    });
+    skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
+    scene.add(skyBox);
+    
+    // ============= GROUND =============
+    const groundGeo = new THREE.PlaneGeometry(200, 200);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1a24,
+      roughness: 0.8,
+      metalness: 0.2
+    });
+    groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+    
+    // Grid lines on ground
+    const gridHelper = new THREE.GridHelper(50, 50, 0x001f3f, 0x001f3f);
+    gridHelper.position.y = CONFIG.GROUND_Y;
+    scene.add(gridHelper);
+    
+    // ============= PLAYER =============
+    const playerGeo = new THREE.IcosahedronGeometry(CONFIG.PLAYER_RADIUS, 1);
+    const playerMat = new THREE.MeshStandardMaterial({
+      color: 0x00f5d4,
+      emissive: 0x004444,
+      emissiveIntensity: CONFIG.EMISSIVE_INTENSITY,
+      roughness: 0.3,
+      metalness: 0.1
+    });
+    playerObject = new THREE.Mesh(playerGeo, playerMat);
+    playerObject.position.set(lanePositions[CONFIG.START_LANE], CONFIG.GROUND_Y, 0);
+    playerObject.castShadow = true;
+    playerObject.receiveShadow = true;
+    scene.add(playerObject);
+    
+    // Jump marker
+    const markerGeo = new THREE.PlaneGeometry(2, 2);
+    const markerMat = new THREE.MeshBasicMaterial({
+      color: 0x00f5d4,
+      transparent: true,
+      opacity: 0.5,
+      depthTest: false
+    });
+    jumpMarker = new THREE.Mesh(markerGeo, markerMat);
+    jumpMarker.position.set(lanePositions[currentLane], CONFIG.GROUND_Y + 0.1, 0);
+    jumpMarker.visible = false;
+    scene.add(jumpMarker);
+    
+    // ============= TRACK GENERATION =============
+    trackGeometry = new THREE.BufferGeometry();
+    
+    for (let i = 0; i < CONFIG.MIN_SEGMENTS; i++) {
+      addTrackSegment(i * CONFIG.SEGMENT_LENGTH);
+    }
+    
+    // ============= OBSTACLES =============
+    const obstacleCount = MAX_OBSTACLES;
+    const obstaclePositions = new Float32Array(obstacleCount * 3);
+    const obstacleScales = new Float32Array(obstacleCount);
+    const obstacleColors = new Float32Array(obstacleCount * 3);
+    
+    obstacleInstancedMesh = new THREE.InstancedMesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshStandardMaterial({
+        color: 0xff0000,
+        emissive: 0x220000,
+        emissiveIntensity: 0.5
+      }),
+      obstacleCount
+    );
+    obstacleInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    scene.add(obstacleInstancedMesh);
+    
+    for (let i = 0; i < obstacleCount; i++) {
+      obstacleData.push({ type: 0, active: false, passed: false });
+    }
+    
+    // ============= SHARDS =============
+    const shardCount = MAX_SHARDS;
+    const shardPositions = new Float32Array(shardCount * 3);
+    const shardColors = new Float32Array(shardCount * 3);
+    const shardScales = new Float32Array(shardCount);
+    
+    shardInstancedMesh = new THREE.InstancedMesh(
+      new THREE.OctahedronGeometry(0.3),
+      new THREE.MeshStandardMaterial({
+        color: 0x00f5d4,
+        emissive: 0x004444,
+        emissiveIntensity: CONFIG.EMISSIVE_INTENSITY
+      }),
+      shardCount
+    );
+    shardInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    scene.add(shardInstancedMesh);
+    
+    for (let i = 0; i < shardCount; i++) {
+      shardData.push({ active: false, collected: false });
+    }
+    
+    // ============= PARTICLES =============
+    for (let i = 0; i < 5; i++) {
+      const particles = {
+        positions: new Float32Array(MAX_PARTICLES * 3),
+        colors: new Float32Array(MAX_PARTICLES * 3),
+        scales: new Float32Array(MAX_PARTICLES),
+        active: new Uint8Array(MAX_PARTICLES),
+        count: 0,
+        type: 'none',
+        instancedMesh: new THREE.InstancedMesh(
+          new THREE.SphereGeometry(0.1, 4, 4),
+          new THREE.MeshBasicMaterial({
+            transparent: true,
+            opacity: 1
+          }),
+          MAX_PARTICLES
+        )
+      };
+      particleSystems.push(particles);
+      scene.add(particles.instancedMesh);
+    }
+    
+    // ============= LIGHTS =============
+    const ambientLight = new THREE.AmbientLight(0x222233, 0.5);
+    scene.add(ambientLight);
+    
+    const topLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    topLight.position.set(10, 10, 5);
+    topLight.castShadow = true;
+    scene.add(topLight);
+    
+    const playerLight = new THREE.PointLight(0x00f5d4, 0.5, 10);
+    playerObject.add(playerLight);
+    
+    // ============= REDUCED MOTION DETECTION =============
+    const reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotion = reducedMotionMedia.matches;
+    if (reducedMotion) {
+      document.getElementById('reduced-motion-banner').style.display = 'block';
+    }
+    reducedMotionMedia.addEventListener('change', (e) => {
+      reducedMotion = e.matches;
+      if (reducedMotion) {
+        document.getElementById('reduced-motion-banner').style.display = 'block';
+      }
+    });
+    
+    // ============= RESIZE HANDLER =============
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    console.log('Three.js initialized successfully');
+  };
+  
+  // =========================================
+  // TRACK SEGMENT GENERATION
+  // =========================================
+  
+  let totalGeneratedDistance = 0;
+  
+  const addTrackSegment = (zPosition) => {
+    const segmentData = {
+      z: zPosition,
+      curvature: (Math.random() - 0.5) * CONFIG.CURVATURE_RANGE[1] * 2,
+      obstacles: [],
+      shards: []
+    };
+    
+    generateSegmentGrid(segmentData);
+    spawnSegmentObstacles(segmentData);
+    spawnSegmentShards(segmentData);
+    
+    trackSegments.push(segmentData);
+    totalGeneratedDistance = Math.max(totalGeneratedDistance, zPosition + CONFIG.SEGMENT_LENGTH);
+    
+    return segmentData;
+  };
+  
+  const generateSegmentGrid = (segment) => {
+    const gridSpacing = 2;
+    const gridCount = Math.floor(CONFIG.LANE_WIDTH * 2 / gridSpacing) + 1;
+    
+    for (let i = 0; i < gridCount; i++) {
+      for (let j = 0; j < gridCount; j++) {
+        const posX = (i - gridCount / 2) * gridSpacing;
+        const posZ = segment.z;
+        
+        const lineMat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setHSL(0.55 + Math.random() * 0.1, 0.1, 0.9),
+          transparent: true,
+          opacity: 0.3
+        });
+        
+        const lineGeo = new THREE.PlaneGeometry(gridSpacing * 0.9, 0.1);
+        const lineMesh = new THREE.Mesh(lineGeo, lineMat);
+        lineMesh.position.set(posX, CONFIG.GROUND_Y, posZ);
+        lineMesh.rotation.z = segment.curvature * 0.1;
+        scene.add(lineMesh);
+        
+        const accentMat = new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setHSL(0.85, 0.5, 0.7),
+          transparent: true,
+          opacity: 0.5
+        });
+        const accentGeo = new THREE.PlaneGeometry(0.1, gridSpacing * 0.8);
+        const accentMesh = new THREE.Mesh(accentGeo, accentMat);
+        accentMesh.position.set(posX, CONFIG.GROUND_Y + 0.02, posZ);
+        accentMesh.rotation.z = segment.curvature * 0.1;
+        scene.add(accentMesh);
+      }
+    }
+  };
+  
+  const spawnSegmentObstacles = (segment) => {
+    const lanePositions = [-CONFIG.LANE_WIDTH, 0, CONFIG.LANE_WIDTH];
+    const numObstacles = Math.floor(Math.random() * 3) + 1;
+    
+    for (let i = 0; i < numObstacles; i++) {
+      const laneIdx = Math.floor(Math.random() * lanePositions.length);
+      const lane = lanePositions[laneIdx];
+      
+      const obstacleType = Math.floor(Math.random() * CONFIG.OBSTACLE_TYPES);
+      const height = 1 + Math.random() * 2;
+      const depth = 1 + Math.random() * 1;
+      
+      segment.obstacles.push({
+        lane: laneIdx,
+        x: lane,
+        type: obstacleType,
+        height: height,
+        depth: depth,
+        active: true,
+        passed: false
+      });
+    }
+  };
+  
+  const spawnSegmentShards = (segment) => {
+    const numShards = Math.floor(Math.random() * 4) + 1;
+    
+    for (let i = 0; i < numShards; i++) {
+      const laneIdx = Math.floor(Math.random() * lanePositions.length);
+      const lane = lanePositions[laneIdx];
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 3 + Math.random() * 5;
+      
+      const x = lane + Math.cos(angle) * 0.5;
+      const z = segment.z + Math.sin(angle) * 2 + 10;
+      
+      segment.shards.push({
+        x: x,
+        y: CONFIG.GROUND_Y + 0.5,
+        z: z,
+        lane: laneIdx,
+        collected: false,
+        pointValue: Math.floor(Math.random() * 20) + 10
+      });
+    }
+  };
+  
+  // =========================================
+  // OBSTACLE POOLING & RECYCLING
+  // =========================================
+  
+  let nextSegmentIndex = CONFIG.MIN_SEGMENTS;
+  
+  const recycleSegments = () => {
+    const playerZ = playerObject.position.z;
+    
+    const segmentsToKeep = [];
+    for (const seg of trackSegments) {
+      if (seg.z + CONFIG.SEGMENT_LENGTH > playerZ - 20) {
+        segmentsToKeep.push(seg);
+      }
+    }
+    
+    while (trackSegments.length > segmentsToKeep.length) {
+      const oldSeg = trackSegments.shift();
+    }
+    
+    while (trackSegments.length < 10 && nextSegmentIndex < 50) {
+      const newZ = nextSegmentIndex * CONFIG.SEGMENT_LENGTH;
+      addTrackSegment(newZ);
+      nextSegmentIndex++;
+    }
+  };
+  
+  // =========================================
+  // COLLISION DETECTION
+  // =========================================
+  
+  const checkCollision = () => {
+    const playerPos = playerObject.position;
+    
+    for (const seg of trackSegments) {
+      for (const obs of seg.obstacles) {
+        if (!obs.active) continue;
+        
+        const playerLane = Math.round((playerPos.x - lanePositions[0]) / CONFIG.LANE_WIDTH);
+        const clampedLane = Math.max(0, Math.min(CONFIG.LANE_COUNT - 1, playerLane));
+        
+        if (clampedLane === obs.lane) {
+          const zDiff = Math.abs(playerPos.z - obs.z);
+          if (zDiff < CONFIG.SEGMENT_LENGTH + obs.depth) {
+            if (Math.abs(playerPos.x - obs.x) < CONFIG.LANE_WIDTH * 0.6) {
+              return { hit: true, obstacle: obs, segment: seg };
+            }
+          }
+        }
+      }
+    }
+    
+    return { hit: false };
+  };
+  
+  const checkShardCollection = () => {
+    const playerPos = playerObject.position;
+    
+    for (const seg of trackSegments) {
+      for (const shard of seg.shards) {
+        if (shard.collected) continue;
+        
+        const dist = Math.sqrt(
+          Math.pow(playerPos.x - shard.x, 2) +
+          Math.pow(playerPos.z - shard.z, 2)
+        );
+        
+        if (dist < 3.0) {
+          shard.collected = true;
+          score += shard.pointValue * multiplier;
+          updateScore();
+          
+          combo++;
+          multiplier = Math.min(5, 1 + Math.floor(combo / 5));
+          
+          if (!muted && audioContext) {
+            const freq = 440 * Math.pow(1.1, combo);
+            playOscillator(freq, 0.1, 'sine', { attack: 0, hold: 0.02, decay: 0.05, sustain: 0.5 });
+          }
+          
+          spawnPickupParticles(shard.x, shard.y, shard.z);
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  };
+  
+  // =========================================
+  // PARTICLE SYSTEMS
+  // =========================================
+  
+  const spawnPickupParticles = (x, y, z) => {
+    const sys = particleSystems.find(s => s.type === 'shard' && s.count < MAX_PARTICLES);
+    if (!sys) return;
+    
+    sys.type = 'shard';
+    sys.count = 0;
+    
+    for (let i = 0; i < CONFIG.PARTICLE_COUNT_SHARD; i++) {
+      const idx = sys.count++;
+      const angle = Math.random() * Math.PI * 2;
+      const vel = 2 + Math.random() * 2;
+      
+      sys.positions[idx * 3] = x + Math.cos(angle) * vel;
+      sys.positions[idx * 3 + 1] = y + Math.random() * 2;
+      sys.positions[idx * 3 + 2] = z + Math.sin(angle) * vel;
+      
+      const hue = 0.55 + Math.random() * 0.1;
+      const c = new THREE.Color().setHSL(hue, 0.8, 0.6);
+      sys.colors[idx * 3] = c.r;
+      sys.colors[idx * 3 + 1] = c.g;
+      sys.colors[idx * 3 + 2] = c.b;
+      
+      sys.scales[idx] = 0.1 + Math.random() * 0.2;
+    }
+    
+    sys.instancedMesh.instanceCount = CONFIG.PARTICLE_COUNT_SHARD;
+    sys.instancedMesh.needsUpdate = true;
+  };
+  
+  const spawnDeathParticles = (x, y, z) => {
+    const sys = particleSystems.find(s => s.active[0] === 0 && s.type === 'none');
+    if (!sys) return;
+    
+    sys.type = 'death';
+    sys.count = 0;
+    
+    for (let i = 0; i < CONFIG.PARTICLE_COUNT_DEATH; i++) {
+      const idx = sys.count++;
+      const angle = Math.random() * Math.PI * 2;
+      const vel = 3 + Math.random() * 3;
+      
+      sys.positions[idx * 3] = x + Math.cos(angle) * vel;
+      sys.positions[idx * 3 + 1] = y + Math.random() * 3;
+      sys.positions[idx * 3 + 2] = z + Math.sin(angle) * vel;
+      
+      const hue = 0.9 + Math.random() * 0.1;
+      const c = new THREE.Color().setHSL(hue, 0.5, 0.5);
+      sys.colors[idx * 3] = c.r;
+      sys.colors[idx * 3 + 1] = c.g;
+      sys.colors[idx * 3 + 2] = c.b;
+      
+      sys.scales[idx] = 0.5 + Math.random() * 1.0;
+    }
+    
+    sys.instancedMesh.instanceCount = CONFIG.PARTICLE_COUNT_DEATH;
+    sys.instancedMesh.needsUpdate = true;
+  };
+  
+  // =========================================
+  // AUDIO: DRONE BED
+  // =========================================
+  
+  let droneTimeout = null;
+  
+  const startDrone = () => {
+    if (!audioContext || muted) return;
+    
+    const startDroneNote = (baseFreq, duration) => {
+      const now = audioContext.currentTime;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = baseFreq;
+      
+      gain.gain.value = 0;
+      gain.gain.setTargetAtTime(0.1, now, 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.start(now);
+      osc.stop(now + duration);
+    };
+    
+    droneTimeout = setInterval(() => {
+      const now = audioContext.currentTime;
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          startDroneNote(CONFIG.DRONE_FREQ + i * 20, 0.5);
+        }, i * 50);
+      }
+    }, 200);
+  };
+  
+  const stopDrone = () => {
+    if (droneTimeout) {
+      clearInterval(droneTimeout);
+      droneTimeout = null;
+    }
+    if (audioContext) {
+      audioContext.suspend?.();
+    }
+  };
+  
+  // =========================================
+  // INPUT LISTENERS
+  // =========================================
+  
+  document.addEventListener('keydown', handleKeyDown);
+  document.addEventListener('keyup', handleKeyUp);
+  
+  let touchStartY = 0;
+  let touchStartX = 0;
+  
+  const handleTouchStart = (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  };
+  
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+  };
+  
+  const handleTouchEnd = (e) => {
+    if (gameState === 'title' || gameState === 'dead') {
+      startGame();
+      return;
+    }
+    if (gameState === 'paused') {
+      togglePause();
+      return;
+    }
+    
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    const deltaY = e.changedTouches[0].clientY - touchStartY;
+    
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 30) switchLane(1);
+      else if (deltaX < -30) switchLane(-1);
+    } else {
+      if (deltaY > 30 && !isJumping) startJump();
+      else if (deltaY < -30) startSlide();
+    }
+  };
+  
+  document.addEventListener('touchstart', handleTouchStart, { passive: false });
+  document.addEventListener('touchmove', handleTouchMove, { passive: false });
+  document.addEventListener('touchend', handleTouchEnd);
+  
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isPaused) togglePause();
+  });
+  
+  const volumeControl = document.getElementById('volume-slider');
+  if (volumeControl) {
+    volumeControl.addEventListener('input', (e) => {
+      volume = parseFloat(e.target.value);
+      if (gainNode) gainNode.gain.value = volume;
+    });
+  }
+  
+  let muteButton = null;
+  const initMuteButton = () => {
+    if (!muteButton) {
+      muteButton = document.createElement('div');
+      muteButton.id = 'mute-button';
+      muteButton.innerHTML = muted ? '🔊' : '🔇';
+      muteButton.style.cssText = `
+        position: absolute; top: 2rem; right: 2rem;
+        width: 2rem; height: 2rem; background: var(--bg);
+        border: 1px solid var(--muted); color: var(--fg);
+        border-radius: 50%; font-size: 1rem; text-align: center;
+        cursor: pointer; line-height: 1.5;
+      `;
+      muteButton.addEventListener('click', () => {
+        muted = toggleMute();
+        muteButton.textContent = muted ? '🔇' : '🔊';
+      });
+      document.body.appendChild(muteButton);
+    }
+  };
+  
+  // =========================================
+  // GAME STATE & SCORE UI
+  // =========================================
+  
+  const scorePanel = document.getElementById('score-panel');
+  const bestScoreEl = document.getElementById('best-value');
+  const scoreValueEl = document.getElementById('score-value');
+  
+  const updateScore = () => {
+    scoreValueEl.textContent = Math.floor(score);
+  };
+  
+  const updateBestScore = () => {
+    if (score > bestScoreVal) {
+      bestScoreVal = score;
+      localStorage.setItem('prismRunnerBestScore', bestScoreVal);
+      if (bestScoreEl) bestScoreEl.textContent = bestScoreVal;
+    }
+  };
+  
+  const loadBestScore = () => {
+    const saved = localStorage.getItem('prismRunnerBestScore');
+    if (saved !== null) {
+      bestScoreVal = parseInt(saved, 10);
+      if (bestScoreEl) bestScoreEl.textContent = bestScoreVal;
+    }
+  };
+  
+  // =========================================
+  // HIT STOP & SCREEN SHAKE
+  // =========================================
+  
+  const startHitStop = () => {
+    hitStopRemaining = CONFIG.HIT_STOP_MS / 1000;
+  };
+  
+  const updateHitStop = (dt) => {
+    if (hitStopRemaining > 0) {
+      hitStopRemaining -= dt;
+      if (hitStopRemaining <= 0) hitStopRemaining = 0;
+    }
+  };
+  
+  const updateScreenShake = () => {
+    if (shakeIntensity > 0 && !reducedMotion) {
+      const offset = shakeIntensity * Math.random() * 0.1;
+      camera.position.x += (Math.random() - 0.5) * offset;
+      camera.position.y += (Math.random() - 0.5) * offset;
+      camera.position.z += (Math.random() - 0.5) * offset;
+      shakeIntensity -= CONFIG.SHAKE_DECAY * dt;
+      if (shakeIntensity < 0) shakeIntensity = 0;
+    }
+  };
+  
+  // =========================================
+  // LANE ROLL ANIMATION
+  // =========================================
+  
+  const updateLaneRoll = (dt) => {
+    laneRollTarget = currentLane === 0 ? -15 : currentLane === 2 ? 15 : 0;
+    laneRoll += (laneRollTarget - laneRoll) * 5 * dt;
+    playerObject.rotation.z = THREE.MathUtils.lerp(0, laneRoll * Math.PI / 180, 0.5);
+  };
+  
+  // =========================================
+  // FOV PUNCH
+  // =========================================
+  
+  const updateFOV = (dt) => {
+    const targetFOV = CONFIG.FOV_START + (CONFIG.FOV_MAX - CONFIG.FOV_START) * Math.min(speed / CONFIG.SPEED_MAX, 1);
+    fov += (targetFOV - fov) * 3 * dt;
+    camera.fov = Math.max(CONFIG.FOV_START, Math.min(CONFIG.FOV_MAX, fov));
+    camera.updateProjectionMatrix();
+  };
+  
+  // =========================================
+  // MAIN GAME LOOP - Fixed timestep
+  // =========================================
+  
+  const gameLoop = (time) => {
+    if (!lastTime) {
+      lastTime = time;
+      lastUpdate = time;
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+    
+    const delta = (time - lastTime) / 1000;
+    lastTime = time;
+    
+    const clampedDelta = Math.min(delta, 0.1);
+    accumulator += clampedDelta;
+    
+    processInput();
+    
+    updateHitStop(clampedDelta);
+    updateScreenShake();
+    
+    while (accumulator >= dt) {
+      if (isJumping && gameState === 'playing' && !isPaused) {
+        jumpVel -= CONFIG.GRAVITY * dt;
+        if (jumpVel < -CONFIG.JUMP_TERMINAL) jumpVel = -CONFIG.JUMP_TERMINAL;
+        playerObject.position.y += jumpVel * dt;
+        
+        if (playerObject.position.y <= CONFIG.GROUND_Y) {
+          playerObject.position.y = CONFIG.GROUND_Y;
+          isJumping = false;
+          jumpVel = 0;
+          jumpMarker.visible = false;
+        }
+      }
+      
+      updateHitStop(dt);
+      updateLaneRoll(dt);
+      accumulator -= dt;
+    }
+    
+    const alpha = accumulator / dt;
+    
+    motionTime += clampedDelta;
+    
+    cameraTarget.x = lanePositions[currentLane];
+    cameraTarget.y = 8 + speed * 0.01;
+    cameraTarget.z = playerObject.position.z + 15;
+    
+    cameraOffset.lerpVectors(
+      new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z),
+      new THREE.Vector3(cameraTarget.x, cameraTarget.y, cameraTarget.z),
+      5 * clampedDelta
+    );
+    camera.position.copy(cameraOffset);
+    
+    camera.rotation.z = laneRoll * 0.2;
+    
+    updateFOV(clampedDelta);
+    
+    if (hitStopRemaining <= 0) {
+      updateScreenShake();
+    }
+    
+    recycleSegments();
+    
+    if (gameState === 'playing' && !isPaused) {
+      const collision = checkCollision();
+      if (collision.hit && !isGameOver) {
+        isGameOver = true;
+        handleCollision();
+      }
+      
+      checkShardCollection();
+    }
+    
+    if (gameState === 'playing' && !isPaused) {
+      totalDistance += speed * clampedDelta;
+      
+      if (totalDistance % CONFIG.SPEED_INCREMENT_DISTANCE < speed * clampedDelta) {
+        speed = Math.min(CONFIG.SPEED_MAX, speed + CONFIG.SPEED_ACCEL);
+      }
+    }
+    
+    renderer.render(scene, camera);
+    
+    updateParticles(clampedDelta);
+    
+    requestAnimationFrame(gameLoop);
+  };
+  
+  const updateParticles = (dt) => {
+    for (const sys of particleSystems) {
+      if (sys.type === 'none' || sys.count === 0) continue;
+      
+      if (sys.type === 'death') {
+        for (let i = 0; i < sys.count; i++) {
+          sys.scales[i] -= dt * 3;
+          if (sys.scales[i] <= 0) sys.active[i] = 0;
+        }
+        if (sys.active.every(a => a === 0)) sys.type = 'none';
+      }
+      
+      if (sys.type === 'shard') {
+        for (let i = 0; i < sys.count; i++) {
+          sys.positions[idx * 3 + 1] += dt * 2;
+          sys.scales[i] -= dt * 1.5;
+          age += dt;
+          if (sys.scales[i] <= 0.05) sys.active[i] = 0;
+        }
+        if (sys.active.every(a => a === 0)) sys.type = 'none';
+      }
+    }
+    
+    particleSystems.forEach((sys, si) => {
+      if (sys.type !== 'none' && sys.count > 0) {
+        const matrix = new THREE.Matrix4();
+        for (let i = 0; i < sys.count; i++) {
+          if (sys.active[i]) {
+            matrix.makeTranslation(sys.positions[i * 3], sys.positions[i * 3 + 1], sys.positions[i * 3 + 2]);
+            matrix.scale(sys.scales[i], sys.scales[i], sys.scales[i]);
+            sys.instancedMesh.setMatrixAt(i, matrix);
+          }
+        }
+        sys.instancedMesh.instanceCount = sys.count;
+        sys.instancedMesh.needsUpdate = true;
+      }
+    });
+  };
+  
+  // =========================================
+  // COLLISION HANDLER
+  // =========================================
+  
+  const handleCollision = () => {
+    shakeIntensity = CONFIG.SHAKE_INTENSITY;
+    startHitStop();
+    
+    const playerPos = playerObject.position;
+    spawnDeathParticles(playerPos.x, playerPos.y, playerPos.z);
+    
+    if (!muted && audioContext) {
+      playNoise(100, 0.3, 'white');
+      playOscillator(200, 0.5, 'sine', { attack: 0, hold: 0.01, decay: 0.2, sustain: 0.1 });
+    }
+    
+    gameState = 'dead';
+    setTimeout(() => {
+      document.getElementById('game-over-screen')?.remove();
+      const goScreen = document.createElement('div');
+      goScreen.id = 'game-over-screen';
+      goScreen.innerHTML = `
+        <h2>GAME OVER</h2>
+        <p>Final Score: ${Math.floor(score)}</p>
+        <button class="game-over-key" id="restart-key">R: Restart</button>
+        <button class="game-over-key">Esc: Menu</button>
+      `;
+      document.body.appendChild(goScreen);
+    }, 200);
+    
+    stopDrone();
+    updateBestScore();
+  };
+  
+  // =========================================
+  // RESET TRACK FUNCTION
+  // =========================================
+  
+  const resetTrack = () => {
+    trackSegments = [];
+    totalGeneratedDistance = 0;
+    nextSegmentIndex = CONFIG.MIN_SEGMENTS;
+    
+    trackSegments = [];
+    for (let i = 0; i < CONFIG.MIN_SEGMENTS; i++) {
+      addTrackSegment(i * CONFIG.SEGMENT_LENGTH);
+    }
+  };
+  
+  // =========================================
+  // CLEAR OBSTACLES & SHARDS
+  // =========================================
+  
+  const clearObstacles = () => {
+    for (let i = 0; i < obstacleData.length; i++) {
+      obstacleData[i].active = false;
+    }
+    if (obstacleInstancedMesh) {
+      obstacleInstancedMesh.instanceCount = 0;
+      obstacleInstancedMesh.needsUpdate = true;
+    }
+  };
+  
+  const clearShards = () => {
+    for (let i = 0; i < shardData.length; i++) {
+      shardData[i].active = false;
+      shardData[i].collected = false;
+    }
+    if (shardInstancedMesh) {
+      shardInstancedMesh.instanceCount = 0;
+      shardInstancedMesh.needsUpdate = true;
+    }
+  };
+  
+  // =========================================
+  // INITIALIZATION
+  // =========================================
+  
+  const init = () => {
+    initAudio();
+    loadBestScore();
+    initThree();
+    
+    const startDroneOnGesture = () => {
+      if (audioContext && !muted) {
+        startDrone();
+      }
+      document.removeEventListener('keydown', startDroneOnGesture);
+      document.removeEventListener('touchstart', startDroneOnGesture);
+    };
+    
+    document.addEventListener('keydown', startDroneOnGesture);
+    document.addEventListener('touchstart', startDroneOnGesture);
+    
+    updateBestScore();
+    titleScreen.style.display = 'block';
+    scorePanel.style.display = 'none';
+    bestScore.style.display = 'none';
+    
+    console.log('PRISM RUNNER initialized');
+  };
+  
+  // =========================================
+  // START
+  // =========================================
+  
+  init();
+  
+  // =========================================
+  // DEBUG EXPORTS
+  // =========================================
+  
+  window.prismRunner = {
+    restart: restartGame,
+    togglePause,
+    getScore: () => score
+  };
+  </script>
+</body>
+</html>

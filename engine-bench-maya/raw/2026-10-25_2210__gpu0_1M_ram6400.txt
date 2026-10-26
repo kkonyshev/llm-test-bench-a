@@ -1,0 +1,17 @@
+Project Maya v1.1.28 benchmark, 2026-10-25 22:10
+GPUs: NVIDIA GeForce RTX 5090 32 GB, NVIDIA GeForce RTX 5070 Ti 16 GB; RAM 123 GB; CPU AMD Ryzen 7 9800X3D 8-Core Processor
+setup: maya-ds4.json, context 1048576, GPUs [0]
+decode (writing the answer): mean 20.7 tokens/s over 3 answers of 256 tokens (greedy, thinking off)
+    20.5 tokens/s  Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring.
+    21.1 tokens/s  Explain how photosynthesis works, step by step, for a high-school student.
+    20.6 tokens/s  Write a complete HTML page with a canvas that draws a bouncing ball animation in JavaScript.
+prefill (reading the prompt): 266 tokens/s, 2048 tokens
+prefill (reading the prompt): 853 tokens/s, 8192 tokens
+
+engine lines:
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): on (Linux, NVIDIA, one GPU)
+ds4: the experts VRAM leaves over (~149.0 GB) are read in place from the model's files (copied into RAM after the GPUs' share when the RAM holds them all; --mmap-experts on keeps them in place) (121.9 GB of RAM free to keep them: the most-routed 113.3 GB read ahead; prompts in chunks of 32768)
+ds4: CUDA0 layers [0, 39] + head: weights 8.46 GB, experts 20.03 GB (681 of 15360 in VRAM), caches 0.97 GB, 571 MiB free
+ds4: 14679 routed experts on the CPU lane (161.6 GB, in place in the model's files), 8 threads
+ds4: CUDA0 prompt attention on the tensor cores (sm_120)
+ds4: CUDA0 busy experts (64 rows or more) as FP16 GEMMs, 1024 rows a piece, FFN up to 2304 (77 MB)

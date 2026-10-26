@@ -1,0 +1,1071 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism Runner</title>
+    <meta name="description" content="Endless runner in a dark neon void">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+            touch-action: none;
+        }
+        #game-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+        #title-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            pointer-events: all;
+        }
+        #title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #0ff;
+        }
+        #start-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #0ff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        #best-score {
+            font-size: 16px;
+            color: #888;
+        }
+        #controls-help {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            font-size: 12px;
+            color: #888;
+            max-width: 300px;
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="ui">
+        <div id="score">0</div>
+        <div id="multiplier">×1</div>
+    </div>
+    <div id="controls">
+        ← →: Lane | ↑: Jump | ↓: Slide | P: Pause
+    </div>
+    <div id="title-screen">
+        <div id="title">PRISM RUNNER</div>
+        <button id="start-btn">START</button>
+        <div id="best-score">Best: 0</div>
+        <div id="controls-help">
+            Touch: Swipe to move, Tap to jump<br>
+            P/Esc: Pause | R: Restart | M: Mute
+        </div>
+    </div>
+    <script type="module">
+import * as THREE from "three";
+        // ============================================================================
+        // PRISM RUNNER - Self-contained WebGL game
+        // ============================================================================
+
+        // TUNING CONSTANTS
+        const GAME = {
+            SPEED_START: 0.5,
+            SPEED_MAX: 2.0,
+            SPEED_ACCEL: 0.0002,
+            LANE_WIDTH: 2.0,
+            LANE_COUNT: 3,
+            SEGMENT_LENGTH: 20,
+            SPAWN_AHEAD: 10,
+            GRAVITY: 0.002,
+            JUMP_V: 0.15,
+            JUMP_DURATION: 0.5,
+            SLIDE_DURATION: 0.4,
+            SHARD_SCALE: 0.3,
+            OBSTACLE_SCALE: 1.0,
+            MIN_REACTION_TIME: 0.9,
+            EASY_DURATION: 15
+        };
+
+        // Game states
+        const STATES = {
+            TITLE: 0,
+            PLAYING: 1,
+            PAUSED: 2,
+            DEAD: 3
+        };
+
+        // ============================================================================
+        // MAIN GAME CLASS
+        // ============================================================================
+        class PrismRunner {
+            constructor() {
+                this.state = STATES.TITLE;
+                this.score = 0;
+                this.distance = 0;
+                this.shardsCollected = 0;
+                this.comboMultiplier = 1;
+                this.maxCombo = 1;
+                this.speed = GAME.SPEED_START;
+                this.lane = 1;
+                this.targetLane = 1;
+                this.jumping = false;
+                this.jumpTime = 0;
+                this.sliding = false;
+                this.slideTime = 0;
+                this.lastObstacleTime = 0;
+                this.easyMode = true;
+                this.muted = false;
+                this.bestScore = 0;
+                this.lastTouch = null;
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+
+                // Initialize Three.js
+                this.initThree();
+                this.initAudio();
+                this.initInput();
+                this.initUI();
+                this.loadBestScore();
+
+                // Create game objects
+                this.createPlayer();
+                this.createTrack();
+                this.createObstacles();
+                this.createShards();
+
+                // Animation loop
+                this.lastTime = 0;
+                this.requestId = null;
+                this.animate();
+            }
+
+            initThree() {
+                this.container = document.getElementById('game-container');
+                this.width = this.container.clientWidth;
+                this.height = this.container.clientHeight;
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setSize(this.width, this.height);
+                this.renderer.setClearColor(0x000000, 1);
+                this.container.appendChild(this.renderer.domElement);
+
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000);
+                this.camera.position.z = 10;
+                this.camera.position.y = 2;
+
+                // Add lights
+                this.ambientLight = new THREE.AmbientLight(0x111111);
+                this.scene.add(this.ambientLight);
+
+                this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                this.directionalLight.position.set(1, 1, 1);
+                this.scene.add(this.directionalLight);
+
+                // Fog for depth
+                this.scene.fog = new THREE.Fog(0x000000, 20, 50);
+
+                // Handle resize
+                window.addEventListener('resize', this.onResize.bind(this));
+            }
+
+            initAudio() {
+                this.audioContext = null;
+                this.jumpSound = null;
+                this.laneSound = null;
+                this.shardSound = null;
+                this.crashSound = null;
+                this.music = null;
+            }
+
+            initInput() {
+                // Keyboard
+                document.addEventListener('keydown', this.onKeyDown.bind(this));
+                document.addEventListener('keyup', this.onKeyUp.bind(this));
+
+                // Touch
+                this.container.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
+                this.container.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+                this.container.addEventListener('touchend', this.onTouchEnd.bind(this));
+
+                // Gamepad (optional)
+                window.addEventListener('gamepadconnected', this.onGamepadConnected.bind(this));
+            }
+
+            initUI() {
+                this.scoreElement = document.getElementById('score');
+                this.multiplierElement = document.getElementById('multiplier');
+                this.titleScreen = document.getElementById('title-screen');
+                this.startBtn = document.getElementById('start-btn');
+                this.bestScoreElement = document.getElementById('best-score');
+
+                this.startBtn.addEventListener('click', this.startGame.bind(this));
+            }
+
+            loadBestScore() {
+                try {
+                    const saved = localStorage.getItem('prism-runner-best');
+                    this.bestScore = saved ? parseInt(saved) : 0;
+                    this.bestScoreElement.textContent = `Best: ${this.bestScore}`;
+                } catch (e) {
+                    console.warn('LocalStorage not available');
+                }
+            }
+
+            saveBestScore() {
+                try {
+                    if (this.score > this.bestScore) {
+                        this.bestScore = this.score;
+                        localStorage.setItem('prism-runner-best', this.bestScore.toString());
+                        this.bestScoreElement.textContent = `Best: ${this.bestScore}`;
+                    }
+                } catch (e) {
+                    console.warn('LocalStorage not available');
+                }
+            }
+
+            createPlayer() {
+                // Player geometry (icosahedron)
+                this.playerGeometry = new THREE.IcosahedronGeometry(0.5, 4);
+                this.playerMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x00ffff,
+                    emissive: 0x00ffff,
+                    emissiveIntensity: 0.8,
+                    shininess: 30
+                });
+                this.player = new THREE.Mesh(this.playerGeometry, this.playerMaterial);
+                this.player.position.y = 0.5;
+                this.scene.add(this.player);
+
+                // Hoverboard
+                this.hoverboardGeometry = new THREE.BoxGeometry(1.2, 0.2, 0.8);
+                this.hoverboardMaterial = new THREE.MeshPhongMaterial({
+                    color: 0x4444ff,
+                    emissive: 0x4444ff,
+                    emissiveIntensity: 0.6
+                });
+                this.hoverboard = new THREE.Mesh(this.hoverboardGeometry, this.hoverboardMaterial);
+                this.hoverboard.position.y = -0.3;
+                this.player.add(this.hoverboard);
+
+                // Player shadow
+                this.shadowGeometry = new THREE.PlaneGeometry(1.5, 0.5);
+                this.shadowMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x00ffff,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                this.shadow = new THREE.Mesh(this.shadowGeometry, this.shadowMaterial);
+                this.shadow.rotation.x = -Math.PI / 2;
+                this.scene.add(this.shadow);
+            }
+
+            createTrack() {
+                this.trackSegments = [];
+                this.segmentPool = [];
+
+                // Create initial segments
+                for (let i = 0; i < 5; i++) {
+                    this.createTrackSegment(i * GAME.SEGMENT_LENGTH);
+                }
+            }
+
+            createTrackSegment(position) {
+                const geometry = new THREE.PlaneGeometry(GAME.LANE_WIDTH * GAME.LANE_COUNT, GAME.SEGMENT_LENGTH);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x111111,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const segment = new THREE.Mesh(geometry, material);
+                segment.position.z = position;
+                segment.position.y = -0.5;
+
+                // Add grid lines
+                const gridGeometry = new THREE.BufferGeometry();
+                const gridVertices = [];
+                const gridSize = GAME.LANE_WIDTH * GAME.LANE_COUNT;
+                const gridSpacing = 1;
+
+                for (let x = -gridSize / 2; x <= gridSize / 2; x += gridSpacing) {
+                    gridVertices.push(x, 0, -GAME.SEGMENT_LENGTH / 2);
+                    gridVertices.push(x, 0, GAME.SEGMENT_LENGTH / 2);
+                    gridVertices.push(-gridSize / 2, 0, x);
+                    gridVertices.push(gridSize / 2, 0, x);
+                }
+
+                gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(gridVertices, 3));
+                const gridMaterial = new THREE.LineBasicMaterial({
+                    color: 0x00ffff,
+                    transparent: true,
+                    opacity: 0.5
+                });
+                const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
+                segment.add(grid);
+
+                this.scene.add(segment);
+                this.trackSegments.push(segment);
+                return segment;
+            }
+
+            createObstacles() {
+                this.obstacles = [];
+                this.obstaclePool = [];
+
+                // Create obstacle pool
+                for (let i = 0; i < 20; i++) {
+                    const geometry = new THREE.BoxGeometry(0.8, 1.5, 0.8);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0xff0000,
+                        emissive: 0xff0000,
+                        emissiveIntensity: 0.5
+                    });
+                    const obstacle = new THREE.Mesh(geometry, material);
+                    obstacle.visible = false;
+                    this.scene.add(obstacle);
+                    this.obstaclePool.push(obstacle);
+                }
+            }
+
+            createShards() {
+                this.shards = [];
+                this.shardPool = [];
+
+                // Create shard pool
+                for (let i = 0; i < 30; i++) {
+                    const geometry = new THREE.TetrahedronGeometry(GAME.SHARD_SCALE, 0);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0xffff00,
+                        emissive: 0xffff00,
+                        emissiveIntensity: 0.8
+                    });
+                    const shard = new THREE.Mesh(geometry, material);
+                    shard.visible = false;
+                    this.scene.add(shard);
+                    this.shardPool.push(shard);
+                }
+            }
+
+            startGame() {
+                if (this.state !== STATES.TITLE) return;
+
+                this.state = STATES.PLAYING;
+                this.titleScreen.style.display = 'none';
+                this.score = 0;
+                this.distance = 0;
+                this.shardsCollected = 0;
+                this.comboMultiplier = 1;
+                this.speed = GAME.SPEED_START;
+                this.lane = 1;
+                this.targetLane = 1;
+                this.jumping = false;
+                this.sliding = false;
+                this.easyMode = true;
+
+                // Reset player position
+                this.player.position.x = 0;
+                this.player.position.z = -5;
+                this.shadow.position.x = 0;
+                this.shadow.position.z = -5;
+
+                // Reset track
+                while (this.trackSegments.length > 0) {
+                    const segment = this.trackSegments.pop();
+                    this.scene.remove(segment);
+                }
+
+                for (let i = 0; i < 5; i++) {
+                    this.createTrackSegment(i * GAME.SEGMENT_LENGTH);
+                }
+
+                // Reset obstacles
+                this.obstacles.forEach(obstacle => {
+                    obstacle.visible = false;
+                });
+                this.obstacles = [];
+
+                // Reset shards
+                this.shards.forEach(shard => {
+                    shard.visible = false;
+                });
+                this.shards = [];
+
+                // Start audio after user gesture
+                this.initAudioContext();
+
+                // Update UI
+                this.scoreElement.textContent = '0';
+                this.multiplierElement.textContent = '×1';
+            }
+
+            initAudioContext() {
+                if (this.audioContext) return;
+
+                // Create audio context after user gesture
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Create sounds
+                this.createJumpSound();
+                this.createLaneSound();
+                this.createShardSound();
+                this.createCrashSound();
+                this.createMusic();
+
+                // Start music
+                if (!this.muted) {
+                    this.music.start();
+                }
+            }
+
+            createJumpSound() {
+                this.jumpSound = this.audioContext.createOscillator();
+                this.jumpSound.type = 'sine';
+                this.jumpSound.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                this.jumpSound.frequency.exponentialRampToValueAtTime(0.1, this.audioContext.currentTime + 0.5);
+
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.5);
+
+                this.jumpSound.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+            }
+
+            createLaneSound() {
+                this.laneSound = this.audioContext.createOscillator();
+                this.laneSound.type = 'sine';
+                this.laneSound.frequency.setValueAtTime(600, this.audioContext.currentTime);
+                this.laneSound.frequency.exponentialRampToValueAtTime(0.1, this.audioContext.currentTime + 0.3);
+
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
+
+                this.laneSound.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+            }
+
+            createShardSound() {
+                this.shardSound = this.audioContext.createOscillator();
+                this.shardSound.type = 'sine';
+
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.3);
+
+                this.shardSound.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+            }
+
+            createCrashSound() {
+                this.crashSound = this.audioContext.createOscillator();
+                this.crashSound.type = 'sawtooth';
+                this.crashSound.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                this.crashSound.frequency.exponentialRampToValueAtTime(0.1, this.audioContext.currentTime + 0.5);
+
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.5, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.5);
+
+                this.crashSound.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+            }
+
+            createMusic() {
+                this.music = this.audioContext.createOscillator();
+                this.music.type = 'sine';
+                this.music.frequency.setValueAtTime(120, this.audioContext.currentTime);
+
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+
+                this.music.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+            }
+
+            onKeyDown(event) {
+                if (this.state === STATES.TITLE) {
+                    if (event.code === 'Enter' || event.code === 'Space') {
+                        this.startGame();
+                    }
+                    return;
+                }
+
+                if (this.state === STATES.PLAYING) {
+                    switch (event.code) {
+                        case 'ArrowLeft':
+                        case 'KeyA':
+                            this.changeLane(-1);
+                            break;
+                        case 'ArrowRight':
+                        case 'KeyD':
+                            this.changeLane(1);
+                            break;
+                        case 'ArrowUp':
+                        case 'KeyW':
+                        case 'Space':
+                            this.jump();
+                            break;
+                        case 'ArrowDown':
+                        case 'KeyS':
+                            this.slide();
+                            break;
+                        case 'KeyP':
+                        case 'Escape':
+                            this.pause();
+                            break;
+                        case 'KeyR':
+                            this.restart();
+                            break;
+                        case 'KeyM':
+                            this.toggleMute();
+                            break;
+                    }
+                } else if (this.state === STATES.PAUSED) {
+                    if (event.code === 'KeyP' || event.code === 'Escape') {
+                        this.unpause();
+                    }
+                    if (event.code === 'KeyR') {
+                        this.restart();
+                    }
+                } else if (this.state === STATES.DEAD) {
+                    if (event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyR') {
+                        this.restart();
+                    }
+                }
+            }
+
+            onKeyUp(event) {
+                // Handle key releases if needed
+            }
+
+            onTouchStart(event) {
+                event.preventDefault();
+
+                if (this.state === STATES.TITLE) {
+                    if (event.touches.length === 1) {
+                        this.startGame();
+                    }
+                    return;
+                }
+
+                if (this.state === STATES.PLAYING) {
+                    this.touchStartX = event.touches[0].clientX;
+                    this.touchStartY = event.touches[0].clientY;
+                    this.lastTouch = event.touches[0];
+                }
+            }
+
+            onTouchMove(event) {
+                event.preventDefault();
+
+                if (this.state !== STATES.PLAYING || !this.lastTouch) return;
+
+                const touch = event.touches[0];
+                const dx = touch.clientX - this.touchStartX;
+                const dy = touch.clientY - this.touchStartY;
+
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    // Horizontal swipe
+                    if (dx > 30) {
+                        this.changeLane(1);
+                    } else if (dx < -30) {
+                        this.changeLane(-1);
+                    }
+                } else {
+                    // Vertical swipe
+                    if (dy > 30) {
+                        this.slide();
+                    } else if (dy < -30) {
+                        this.jump();
+                    }
+                }
+
+                this.touchStartX = touch.clientX;
+                this.touchStartY = touch.clientY;
+            }
+
+            onTouchEnd(event) {
+                event.preventDefault();
+                this.lastTouch = null;
+            }
+
+            onResize() {
+                this.width = this.container.clientWidth;
+                this.height = this.container.clientHeight;
+                this.camera.aspect = this.width / this.height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(this.width, this.height);
+            }
+
+            changeLane(direction) {
+                const newLane = this.lane + direction;
+                if (newLane >= 0 && newLane < GAME.LANE_COUNT) {
+                    this.targetLane = newLane;
+
+                    // Play lane change sound
+                    if (this.laneSound) {
+                        this.laneSound.stop();
+                        this.laneSound = null;
+                        this.createLaneSound();
+                        this.laneSound.start();
+                    }
+                }
+            }
+
+            jump() {
+                if (this.jumping || this.sliding) return;
+
+                this.jumping = true;
+                this.jumpTime = 0;
+
+                // Play jump sound
+                if (this.jumpSound) {
+                    this.jumpSound.stop();
+                    this.jumpSound = null;
+                    this.createJumpSound();
+                    this.jumpSound.start();
+                }
+            }
+
+            slide() {
+                if (this.jumping || this.sliding) return;
+
+                this.sliding = true;
+                this.slideTime = 0;
+            }
+
+            pause() {
+                if (this.state === STATES.PLAYING) {
+                    this.state = STATES.PAUSED;
+                }
+            }
+
+            unpause() {
+                if (this.state === STATES.PAUSED) {
+                    this.state = STATES.PLAYING;
+                }
+            }
+
+            restart() {
+                this.state = STATES.TITLE;
+                this.titleScreen.style.display = 'flex';
+                this.saveBestScore();
+            }
+
+            toggleMute() {
+                this.muted = !this.muted;
+
+                if (this.music) {
+                    if (this.muted) {
+                        this.music.stop();
+                    } else {
+                        this.music.start();
+                    }
+                }
+
+                try {
+                    localStorage.setItem('prism-runner-muted', this.muted.toString());
+                } catch (e) {
+                    console.warn('LocalStorage not available');
+                }
+            }
+
+            onGamepadConnected(event) {
+                // Gamepad support would be implemented here
+            }
+
+            update(delta) {
+                if (this.state === STATES.TITLE || this.state === STATES.PAUSED) {
+                    return;
+                }
+
+                // Update player lane
+                if (this.lane !== this.targetLane) {
+                    const direction = Math.sign(this.targetLane - this.lane);
+                    this.lane += direction * delta * 5;
+                    if (Math.abs(this.lane - this.targetLane) < 0.1) {
+                        this.lane = this.targetLane;
+                    }
+                }
+
+                // Update jump
+                if (this.jumping) {
+                    this.jumpTime += delta;
+                    if (this.jumpTime >= GAME.JUMP_DURATION) {
+                        this.jumping = false;
+                    }
+                }
+
+                // Update slide
+                if (this.sliding) {
+                    this.slideTime += delta;
+                    if (this.slideTime >= GAME.SLIDE_DURATION) {
+                        this.sliding = false;
+                    }
+                }
+
+                // Update player position
+                const laneOffset = (this.lane - 1) * GAME.LANE_WIDTH;
+                this.player.position.x = laneOffset;
+                this.shadow.position.x = laneOffset;
+
+                // Jump animation
+                if (this.jumping) {
+                    const jumpProgress = this.jumpTime / GAME.JUMP_DURATION;
+                    const jumpHeight = GAME.JUMP_V * Math.sin(jumpProgress * Math.PI);
+                    this.player.position.y = 0.5 + jumpHeight;
+                    this.shadow.position.y = -0.4 + jumpHeight * 0.5;
+                } else {
+                    this.player.position.y = 0.5;
+                    this.shadow.position.y = -0.4;
+                }
+
+                // Slide animation
+                if (this.sliding) {
+                    this.player.position.y = 0.2;
+                    this.shadow.position.y = -0.4;
+                }
+
+                // Update distance and score
+                this.distance += this.speed * delta;
+                this.score = Math.floor(this.distance * 10);
+                this.scoreElement.textContent = this.score.toString();
+
+                // Update speed
+                this.speed += GAME.SPEED_ACCEL * delta;
+                if (this.speed > GAME.SPEED_MAX) {
+                    this.speed = GAME.SPEED_MAX;
+                }
+
+                // Exit easy mode after duration
+                if (this.easyMode && this.distance > GAME.EASY_DURATION) {
+                    this.easyMode = false;
+                }
+
+                // Spawn obstacles and shards
+                this.spawnObstacles(delta);
+                this.spawnShards(delta);
+
+                // Check collisions
+                this.checkCollisions();
+
+                // Update camera
+                this.updateCamera();
+
+                // Update track segments
+                this.updateTrack();
+            }
+
+            spawnObstacles(delta) {
+                this.lastObstacleTime += delta;
+
+                // Don't spawn too frequently
+                if (this.lastObstacleTime < this.easyMode ? 1.5 : 0.8) {
+                    return;
+                }
+
+                this.lastObstacleTime = 0;
+
+                // Determine how many lanes to block (1-2)
+                const blockedLanes = this.easyMode ? 1 : Math.floor(Math.random() * 2) + 1;
+
+                // Ensure at least one lane is open
+                const openLanes = [];
+                for (let i = 0; i < GAME.LANE_COUNT; i++) {
+                    openLanes.push(i);
+                }
+
+                // Remove blocked lanes
+                for (let i = 0; i < blockedLanes; i++) {
+                    const lane = Math.floor(Math.random() * openLanes.length);
+                    openLanes.splice(lane, 1);
+                }
+
+                // Spawn obstacles in blocked lanes
+                for (let i = 0; i < GAME.LANE_COUNT; i++) {
+                    if (openLanes.includes(i)) continue;
+
+                    // Get obstacle from pool
+                    let obstacle = this.obstaclePool.pop();
+                    if (!obstacle) {
+                        const geometry = new THREE.BoxGeometry(0.8, 1.5, 0.8);
+                        const material = new THREE.MeshPhongMaterial({
+                            color: 0xff0000,
+                            emissive: 0xff0000,
+                            emissiveIntensity: 0.5
+                        });
+                        obstacle = new THREE.Mesh(geometry, material);
+                        this.scene.add(obstacle);
+                    }
+
+                    obstacle.position.x = (i - 1) * GAME.LANE_WIDTH;
+                    obstacle.position.z = this.player.position.z + GAME.SEGMENT_LENGTH * 2;
+                    obstacle.position.y = 0.75;
+                    obstacle.visible = true;
+
+                    this.obstacles.push(obstacle);
+                }
+            }
+
+            spawnShards(delta) {
+                // Random shard spawning
+                if (Math.random() < 0.01 * delta) {
+                    let shard = this.shardPool.pop();
+                    if (!shard) {
+                        const geometry = new THREE.TetrahedronGeometry(GAME.SHARD_SCALE, 0);
+                        const material = new THREE.MeshPhongMaterial({
+                            color: 0xffff00,
+                            emissive: 0xffff00,
+                            emissiveIntensity: 0.8
+                        });
+                        shard = new THREE.Mesh(geometry, material);
+                        this.scene.add(shard);
+                    }
+
+                    const lane = Math.floor(Math.random() * GAME.LANE_COUNT);
+                    shard.position.x = (lane - 1) * GAME.LANE_WIDTH;
+                    shard.position.z = this.player.position.z + GAME.SEGMENT_LENGTH * 3;
+                    shard.position.y = 0.5;
+                    shard.visible = true;
+
+                    this.shards.push(shard);
+                }
+            }
+
+            checkCollisions() {
+                // Check obstacle collisions
+                for (let i = 0; i < this.obstacles.length; i++) {
+                    const obstacle = this.obstacles[i];
+
+                    if (obstacle.position.z > this.player.position.z + 5) {
+                        continue;
+                    }
+
+                    const dx = Math.abs(this.player.position.x - obstacle.position.x);
+                    const dz = Math.abs(this.player.position.z - obstacle.position.z);
+
+                    if (dx < 1.0 && dz < 1.0) {
+                        // Collision detected
+                        this.gameOver();
+                        return;
+                    }
+                }
+
+                // Check shard collections
+                for (let i = 0; i < this.shards.length; i++) {
+                    const shard = this.shards[i];
+
+                    if (shard.position.z > this.player.position.z + 5) {
+                        continue;
+                    }
+
+                    const dx = Math.abs(this.player.position.x - shard.position.x);
+                    const dz = Math.abs(this.player.position.z - shard.position.z);
+
+                    if (dx < 0.5 && dz < 0.5) {
+                        // Shard collected
+                        shard.visible = false;
+                        this.shards.splice(i, 1);
+                        this.shardPool.push(shard);
+
+                        this.shardsCollected++;
+                        this.comboMultiplier++;
+                        if (this.comboMultiplier > this.maxCombo) {
+                            this.maxCombo = this.comboMultiplier;
+                        }
+
+                        this.multiplierElement.textContent = `×${this.comboMultiplier}`;
+
+                        // Play shard sound with pitch based on combo
+                        if (this.shardSound) {
+                            this.shardSound.stop();
+                            this.shardSound = null;
+                            this.createShardSound();
+                            this.shardSound.frequency.setValueAtTime(800 + this.comboMultiplier * 100, this.audioContext.currentTime);
+                            this.shardSound.start();
+                        }
+
+                        // Update score with multiplier
+                        this.score += 10 * this.comboMultiplier;
+                        this.scoreElement.textContent = this.score.toString();
+
+                        return;
+                    }
+                }
+            }
+
+            gameOver() {
+                this.state = STATES.DEAD;
+
+                // Play crash sound
+                if (this.crashSound) {
+                    this.crashSound.stop();
+                    this.crashSound = null;
+                    this.createCrashSound();
+                    this.crashSound.start();
+                }
+
+                // Save best score
+                this.saveBestScore();
+            }
+
+            updateCamera() {
+                // Simple camera follow
+                const targetZ = this.player.position.z + 10;
+                const targetY = 2 + Math.sin(this.player.position.z * 0.1) * 0.5;
+
+                this.camera.position.z = THREE.MathUtils.lerp(this.camera.position.z, targetZ, 0.1);
+                this.camera.position.y = THREE.MathUtils.lerp(this.camera.position.y, targetY, 0.1);
+
+                // Slight roll effect
+                const roll = (this.player.position.x / GAME.LANE_WIDTH) * 0.1;
+                this.camera.rotation.x = THREE.MathUtils.lerp(this.camera.rotation.x, 0, 0.1);
+                this.camera.rotation.y = THREE.MathUtils.lerp(this.camera.rotation.y, roll, 0.1);
+
+                this.camera.lookAt(0, 0, this.player.position.z + 5);
+            }
+
+            updateTrack() {
+                // Move track segments
+                for (const segment of this.trackSegments) {
+                    segment.position.z -= this.speed * 0.1;
+
+                    // Recycle segments behind player
+                    if (segment.position.z < this.player.position.z - GAME.SEGMENT_LENGTH * 3) {
+                        segment.position.z = this.player.position.z + GAME.SEGMENT_LENGTH * 2;
+                    }
+                }
+
+                // Recycle obstacles
+                for (let i = 0; i < this.obstacles.length; i++) {
+                    const obstacle = this.obstacles[i];
+                    obstacle.position.z -= this.speed * 0.1;
+
+                    if (obstacle.position.z < this.player.position.z - 20) {
+                        obstacle.visible = false;
+                        this.obstacles.splice(i, 1);
+                        this.obstaclePool.push(obstacle);
+                        i--;
+                    }
+                }
+
+                // Recycle shards
+                for (let i = 0; i < this.shards.length; i++) {
+                    const shard = this.shards[i];
+                    shard.position.z -= this.speed * 0.1;
+
+                    if (shard.position.z < this.player.position.z - 20) {
+                        shard.visible = false;
+                        this.shards.splice(i, 1);
+                        this.shardPool.push(shard);
+                        i--;
+                    }
+                }
+            }
+
+            animate() {
+                const currentTime = performance.now();
+                const delta = (currentTime - this.lastTime) / 1000;
+                this.lastTime = currentTime;
+
+                // Clamp delta to prevent large jumps
+                if (delta > 0.1) delta = 0.1;
+
+                // Update game state
+                this.update(delta);
+
+                // Rotate player
+                this.player.rotation.y += delta * 0.5;
+
+                // Render
+                this.renderer.render(this.scene, this.camera);
+
+                // Continue animation loop
+                this.requestId = requestAnimationFrame(this.animate.bind(this));
+            }
+        }
+
+        // Start the game when the page loads
+        window.addEventListener('load', () => {
+            const game = new PrismRunner();
+
+            // Handle visibility changes
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    game.pause();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    

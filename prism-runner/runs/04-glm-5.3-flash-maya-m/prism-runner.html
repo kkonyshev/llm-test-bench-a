@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     PRISM RUNNER — single-file three.js endless runner
+     - One external dependency: three@0.160.1 via importmap (unpkg).
+     - All geometry, textures, audio and UI are generated in code.
+     - Fixed-timestep sim (120 Hz), pooled objects, instanced meshes.
+     Serve over HTTP:  python3 -m http.server  ->  http://localhost:8000/prism-runner.html
+     Also works from file:// in Chrome/Firefox (unpkg sends CORS *).
+     ============================================================ -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PRISM RUNNER</title>
+<style>
+  :root { --cyan:#4df3ff; --mag:#ff4de0; --amber:#ffb347; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; background:#04040c; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    color:#dff6ff; user-select:none; -webkit-user-select:none;
+    touch-action:none; overscroll-behavior:none;
+  }
+  #app { position:fixed; inset:0; }
+  #scene { position:absolute; inset:0; width:100%; height:100%; display:block; }
+
+  /* vignette + scanline overlay (pure CSS, no render pass) */
+  #fx {
+    position:absolute; inset:0; pointer-events:none; z-index:5;
+    background:
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,0.55) 100%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 3px);
+    mix-blend-mode:screen;
+  }
+  @media (prefers-reduced-motion: reduce) { #fx { background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,10,0.55) 100%); } }
+
+  .overlay {
+    position:absolute; inset:0; z-index:10; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    background:rgba(3,4,14,0.55); backdrop-filter:blur(2px);
+  }
+  .hidden { display:none !important; }
+  h1 {
+    font-size:clamp(40px,9vw,88px); letter-spacing:0.22em; font-weight:800;
+    background:linear-gradient(90deg,var(--cyan),#fff 45%,var(--mag));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 32px rgba(77,243,255,0.35);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { h1 { animation:none; } }
+  @keyframes pulse { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.35);} }
+  h2 { font-size:clamp(28px,6vw,52px); letter-spacing:0.3em; color:var(--mag); text-shadow:0 0 24px rgba(255,77,224,0.5); }
+  .sub { margin-top:14px; font-size:14px; letter-spacing:0.14em; opacity:0.85; line-height:1.9; }
+  .key { display:inline-block; min-width:26px; padding:1px 7px; margin:0 2px;
+         border:1px solid rgba(77,243,255,0.6); border-radius:5px; color:var(--cyan);
+         font-family:ui-monospace,monospace; font-size:12px; }
+  .cta { margin-top:26px; font-size:15px; letter-spacing:0.28em; color:#fff;
+         animation:blink 1.3s steps(2) infinite; }
+  @media (prefers-reduced-motion: reduce) { .cta { animation:none; } }
+  @keyframes blink { 50%{opacity:0.25;} }
+  .stat { font-size:20px; margin:4px 0; letter-spacing:0.12em; }
+  .stat b { color:var(--amber); }
+
+  #hud {
+    position:absolute; z-index:8; inset:0; pointer-events:none;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:14px 18px; font-family:ui-monospace,monospace;
+    text-shadow:0 0 12px rgba(77,243,255,0.7);
+  }
+  #hudL { font-size:13px; letter-spacing:0.18em; line-height:1.8; }
+  #score { font-size:34px; letter-spacing:0.1em; color:#fff; }
+  #hudR { text-align:right; font-size:13px; letter-spacing:0.18em; opacity:0.9; }
+  #muteTag { position:absolute; bottom:12px; right:18px; font-size:11px; letter-spacing:0.2em; opacity:0.6; }
+  #fatal h2 { color:#ff6a6a; }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+  <div id="fx"></div>
+
+  <div id="hud" class="hidden">
+    <div id="hudL">
+      <div id="score">0</div>
+      <div id="meter">SPD 0%</div>
+      <div id="mult">x1 COMBO</div>
+    </div>
+    <div id="hudR">
+      <div>BEST <span id="best">0</span></div>
+      <div>SHARDS <span id="shards">0</span></div>
+    </div>
+    <div id="muteTag">M — SOUND ON</div>
+  </div>
+
+  <div id="title" class="overlay">
+    <h1>PRISM RUNNER</h1>
+    <div class="sub">
+      <span class="key">←</span><span class="key">→</span> or <span class="key">A</span><span class="key">D</span> — switch lane<br>
+      <span class="key">↑</span><span class="key">W</span><span class="key">Space</span> — jump &nbsp;·&nbsp;
+      <span class="key">↓</span><span class="key">S</span> — slide under gates<br>
+      <span class="key">P</span>/<span class="key">Esc</span> pause · <span class="key">R</span> restart · <span class="key">M</span> mute<br>
+      On phone: swipe to move, tap to start.
+    </div>
+    <div class="sub">BEST <b id="bestTitle">0</b></div>
+    <div class="cta">PRESS ENTER / TAP TO START</div>
+  </div>
+
+  <div id="paused" class="overlay hidden">
+    <h2>PAUSED</h2>
+    <div class="sub"><span class="key">P</span> / <span class="key">Esc</span> or tap to resume</div>
+  </div>
+
+  <div id="dead" class="overlay hidden">
+    <h2>SIGNAL LOST</h2>
+    <div class="sub stat">SCORE <b id="deadScore">0</b></div>
+    <div class="sub stat">BEST&nbsp;&nbsp;<b id="deadBest">0</b></div>
+    <div class="sub stat">SHARDS <b id="deadShards">0</b></div>
+    <div class="cta">R / TAP — RETRY</div>
+  </div>
+
+  <div id="fatal" class="overlay hidden">
+    <h2>NO WEBGL2</h2>
+    <div class="sub">This game needs WebGL2. Try a recent Chrome, Firefox,<br>Safari 16+ or Edge on desktop or mobile.</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.1/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* =====================================================================
+   1. TUNING CONSTANTS — tweak the feel of the whole game from here
+   ===================================================================== */
+const SPEED_START   = 14;      // world units / s at run start
+const SPEED_MAX     = 42;      // hard speed ceiling
+const SPEED_RAMP    = 0.55;    // acceleration (units/s per second)
+const LANE_WIDTH    = 2.3;     // lateral distance between lane centers
+const GRAVITY       = 26;      // jump gravity (units/s^2)
+const JUMP_V        = 9.2;     // jump impulse -> ~0.71 s airtime, 1.63 apex
+const SLIDE_TIME    = 0.4;     // slide/dash duration (s)
+const STEP          = 1/120;   // fixed simulation timestep
+const MAX_FRAME_DT  = 0.1;     // clamp long frames (tab-switch spikes)
+const SPAWN_AHEAD   = 230;     // generate patterns this far in front
+const RECYCLE_BEHIND= 26;      // recycle objects this far behind camera
+const MIN_REACTION  = 0.9;     // min seconds of travel between pattern starts
+const EASE_TIME     = 15;      // seconds of easy-only patterns at run start
+const SHARD_SCORE   = 25;      // points per shard (times multiplier)
+const MULT_STEP     = 10;      // shards per +1 multiplier
+const MULT_MAX      = 5;
+const TRACK_WIDTH   = 8.4;
+const SEG_LEN       = 30;      // track segment length (z)
+const NUM_SEGS      = 12;      // 12 * 30 = 360 units of track, pooled
+const FOV_BASE      = 74;
+const BLOCK_H       = 1.25;    // low wall height (jump over)
+const GATE_BOT      = 1.42;    // gate bar bottom (slide under)
+const PILLAR_H      = 4.2;     // tall column (cannot jump)
+const OB_MAX        = 48;      // obstacle instance pool
+const SH_MAX        = 64;      // shard instance pool
+const PT_MAX        = 160;     // particle pool
+
+const ST_TITLE='title', ST_PLAY='play', ST_PAUSE='pause', ST_DEAD='dead';
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* =====================================================================
+   2. SMALL UTILITIES + SAFE STORAGE
+   ===================================================================== */
+const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+const ri    = (n) => (Math.random() * n) | 0;               // int in [0,n)
+const laneX = (l) => l * LANE_WIDTH;
+
+const store = {
+  get(k)      { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v)   { try { window.localStorage.setItem(k, v); } catch (e) { /* private mode etc. */ } }
+};
+
+/* All event listeners below are attached exactly once at boot to
+   window/document and live for the page lifetime — nothing to remove. */
+
+/* =====================================================================
+   3. BOOT GUARD — WebGL2 check before touching three.js
+   ===================================================================== */
+function hasWebGL2() {
+  try { const c = document.createElement('canvas');
+        return !!(c.getContext('webgl2') || c.getContext('experimental-webgl2')); }
+  catch (e) { return false; }
+}
+const fatalUI = document.getElementById('fatal');
+if (!hasWebGL2()) { fatalUI.classList.remove('hidden'); throw new Error('WebGL2 unavailable'); }
+
+/* =====================================================================
+   4. RENDERER / SCENE / CAMERA
+   ===================================================================== */
+const canvas   = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04040c);
+scene.fog = new THREE.FogExp2(0x06071a, 0.0115);
+
+const camera = new THREE.PerspectiveCamera(FOV_BASE, window.innerWidth / window.innerHeight, 0.1, 400);
+camera.position.set(0, 4.4, 8.4);
+
+/* shared preallocated temporaries — never allocate inside the loop */
+const _v3  = new THREE.Vector3();
+const _v3b = new THREE.Vector3();
+const _q   = new THREE.Quaternion();
+const _e   = new THREE.Euler();
+const _m4  = new THREE.Matrix4();
+const _col = new THREE.Color();
+const _zeroQ = new THREE.Quaternion();
+const _scale0 = new THREE.Vector3(0.00001, 0.00001, 0.00001);
+
+/* =====================================================================
+   5. GENERATED TEXTURES (canvas — no external images)
+   ===================================================================== */
+function makeGlowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+function makeGridTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#0a0e20'; g.fillRect(0, 0, 128, 128);
+  g.strokeStyle = 'rgba(77,243,255,0.5)'; g.lineWidth = 2;
+  for (let i = 0; i <= 128; i += 32) {
+    g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 128); g.stroke();
+    g.beginPath(); g.moveTo(0, i); g.lineTo(128, i); g.stroke();
+  }
+  g.strokeStyle = 'rgba(77,243,255,0.95)'; g.lineWidth = 5;
+  g.strokeRect(1, 1, 126, 126);          // bright border = track edge glow
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(2, 6);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const glowTex = makeGlowTexture();
+const gridTex = makeGridTexture();
+
+/* =====================================================================
+   6. STATIC BACKDROP — far stars (1 draw call, never moves)
+   ===================================================================== */
+{
+  const N = 420, pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const a = Math.random() * Math.PI * 2, r = 140 + Math.random() * 160;
+    pos[i*3]   = Math.cos(a) * r;
+    pos[i*3+1] = Math.random() * 90 - 10;
+    pos[i*3+2] = -Math.abs(Math.sin(a)) * r - 40;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const mat = new THREE.PointsMaterial({ color: 0x8ab8ff, size: 1.6, sizeAttenuation: true, fog: false,
+    transparent: true, opacity: 0.7, map: glowTex, depthWrite: false });
+  const stars = new THREE.Points(geo, mat);
+  stars.frustumCulled = false;
+  scene.add(stars);
+}
+
+/* =====================================================================
+   7. TRACK — instanced grid segments with vertical curvature + edge rails
+   The track y at arc-position w is a sum of sines; the whole function
+   scrolls under the player, so the horizon stays alive.
+   ===================================================================== */
+function curveY(w) { return Math.sin(w * 0.021) * 1.1 + Math.sin(w * 0.043 + 1.7) * 0.55; }
+
+const segGeo = new THREE.PlaneGeometry(TRACK_WIDTH, SEG_LEN + 0.6).rotateX(-Math.PI / 2);
+const segMat = new THREE.MeshBasicMaterial({ map: gridTex });
+const segMesh = new THREE.InstancedMesh(segGeo, segMat, NUM_SEGS);
+const railGeo = new THREE.BoxGeometry(0.14, 0.3, SEG_LEN + 0.6);
+const railMat = new THREE.MeshBasicMaterial({ color: 0x2de8ff });
+const railMesh = new THREE.InstancedMesh(railGeo, railMat, NUM_SEGS * 2);
+segMesh.frustumCulled = railMesh.frustumCulled = false;
+segMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+railMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(segMesh, railMesh);
+
+const segW = new Array(NUM_SEGS);              // world arc-position of each segment
+function initSegments() {
+  for (let i = 0; i < NUM_SEGS; i++) segW[i] = 130 - i * SEG_LEN; // covers z -190..+130 at s=0
+}
+initSegments();
+
+/* side pillars for speed sensation */
+const PIL_SPACE = 16, PIL_N = 16;
+const pilGeo = new THREE.BoxGeometry(0.8, 7, 0.8);
+const pilMat = new THREE.MeshBasicMaterial({ color: 0x274b6e });
+const pilMesh = new THREE.InstancedMesh(pilGeo, pilMat, PIL_N * 2);
+pilMesh.frustumCulled = false;
+pilMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(pilMesh);
+const pilW = new Array(PIL_N);
+function initPillars() { for (let i = 0; i < PIL_N; i++) pilW[i] = 130 - i * PIL_SPACE; }
+initPillars();
+
+/* =====================================================================
+   8. OBSTACLES & SHARDS — pooled records + one InstancedMesh per kind
+   kinds: 0 block (jump)  1 gate (slide)  2 pillar (dodge)
+   ===================================================================== */
+const KIND_BLOCK = 0, KIND_GATE = 1, KIND_PILLAR = 2;
+const unitBox = new THREE.BoxGeometry(1, 1, 1);
+const obMats = [
+  new THREE.MeshBasicMaterial({ color: 0xff2fb0 }),   // magenta blocks
+  new THREE.MeshBasicMaterial({ color: 0xffa02f }),   // amber gates
+  new THREE.MeshBasicMaterial({ color: 0xff3b3b })    // red pillars
+];
+const obMeshes = [];
+for (let k = 0; k < 3; k++) {
+  const m = new THREE.InstancedMesh(unitBox, obMats[k], OB_MAX);
+  m.frustumCulled = false;
+  m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  m.count = 0;
+  scene.add(m); obMeshes.push(m);
+}
+const obPool = [], obstacles = [];
+for (let i = 0; i < OB_MAX; i++) obPool.push({ kind: 0, w: 0, x: 0, halfW: 0 });
+
+const shardGeo = new THREE.OctahedronGeometry(0.45, 0);
+const shardMat = new THREE.MeshBasicMaterial({ color: 0x53fff0 });
+const shardMesh = new THREE.InstancedMesh(shardGeo, shardMat, SH_MAX);
+shardMesh.frustumCulled = false;
+shardMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+shardMesh.count = 0;
+scene.add(shardMesh);
+const shardPool = [], shards = [];
+for (let i = 0; i < SH_MAX; i++) shardPool.push({ w: 0, lane: 0, yOff: 0 });
+
+function acquireObstacle() { return obPool.length ? obPool.pop() : null; }
+function acquireShard()    { return shardPool.length ? shardPool.pop() : null; }
+
+const BLOCK_W = 1.9, BLOCK_D = 1.6;
+function addBlock(lane, w) {
+  const o = acquireObstacle(); if (!o) return;
+  o.kind = KIND_BLOCK; o.w = w; o.x = laneX(lane); o.halfW = BLOCK_W * 0.5;
+  obstacles.push(o);
+}
+function addPillar(lane, w) {
+  const o = acquireObstacle(); if (!o) return;
+  o.kind = KIND_PILLAR; o.w = w; o.x = laneX(lane); o.halfW = 0.65;
+  obstacles.push(o);
+}
+/* gate spans exactly two ADJACENT lanes — the third lane stays fully open */
+function addGate(la, lb, w) {
+  const o = acquireObstacle(); if (!o) return;
+  o.kind = KIND_GATE; o.w = w;
+  o.x = (laneX(la) + laneX(lb)) / 2;
+  o.halfW = (Math.abs(laneX(la) - laneX(lb)) + BLOCK_W) / 2;
+  obstacles.push(o);
+}
+function addShard(lane, w, yOff) {
+  const sh = acquireShard(); if (!sh) return;
+  sh.w = w; sh.lane = lane; sh.yOff = yOff || 0;
+  shards.push(sh);
+}
+
+/* =====================================================================
+   9. PLAYER RIG — icosahedron + hoverboard + glow + ground marker
+   ===================================================================== */
+const playerRig = new THREE.Group();
+const coreGeo = new THREE.IcosahedronGeometry(0.55, 0);
+const coreMat = new THREE.MeshBasicMaterial({ color: 0x8df6ff });
+const core = new THREE.Mesh(coreGeo, coreMat);
+const wire = new THREE.Mesh(coreGeo, new THREE.MeshBasicMaterial({
+  color: 0xffffff, wireframe: true, transparent: true, opacity: 0.65 }));
+wire.scale.setScalar(1.001);
+const boardGeo = new THREE.BoxGeometry(1.7, 0.12, 2.7);
+const boardMat = new THREE.MeshBasicMaterial({ color: 0x161a2e });
+const board = new THREE.Mesh(boardGeo, boardMat);
+board.position.y = -0.55;
+const boardGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 3.6),
+  new THREE.MeshBasicMaterial({ map: glowTex, color: 0x37e0ff, transparent: true, opacity: 0.5,
+    blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+boardGlow.rotation.x = -Math.PI / 2;
+boardGlow.position.y = -0.62;
+const halo = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4),
+  new THREE.MeshBasicMaterial({ map: glowTex, color: 0x64f0ff, transparent: true, opacity: 0.35,
+    blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+playerRig.add(core, wire, board, boardGlow, halo);
+scene.add(playerRig);
+const markerMat = new THREE.MeshBasicMaterial({ map: glowTex, color: 0x64f0ff, transparent: true,
+  opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+const marker = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), markerMat);
+marker.rotation.x = -Math.PI / 2;
+scene.add(marker);
+
+/* =====================================================================
+   10. PARTICLES — one instanced additive plane pool, billboarded
+   ===================================================================== */
+const ptGeo = new THREE.PlaneGeometry(1, 1);
+const ptMat = new THREE.MeshBasicMaterial({ map: glowTex, transparent: true,
+  blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+const ptMesh = new THREE.InstancedMesh(ptGeo, ptMat, PT_MAX);
+ptMesh.frustumCulled = false;
+ptMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+ptMesh.count = PT_MAX;
+scene.add(ptMesh);
+const parts = [];
+for (let i = 0; i < PT_MAX; i++) {
+  parts.push({ x:0, y:-999, z:0, vx:0, vy:0, vz:0, life:0, max:1, size:0.5 });
+  ptMesh.setColorAt(i, _col.setHex(0xffffff));   // allocate instanceColor once, up-front
+}
+ptMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+
+function burst(x, y, z, n, hex, spd, size) {
+  let made = 0;
+  for (let i = 0; i < PT_MAX && made < n; i++) {
+    const p = parts[i];
+    if (p.life > 0) continue;
+    const a = Math.random() * Math.PI * 2, u = Math.random() * 2 - 1, r = Math.sqrt(1 - u * u);
+    const s = spd * (0.4 + Math.random() * 0.8);
+    p.x = x; p.y = y; p.z = z;
+    p.vx = Math.cos(a) * r * s; p.vy = (u * 0.5 + 0.7) * s; p.vz = Math.sin(a) * r * s;
+    p.max = p.life = 0.45 + Math.random() * 0.45;
+    p.size = size * (0.6 + Math.random() * 0.8);
+    ptMesh.setColorAt(i, _col.setHex(hex));
+    made++;
+  }
+  if (ptMesh.instanceColor) ptMesh.instanceColor.needsUpdate = true;
+}
+function updateParticles(dt) {
+  for (let i = 0; i < PT_MAX; i++) {
+    const p = parts[i];
+    if (p.life > 0) {
+      p.life -= dt;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+      p.vy -= 6 * dt;
+      const k = Math.max(p.life / p.max, 0);
+      _v3.set(p.x, p.y, p.z);
+      _q.copy(camera.quaternion);
+      const sc = p.size * k;
+      _m4.compose(_v3, _q, _v3b.set(sc, sc, sc));
+    } else {
+      _m4.compose(_v3.set(0, -999, 0), _zeroQ, _scale0);
+    }
+    ptMesh.setMatrixAt(i, _m4);
+  }
+  ptMesh.instanceMatrix.needsUpdate = true;
+}
+
+/* =====================================================================
+   11. AUDIO — fully synthesized WebAudio (created after user gesture)
+   ===================================================================== */
+const audio = {
+  ctx: null, master: null, music: null, noiseBuf: null,
+  muted: store.get('prism-runner.muted') === '1',
+
+  ensure() {
+    if (this.ctx) return true;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = this.muted ? 0 : 0.85;
+      this.master.connect(this.ctx.destination);
+      const len = this.ctx.sampleRate | 0;
+      this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      const d = this.noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this.music = this.ctx.createGain();
+      this.music.gain.value = 0;
+      this.music.connect(this.master);
+      this.buildDrone();
+      return true;
+    } catch (e) { return false; }
+  },
+  buildDrone() {  // low music bed: detuned saws + slow filter sweep
+    const t = this.ctx, t0 = t.currentTime;
+    const filt = t.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 220; filt.Q.value = 4;
+    filt.connect(this.music);
+    const o1 = t.createOscillator(); o1.type = 'sawtooth'; o1.frequency.value = 55;  o1.detune.value = -6;
+    const o2 = t.createOscillator(); o2.type = 'triangle'; o2.frequency.value = 110; o2.detune.value = 7;
+    const g2 = t.createGain(); g2.gain.value = 0.5;
+    o1.connect(filt); o2.connect(g2); g2.connect(filt);
+    const lfo = t.createOscillator(); lfo.frequency.value = 0.08;
+    const lfoG = t.createGain(); lfoG.gain.value = 90;
+    lfo.connect(lfoG); lfoG.connect(filt.frequency);
+    o1.start(t0); o2.start(t0); lfo.start(t0);
+  },
+  setRunning(on) {
+    if (!this.ctx) return;
+    this.music.gain.setTargetAtTime(on ? 0.4 : 0, this.ctx.currentTime, 0.35);
+  },
+  tone(type, f0, f1, dur, vol) {
+    if (!this.ctx) return;
+    const t = this.ctx, t0 = t.currentTime;
+    const o = t.createOscillator(), g = t.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t0);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t0 + dur);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t0); o.stop(t0 + dur + 0.05);
+  },
+  whoosh(vol) {
+    if (!this.ctx) return;
+    const t = this.ctx, t0 = t.currentTime;
+    const src = t.createBufferSource(); src.buffer = this.noiseBuf;
+    const f = t.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
+    f.frequency.setValueAtTime(500, t0);
+    f.frequency.exponentialRampToValueAtTime(2600, t0 + 0.16);
+    const g = t.createGain();
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(t0); src.stop(t0 + 0.25);
+  },
+  jump()   { this.tone('triangle', 300, 640, 0.2, 0.3); },
+  land()   { this.tone('sine', 150, 85, 0.12, 0.22); },
+  pick(streak) {
+    const f = 520 * Math.pow(2, (streak % 14) / 12);   // rising pitch per combo
+    this.tone('sine', f, f * 1.6, 0.16, 0.32);
+  },
+  crash() {
+    if (!this.ctx) return;
+    const t = this.ctx, t0 = t.currentTime;
+    const src = t.createBufferSource(); src.buffer = this.noiseBuf;
+    const f = t.createBiquadFilter(); f.type = 'lowpass';
+    f.frequency.setValueAtTime(2400, t0);
+    f.frequency.exponentialRampToValueAtTime(120, t0 + 0.5);
+    const g = t.createGain();
+    g.gain.setValueAtTime(0.9, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(t0); src.stop(t0 + 0.7);
+    this.tone('sawtooth', 150, 32, 0.55, 0.5);
+  },
+  setMuted(m) {
+    this.muted = m;
+    store.set('prism-runner.muted', m ? '1' : '0');
+    if (this.master) this.master.gain.value = m ? 0 : 0.85;
+  }
+};
+
+/* =====================================================================
+   12. GAME STATE
+   ===================================================================== */
+const ui = {
+  hud:    document.getElementById('hud'),
+  title:  document.getElementById('title'),
+  paused: document.getElementById('paused'),
+  dead:   document.getElementById('dead'),
+  score:  document.getElementById('score'),
+  meter:  document.getElementById('meter'),
+  mult:   document.getElementById('mult'),
+  best:   document.getElementById('best'),
+  shardsH:document.getElementById('shards'),
+  bestTitle: document.getElementById('bestTitle'),
+  deadScore: document.getElementById('deadScore'),
+  deadBest:  document.getElementById('deadBest'),
+  deadShards:document.getElementById('deadShards'),
+  muteTag:   document.getElementById('muteTag')
+};
+
+let state = ST_TITLE;
+let s = 0;                 // distance travelled (world arc position of player)
+let speed = SPEED_START;
+let playTime = 0, acc = 0, lastT = 0;
+let score = 0, shardCount = 0, streak = 0, mult = 1;
+let nextW = 70;            // arc position where the next pattern spawns
+let hitStop = 0, shake = 0, fovKick = 0, deadTime = 0;
+let best = parseInt(store.get('prism-runner.best') || '0', 10) || 0;
+
+const player = { lane: 0, x: 0, jumpY: 0, vy: 0, slideT: 0, grounded: true };
+
+function resetWorld() {
+  s = 0; speed = SPEED_START; playTime = 0;
+  score = 0; shardCount = 0; streak = 0; mult = 1;
+  nextW = 70; hitStop = 0; shake = 0; fovKick = 0; deadTime = 0;
+  player.lane = 0; player.x = 0; player.jumpY = 0; player.vy = 0; player.slideT = 0;
+  player.grounded = true;
+  for (let i = 0; i < obstacles.length; i++) obPool.push(obstacles[i]);
+  obstacles.length = 0;
+  for (let i = 0; i < shards.length; i++) shardPool.push(shards[i]);
+  shards.length = 0;
+  for (let i = 0; i < PT_MAX; i++) parts[i].life = 0;
+  initSegments(); initPillars();
+  core.visible = wire.visible = board.visible = boardGlow.visible = halo.visible = true;
+  playerRig.visible = true;
+  marker.visible = true;
+  camera.position.set(0, curveY(0) + 3.4, 8.4);
+  camera.fov = FOV_BASE; camera.updateProjectionMatrix();
+  updateHUD(true);
+}
+
+function startGame() {
+  audio.ensure(); if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+  resetWorld();
+  state = ST_PLAY;
+  acc = 0;
+  ui.title.classList.add('hidden');
+  ui.dead.classList.add('hidden');
+  ui.paused.classList.add('hidden');
+  ui.hud.classList.remove('hidden');
+  audio.setRunning(true);
+}
+function togglePause() {
+  if (state === ST_PLAY) {
+    state = ST_PAUSE;
+    ui.paused.classList.remove('hidden');
+    audio.setRunning(false);
+  } else if (state === ST_PAUSE) {
+    state = ST_PLAY;
+    acc = 0; lastT = performance.now() * 0.001;
+    ui.paused.classList.add('hidden');
+    audio.setRunning(true);
+  }
+}
+function toggleMute() {
+  audio.ensure();
+  audio.setMuted(!audio.muted);
+  ui.muteTag.textContent = audio.muted ? 'M — SOUND OFF' : 'M — SOUND ON';
+}
+ui.muteTag.textContent = audio.muted ? 'M — SOUND OFF' : 'M — SOUND ON';
+
+/* =====================================================================
+   13. PATTERN GENERATION (fairness by construction)
+   Rules enforced here:
+   - max 2 solid lanes per row  -> never all 3 blocked
+   - gates span 2 ADJACENT lanes -> the third lane has zero obstacles
+   - rows inside a pattern are >= clamp(speed*0.45, 7, 19) apart
+   - separate patterns are >= speed * MIN_REACTION apart (see step())
+   - first EASE_TIME seconds use easy-only patterns and bigger gaps
+   ===================================================================== */
+function spawnPattern(w0) {
+  const easy = playTime < EASE_TIME;
+  const gap = clamp(speed * 0.45, 7, 19);
+  const roll = Math.random();
+  let depth = 0;
+
+  if (easy) {
+    if (roll < 0.3) {                       // single low block
+      addBlock(ri(3) - 1, w0);
+    } else if (roll < 0.55) {               // gate over two adjacent lanes
+      if (Math.random() < 0.5) addGate(0, 1, w0); else addGate(1, 2, w0);
+    } else if (roll < 0.75) {               // single pillar
+      addPillar(ri(3) - 1, w0);
+    } else {                                // shard line
+      const l = ri(3) - 1;
+      for (let k = 0; k < 4; k++) addShard(l, w0 + k * 3, 0);
+      depth = 10;
+    }
+  } else {
+    if (roll < 0.2) {                       // twin blocks, one open lane
+      const open = ri(3);
+      for (let l = 0; l < 3; l++) if (l !== open) addBlock(l, w0);
+    } else if (roll < 0.38) {               // adjacent gate
+      if (Math.random() < 0.5) addGate(0, 1, w0); else addGate(1, 2, w0);
+    } else if (roll < 0.54) {               // pillar + block combo (never same lane)
+      const a = ri(3) - 1;
+      addPillar(a, w0);
+      const others = [-1, 0, 1].filter((x) => x !== a);   // both other lanes
+      addBlock(others[ri(2)], w0 + gap);
+    } else if (roll < 0.72) {               // zigzag: three single-block rows
+      const l1 = ri(3) - 1;
+      const l2 = l1 === 0 ? 1 : (l1 === 1 ? 0 : -1);
+      addBlock(l1, w0);
+      addBlock(l2, w0 + gap);
+      addBlock(l1 === 0 ? 1 : 0, w0 + 2 * gap);
+      depth = 2 * gap;
+    } else if (roll < 0.88) {               // jump arc of shards
+      const l = ri(3) - 1;
+      const offs = [0, 2.6, 5.2, 7.8], ys = [0.2, 1.1, 1.5, 1.1];
+      for (let k = 0; k < 4; k++) addShard(l, w0 + offs[k], ys[k]);
+      depth = 9;
+    } else {                                // twin pillars, one open lane
+      const open = ri(3);
+      let added = 0;
+      for (let l = 0; l < 3 && added < 2; l++) if (l !== open) { addPillar(l, w0); added++; }
+    }
+  }
+  return depth;
+}
+
+/* =====================================================================
+   14. SIMULATION STEP (fixed 1/120 s)
+   ===================================================================== */
+function die() {
+  state = ST_DEAD;
+  hitStop = 0.08;                       // 80 ms hit-stop
+  shake = REDUCED ? 0.15 : 1;
+  deadTime = 0;
+  burst(player.x, curveY(s) + player.jumpY + 0.6, 0, 46, 0xff7a4d, 9, 0.9);
+  burst(player.x, curveY(s) + player.jumpY + 0.6, 0, 14, 0xffffff, 5, 0.6);
+  core.visible = wire.visible = board.visible = boardGlow.visible = halo.visible = false;
+  playerRig.visible = false;
+  marker.visible = false;
+  audio.crash(); audio.setRunning(false);
+  if (score > best) { best = score; store.set('prism-runner.best', String(best)); }
+  ui.deadScore.textContent = String(Math.floor(score));
+  ui.deadBest.textContent = String(best);
+  ui.deadShards.textContent = String(shardCount);
+}
+
+function step(dt) {
+  playTime += dt;
+  speed = clamp(speed + SPEED_RAMP * dt, 0, SPEED_MAX);
+  s += speed * dt;
+
+  /* spawn ahead — pattern starts are >= speed*MIN_REACTION apart */
+  const react = playTime < EASE_TIME ? MIN_REACTION * 1.6 : MIN_REACTION;
+  while (nextW < s + SPAWN_AHEAD) {
+    const depth = spawnPattern(nextW);
+    nextW += depth + speed * react + 4;
+  }
+
+  /* player lateral: damped approach with snap-on-arrive */
+  const tx = player.lane * LANE_WIDTH;
+  player.x = THREE.MathUtils.damp(player.x, tx, 16, dt);
+  if (Math.abs(player.x - tx) < 0.01) player.x = tx;
+
+  /* player vertical */
+  if (!player.grounded || player.vy !== 0) {
+    player.vy -= GRAVITY * dt;
+    player.jumpY += player.vy * dt;
+    if (player.jumpY <= 0) {
+      player.jumpY = 0; player.vy = 0; player.grounded = true;
+      if (!REDUCED) fovKick = 4;
+      audio.land();
+    }
+  }
+  if (player.slideT > 0) player.slideT -= dt;
+
+  /* NaN guard — if anything went non-finite, snap back to a sane state */
+  if (!Number.isFinite(player.x) || !Number.isFinite(player.jumpY) || !Number.isFinite(s)) {
+    player.x = tx; player.jumpY = 0; player.vy = 0; player.grounded = true;
+  }
+
+  /* obstacles: collide + recycle (swap-pop keeps this allocation-free) */
+  const py0 = player.jumpY;                                   // player bottom
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    const o = obstacles[i];
+    const z = s - o.w;                                        // screen z
+    if (z > RECYCLE_BEHIND) {
+      obstacles[i] = obstacles[obstacles.length - 1]; obstacles.pop(); obPool.push(o);
+      continue;
+    }
+    if (z < -1.2 || z > 1.2) continue;
+    if (Math.abs(player.x - o.x) > 1.05) continue;            // lateral miss
+    if (o.kind === KIND_BLOCK && py0 < BLOCK_H - 0.2) { die(); return; }
+    if (o.kind === KIND_PILLAR) { die(); return; }
+    if (o.kind === KIND_GATE && player.slideT <= 0) { die(); return; }
+  }
+
+  /* shards: collect + recycle */
+  const pcY = curveY(s) + player.jumpY + 0.8;
+  for (let i = shards.length - 1; i >= 0; i--) {
+    const sh = shards[i];
+    const z = s - sh.w;
+    if (z > RECYCLE_BEHIND) {
+      shards[i] = shards[shards.length - 1]; shards.pop(); shardPool.push(sh);
+      continue;
+    }
+    if (z < -1.2 || z > 1.2) continue;
+    if (Math.abs(player.x - laneX(sh.lane)) > 1.0) continue;
+    const sy = curveY(sh.w) + 1.3 + sh.yOff;
+    if (Math.abs(pcY - sy) > 1.5) continue;
+    shardCount++; streak++;
+    mult = Math.min(MULT_MAX, 1 + (streak / MULT_STEP | 0));
+    score += SHARD_SCORE * mult;
+    burst(laneX(sh.lane), sy, 0, 10, 0x53fff0, 5, 0.55);
+    audio.pick(streak);
+    shards[i] = shards[shards.length - 1]; shards.pop(); shardPool.push(sh);
+  }
+
+  score += speed * dt;   // distance points
+}
+
+/* gentle drift for the title screen (no spawns, no collisions) */
+function titleStep(dt) {
+  s += SPEED_START * 0.45 * dt;
+  if (!Number.isFinite(s)) s = 0;
+}
+
+/* =====================================================================
+   15. INPUT — keyboard + touch (listeners attached once, page lifetime)
+   ===================================================================== */
+function tryMove(dir) {
+  if (state !== ST_PLAY) return;
+  const nl = clamp(player.lane + dir, -1, 1);
+  if (nl !== player.lane) { player.lane = nl; audio.whoosh(0.25); }
+}
+function tryJump() {
+  if (state !== ST_PLAY || !player.grounded) return;
+  player.grounded = false;
+  player.vy = JUMP_V;
+  audio.jump();
+}
+function trySlide() {
+  if (state !== ST_PLAY || !player.grounded || player.slideT > 0) return;
+  player.slideT = SLIDE_TIME;
+  audio.whoosh(0.4);
+}
+function startOrRestart() {
+  if (state === ST_TITLE) startGame();
+  else if (state === ST_DEAD && deadTime > 0.5) startGame();
+}
+
+window.addEventListener('keydown', (e) => {
+  const c = e.code;
+  if (c === 'Space' || c === 'ArrowLeft' || c === 'ArrowRight' || c === 'ArrowUp' || c === 'ArrowDown') e.preventDefault();
+  if (e.repeat && c !== 'KeyP' && c !== 'Escape') return;   // no key-repeat spam
+  audio.ensure(); if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+  switch (c) {
+    case 'ArrowLeft': case 'KeyA': tryMove(-1); break;
+    case 'ArrowRight': case 'KeyD': tryMove(1); break;
+    case 'ArrowUp': case 'KeyW': case 'Space':
+      if (state === ST_TITLE || state === ST_DEAD) startOrRestart();
+      else tryJump();
+      break;
+    case 'ArrowDown': case 'KeyS': trySlide(); break;
+    case 'KeyP': case 'Escape':
+      if (state === ST_PLAY || state === ST_PAUSE) togglePause();
+      break;
+    case 'KeyR':
+      if (state === ST_DEAD || state === ST_PLAY || state === ST_PAUSE) startGame();
+      break;
+    case 'KeyM': toggleMute(); break;
+    case 'Enter': startOrRestart(); break;
+  }
+}, { passive: false });
+
+/* touch: swipe moves, tap starts/restarts/pauses-resumes */
+let tX = 0, tY = 0, tT = 0;
+window.addEventListener('touchstart', (e) => {
+  audio.ensure(); if (audio.ctx && audio.ctx.state === 'suspended') audio.ctx.resume();
+  if (e.touches.length !== 1) return;
+  tX = e.touches[0].clientX; tY = e.touches[0].clientY; tT = performance.now();
+}, { passive: true });
+window.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+window.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - tX;
+  const dy = e.changedTouches[0].clientY - tY;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+  if (Math.max(adx, ady) > 28) {                            // swipe
+    if (adx > ady) tryMove(dx > 0 ? 1 : -1);
+    else if (dy < 0) { if (state === ST_PLAY) tryJump(); }
+    else trySlide();
+  } else if (performance.now() - tT < 400) {                // tap
+    if (state === ST_TITLE || state === ST_DEAD) startOrRestart();
+    else if (state === ST_PAUSE) togglePause();
+  }
+});
+
+/* clicking an overlay acts like a tap */
+ui.title.addEventListener('pointerdown', startOrRestart);
+ui.dead.addEventListener('pointerdown', startOrRestart);
+ui.paused.addEventListener('pointerdown', togglePause);
+
+/* auto-pause when the tab loses focus */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && state === ST_PLAY) togglePause();
+});
+window.addEventListener('blur', () => { if (state === ST_PLAY) togglePause(); });
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* =====================================================================
+   16. WORLD MESH SYNC + CAMERA (runs every rendered frame)
+   ===================================================================== */
+function syncWorld() {
+  /* track segments + rails */
+  for (let i = 0; i < NUM_SEGS; i++) {
+    let w = segW[i];
+    let z = s - w;
+    if (z > RECYCLE_BEHIND) { w = segW[i] = w + NUM_SEGS * SEG_LEN; z = s - w; }
+    const y = curveY(w);
+    const slope = (curveY(w + 2) - curveY(w - 2)) / 4;
+    _e.set(Math.atan(slope), 0, 0);
+    _q.setFromEuler(_e);
+    _v3.set(0, y, z);
+    _m4.compose(_v3, _q, _v3b.set(1, 1, 1));
+    segMesh.setMatrixAt(i, _m4);
+    for (let sd = 0; sd < 2; sd++) {
+      _v3.set((sd ? 1 : -1) * TRACK_WIDTH / 2, y + 0.12, z);
+      _m4.compose(_v3, _q, _v3b.set(1, 1, 1));
+      railMesh.setMatrixAt(i * 2 + sd, _m4);
+    }
+  }
+  segMesh.instanceMatrix.needsUpdate = true;
+  railMesh.instanceMatrix.needsUpdate = true;
+
+  /* pillars */
+  for (let i = 0; i < PIL_N; i++) {
+    let w = pilW[i];
+    let z = s - w;
+    if (z > RECYCLE_BEHIND) { w = pilW[i] = w + PIL_N * PIL_SPACE; z = s - w; }
+    const y = curveY(w) + 2.4;
+    for (let sd = 0; sd < 2; sd++) {
+      _v3.set((sd ? 1 : -1) * (TRACK_WIDTH / 2 + 2.6), y, z);
+      _m4.compose(_v3, _zeroQ, _v3b.set(1, 1, 1));
+      pilMesh.setMatrixAt(i * 2 + sd, _m4);
+    }
+  }
+  pilMesh.instanceMatrix.needsUpdate = true;
+
+  /* obstacles */
+  const cb = [0, 0, 0];   // per-kind instance counters (small fixed array)
+  for (let i = 0; i < obstacles.length; i++) {
+    const o = obstacles[i];
+    const z = s - o.w;
+    const y = curveY(o.w);
+    const k = o.kind;
+    let sx = 1, sy = 1, sz = 1, cy = y;
+    if (k === KIND_BLOCK)  { sx = BLOCK_W; sy = BLOCK_H; sz = BLOCK_D; cy = y + BLOCK_H / 2; }
+    if (k === KIND_GATE)   { sx = o.halfW * 2; sy = 0.75; sz = 1.4; cy = y + GATE_BOT + 0.375; }
+    if (k === KIND_PILLAR) { sx = 1.3; sy = PILLAR_H; sz = 1.3; cy = y + PILLAR_H / 2; }
+    _v3.set(o.x, cy, z);
+    _m4.compose(_v3, _zeroQ, _v3b.set(sx, sy, sz));
+    obMeshes[k].setMatrixAt(cb[k], _m4);
+    cb[k]++;
+  }
+  for (let k = 0; k < 3; k++) { obMeshes[k].count = cb[k]; obMeshes[k].instanceMatrix.needsUpdate = true; }
+
+  /* shards */
+  let sc = 0;
+  const spin = s * 0.35;
+  for (let i = 0; i < shards.length; i++) {
+    const sh = shards[i];
+    const z = s - sh.w;
+    _e.set(spin + sh.w, spin * 1.4 + sh.w * 0.5, 0);
+    _q.setFromEuler(_e);
+    _v3.set(laneX(sh.lane), curveY(sh.w) + 1.3 + sh.yOff, z);
+    _m4.compose(_v3, _q, _v3b.set(1, 1, 1));
+    shardMesh.setMatrixAt(sc, _m4);
+    sc++;
+  }
+  shardMesh.count = sc;
+  shardMesh.instanceMatrix.needsUpdate = true;
+}
+
+function syncPlayer(t, dt) {
+  const gy = curveY(s);
+  const py = gy + 0.32 + player.jumpY;
+  const sliding = player.slideT > 0;
+  playerRig.position.set(player.x, py, 0);
+  core.rotation.x = t * 1.9; core.rotation.y = t * 2.6; wire.rotation.copy(core.rotation);
+  const squash = sliding ? 0.45 : 1;
+  core.scale.set(1, squash, 1); wire.scale.set(1.001, squash * 1.001, 1.001);
+  board.position.y = -0.55 / squash;
+  board.rotation.z = (player.lane * LANE_WIDTH - player.x) * -0.18;
+  boardGlow.position.y = -0.62 / squash;
+  const pulse = 0.35 + Math.sin(t * 6) * 0.08;
+  halo.material.opacity = pulse;
+  halo.position.z = 0.1;
+
+  /* ground marker shrinks/fades with jump height */
+  marker.position.set(player.x, gy + 0.06, 0);
+  const hFrac = clamp(player.jumpY / (JUMP_V * JUMP_V / (2 * GRAVITY)), 0, 1);
+  marker.scale.setScalar(1.25 - hFrac * 0.6);
+  markerMat.opacity = 0.4 - hFrac * 0.28;
+  marker.visible = playerRig.visible;
+
+  /* spring-damped camera with speed FOV + roll on lane change */
+  const lam = REDUCED ? 12 : 7;
+  const cx = THREE.MathUtils.damp(camera.position.x, player.x * 0.5, lam, dt);
+  const cy = THREE.MathUtils.damp(camera.position.y, py + 2.6, lam, dt);
+  camera.position.set(cx, cy, 8.4);
+  if (!REDUCED && shake > 0.001) {
+    camera.position.x += (Math.random() - 0.5) * shake * 0.5;
+    camera.position.y += (Math.random() - 0.5) * shake * 0.5;
+  }
+  fovKick = THREE.MathUtils.damp(fovKick, 0, 8, dt);
+  const targetFov = REDUCED ? FOV_BASE
+    : FOV_BASE + (speed - SPEED_START) * 0.42 + fovKick;
+  camera.fov = THREE.MathUtils.damp(camera.fov, targetFov, 4, dt);
+  camera.updateProjectionMatrix();
+  _v3.set(player.x * 0.78, py + 1.2, -5);
+  camera.lookAt(_v3);
+  const roll = clamp((player.lane * LANE_WIDTH - player.x) * -0.045, -0.14, 0.14);
+  camera.rotation.z += REDUCED ? 0 : roll;
+  shake = Math.max(0, shake - dt * 2.2);
+}
+
+/* =====================================================================
+   17. HUD
+   ===================================================================== */
+let shownScore = -1, shownMult = -1, shownShards = -1, shownMeter = -1;
+function updateHUD(force) {
+  const sc = Math.floor(score);
+  if (force || sc !== shownScore) {
+    shownScore = sc;
+    ui.score.textContent = String(sc);
+    ui.best.textContent = String(best);
+    ui.bestTitle.textContent = String(best);
+  }
+  if (force || mult !== shownMult) { shownMult = mult; ui.mult.textContent = 'x' + mult + ' COMBO'; }
+  if (force || shardCount !== shownShards) { shownShards = shardCount; ui.shardsH.textContent = String(shardCount); }
+  const mt = (speed / SPEED_MAX * 100) | 0;
+  if (force || mt !== shownMeter) { shownMeter = mt; ui.meter.textContent = 'SPD ' + mt + '%'; }
+}
+
+/* =====================================================================
+   18. MAIN LOOP — fixed-timestep accumulator, clamped delta
+   ===================================================================== */
+let frameDt = 0.016;
+function frame(tms) {
+  requestAnimationFrame(frame);
+  const now = tms * 0.001;
+  frameDt = clamp(now - lastT, 0, MAX_FRAME_DT);
+  lastT = now;
+
+  if (hitStop > 0) {                     // 80 ms freeze on collision
+    hitStop -= frameDt;
+  } else if (state === ST_PLAY) {
+    acc += frameDt;
+    let n = 0;
+    while (acc >= STEP && n < 20) { step(STEP); acc -= STEP; n++; if (state !== ST_PLAY) break; }
+    if (acc > 0.5) acc = 0;              // safety: never spiral
+  } else if (state === ST_TITLE) {
+    acc += frameDt;
+    while (acc >= STEP) { titleStep(STEP); acc -= STEP; }
+  } else if (state === ST_DEAD) {
+    deadTime += frameDt;
+    if (deadTime > 0.35 && ui.dead.classList.contains('hidden')) ui.dead.classList.remove('hidden');
+  }
+  /* ST_PAUSE: nothing simulates; world stays frozen */
+
+  const t = now;
+  syncWorld();
+  syncPlayer(t, frameDt);
+  updateParticles(frameDt);
+  if (state === ST_PLAY) updateHUD(false);
+
+  renderer.render(scene, camera);
+}
+
+/* =====================================================================
+   19. BOOT
+   ===================================================================== */
+resetWorld();
+ui.bestTitle.textContent = String(best);
+ui.best.textContent = String(best);
+requestAnimationFrame((t) => { lastT = t * 0.001; requestAnimationFrame(frame); });
+</script>
+</body>
+</html>

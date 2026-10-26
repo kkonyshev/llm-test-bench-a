@@ -1,0 +1,20 @@
+Project Maya v1.1.28 benchmark, 2026-10-25 22:14
+GPUs: NVIDIA GeForce RTX 5090 32 GB, NVIDIA GeForce RTX 5070 Ti 16 GB; RAM 123 GB; CPU AMD Ryzen 7 9800X3D 8-Core Processor
+setup: maya-ds4.json, context 1048576, GPUs [0, 1]
+decode (writing the answer): mean 18.7 tokens/s over 3 answers of 256 tokens (greedy, thinking off)
+    20.7 tokens/s  Write a Python function that parses a CSV file into a list of dictionaries, with type hints and a docstring.
+    19.9 tokens/s  Explain how photosynthesis works, step by step, for a high-school student.
+    15.6 tokens/s  Write a complete HTML page with a canvas that draws a bouncing ball animation in JavaScript.
+prefill (reading the prompt): 167 tokens/s, 2048 tokens
+prefill (reading the prompt): 527 tokens/s, 8192 tokens
+
+engine lines:
+ds4: the one-GPU decode path (in-place pulls, windows streamed, landings): off (v1.1.27's path: not Linux + NVIDIA + one GPU)
+ds4: the experts VRAM leaves over (~138.4 GB) are read in place from the model's files (copied into RAM after the GPUs' share when the RAM holds them all; --mmap-experts on keeps them in place) (121.4 GB of RAM free to keep them: the most-routed 112.8 GB read ahead; prompts in chunks of 8192)
+ds4: CUDA0 layers [0, 21]: weights 4.43 GB, experts 22.58 GB (2050 of 8448 in VRAM), caches 0.97 GB, 579 MiB free
+ds4: CUDA1 layers [22, 39] + head: weights 4.04 GB, experts 8.02 GB (717 of 6912 in VRAM), caches 0.39 GB, 589 MiB free
+ds4: 12593 routed experts on the CPU lane (138.9 GB, in place in the model's files), 8 threads
+ds4: CUDA0 prompt attention on the tensor cores (sm_120)
+ds4: CUDA0 busy experts (64 rows or more) as FP16 GEMMs, 1024 rows a piece, FFN up to 2304 (77 MB)
+ds4: CUDA1 prompt attention on the tensor cores (sm_120)
+ds4: CUDA1 busy experts (64 rows or more) as FP16 GEMMs, 1024 rows a piece, FFN up to 2304 (77 MB)

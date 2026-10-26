@@ -60,12 +60,12 @@ first Machine 3 runs. These are the numbers to use when comparing against other 
 |---|---|
 | Motherboard | ASUS ProArt X870E-CREATOR WIFI |
 | CPU | AMD Ryzen 7 9800X3D, 8 cores / 16 threads, up to 5.27 GHz, 96 MB L3 (3D V-Cache) |
-| System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel, **3600 MT/s** configured (`dmidecode`); theoretical bandwidth 57.6 GB/s. Four DIMMs run well below DDR5's rated speeds; at 4800-5600 MT/s, models spilling to RAM would gain roughly a third or more |
-| RAM bandwidth, effective | **~40 GB/s** (~70% of theoretical), derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s |
+| System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel. **3600 MT/s** until 2026-10-25; since then **6400 MT/s** with the EXPO I profile (CL40-40-40-84, VDD/VDDQ 1.35 V; `dmidecode`: Speed 5600, Configured 6400). Four DIMMs at 6400 is aggressive: stability-test before trusting long runs. Every coding and reasoning result in `RESULTS.md` was measured at 3600 |
+| RAM bandwidth, effective | **~40 GB/s** (~70% of theoretical), derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s (at 3600 MT/s). At 6400 MT/s it was not re-measured directly; Maya's DeepSeek decode rose +12% and prefill +30-36% (`engine-bench-maya/`) |
 | RAM bandwidth ceiling | The 9800X3D has a single CCD; its Infinity Fabric link reads about 60-65 GB/s whatever the memory speed. EXPO at 5200-5600 MT/s would bring the effective figure close to that (+20-35% for models spilling to RAM); two DIMMs at 6000-6400 would add only ~5-10% more while halving capacity |
 | GPU 0 | NVIDIA GeForce RTX 5090: 32 GB GDDR7, 512-bit, **1,792 GB/s**, 21,760 CUDA cores, Blackwell (SM 12.0) |
 | GPU 1 | NVIDIA GeForce RTX 5070 Ti: 16 GB GDDR7, 256-bit, **896 GB/s**, 8,960 CUDA cores, Blackwell (SM 12.0) |
-| PCIe | 5.0, both cards at x8 (the board splits the CPU's x16 lanes x8/x8 with two cards) |
+| PCIe | With two cards the board splits the slots x8/x8. Under load `nvidia-smi` shows the **5090 at PCIe 5.0 x8** and the **5070 Ti at PCIe 3.0 x8**. Maya measured host-to-card copies at **26.6 GB/s vs 6.7 GB/s**. This is why GLM's prefill drops 29-49% when the 5070 Ti joins (`engine-bench-maya/`) |
 | GPU driver | 615.71.09 |
 | Ollama | 0.40.5, native install, `OLLAMA_CONTEXT_LENGTH=65536`; the benchmarks pass `num_ctx=32768` |
 | Other engines | Strata 0.1.44 / 0.1.45 (Qwen3.8-Flash-Next), PrismML llama.cpp fork (Ternary Bonsai) |
@@ -139,3 +139,32 @@ active experts.
   same-model repeat runs (GLM-4.7-Flash, DeepSeek-Coder-V2-Lite, Qwen2.5-72B)
   that landed on different bugs/scores each time, confirming this isn't
   hypothetical.
+
+## Machine 4 (planned): Lenovo P620
+
+Bought from a refurbisher in October 2026 and not measured yet. **All speeds below are estimates**
+from the Machine 3 logs, which split each token's time into a GPU part and a CPU-expert part.
+Expect ±20%.
+
+| Field | Value |
+|---|---|
+| CPU | AMD Threadripper PRO 3995WX: 64 cores, 8 CCDs, 256 MB L3 (confirmed from the seller's screenshots) |
+| RAM | Ships with 2 x 16 GB DDR4-3200 RDIMM. The plan is **8 x 32 GB DDR4-3200 RDIMM (256 GB)**, one per channel: 204.8 GB/s theoretical, ~110-130 GB/s expected for llama.cpp and Maya expert reads. Mixed sizes (2 x 16 + 6 x 32 = 224 GB) would interleave over 8 channels only for the first 128 GB and over 6 above that: ~88% of the bandwidth and ~5-8% slower decode |
+| PSU | 1000 W: enough for one 5090 plus the CPU (~855 W), tight with a second card |
+| PCIe | 4.0 x16 per slot: the same bandwidth the 5090 has now, ~4x what the 5070 Ti has |
+| Storage | 500 GB NVMe (Kingston NV3, new) |
+
+Expected decode, tok/s:
+
+| Model | Machine 3, measured | P620 + 5090 | P620 + 5090 + 5070 Ti |
+|---|---|---|---|
+| DeepSeek-V4.1-Flash (Maya), fits in RAM | 20.7 | ~35-40 | ~35-40 (the second card is within the error) |
+| GLM-5.3-Flash Maya-M (Maya) | 31.9 / 40 | ~38-45 | ~45-55, and prefill is no longer penalised |
+| GLM-5.3-Flash Maya-L (156 GB) | does not fit | ~28-35 | - |
+| Mistral Large 3 675B UD-Q2_K_XL (llama.cpp, experts in RAM) | ~2-4 (NVMe-bound) | ~10-12 | ~11-14 |
+| Dense 120B+ (Devstral 2, CPU-bound) | 0.8 | ~2.5-3 | - |
+
+Why the gain is not larger: on Machine 3, roughly 15-20 ms of each DeepSeek token is GPU work and
+synchronisation, which the P620 does not change. That caps DeepSeek near ~50 tok/s even with an
+infinitely fast CPU. Models that fit entirely in VRAM (Nanbeige 33B, Devstral Small 2, the 30B MoEs)
+gain nothing from the P620.

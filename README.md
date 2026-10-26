@@ -27,6 +27,17 @@ local-llm-bench/
     └── run_bench.sh        (calls Ollama, runs the grader)
 ```
 
+## Beyond the two benchmarks
+
+- [`prism-runner/`](prism-runner/): a long **agentic** task. Ten local models each get one prompt
+  in Open WebUI with a terminal attached and must build, save and verify a single-file Three.js
+  game. Recorded: wall time, tokens, resources, tool behaviour, and whether the game actually runs.
+- [`engine-bench-maya/`](engine-bench-maya/): Project Maya's built-in benchmark for
+  DeepSeek-V4.1-Flash and GLM-5.3-Flash on one or two GPUs, at several context sizes and RAM
+  speeds, plus the PCIe finding.
+- `HARDWARE.md` also has estimates for the planned Lenovo P620 (Threadripper PRO 3995WX,
+  8-channel DDR4).
+
 ## Quick start (reproducing on new hardware)
 
 ```bash
