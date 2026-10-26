@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>PRISM RUNNER</title>
+<meta name="description" content="Single-file WebGL neon endless runner. Three.js pinned via import map; geometry, textures and audio are generated in code."/>
+<!--
+  PRISM RUNNER — one HTML file, one render pass, no external assets except pinned three.js.
+  Run:   python3 -m http.server 8000   ->   http://localhost:8000/prism-runner.html
+  Works from file:// as well (the module script is inline; only three.js is fetched from the CDN).
+  Automated-test hook: window.__prism = { state, score, speed, distance } — read-only getters.
+-->
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#04040c;
+    font-family:"Segoe UI", system-ui, -apple-system, sans-serif; color:#cfefff;
+    -webkit-user-select:none; user-select:none; }
+  #c { position:fixed; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+
+  /* Vignette + scanlines are pure CSS — keeps the renderer at exactly one pass. */
+  #vig { position:fixed; inset:0; pointer-events:none; z-index:4;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(2,2,10,0.62) 100%); }
+  #scan { position:fixed; inset:0; pointer-events:none; z-index:4; opacity:.5; mix-blend-mode:overlay;
+    background:repeating-linear-gradient(0deg, rgba(180,240,255,0.05) 0px, rgba(180,240,255,0.05) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px); }
+
+  #hud { position:fixed; top:12px; left:14px; right:14px; z-index:5; pointer-events:none;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    text-shadow:0 0 12px rgba(60,220,255,.8), 0 1px 2px #000; }
+  #score { font-size:clamp(26px,5vw,44px); font-weight:700; letter-spacing:.06em; color:#e8fbff; }
+  #mult  { font-size:clamp(14px,2.6vw,20px); font-weight:600; color:#ffd94a; text-shadow:0 0 10px rgba(255,210,60,.9); }
+  #best  { font-size:clamp(11px,2.2vw,15px); text-align:right; color:#7fd8ff; opacity:.85; line-height:1.5; white-space:pre-line; }
+
+  #ov { position:fixed; inset:0; z-index:6; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(ellipse at center, rgba(6,8,20,0.55) 0%, rgba(2,3,10,0.88) 100%); }
+  #ov.hidden { display:none; }
+  .panel { text-align:center; padding:28px 34px; border:1px solid rgba(70,220,255,.35); border-radius:14px;
+    background:rgba(5,8,18,0.72); box-shadow:0 0 44px rgba(40,180,255,.22), inset 0 0 30px rgba(40,180,255,.06);
+    max-width:min(88vw,560px); }
+  .ttl { font-size:clamp(30px,7vw,54px); font-weight:800; letter-spacing:.14em; margin:0 0 6px;
+    color:#bfe9ff; text-shadow:0 0 18px rgba(60,210,255,.9), 0 0 46px rgba(255,60,160,.4); }
+  .sub { font-size:clamp(12px,2.6vw,15px); color:#9fd8f2; margin:10px 0 18px; letter-spacing:.08em; }
+  .keys { display:grid; grid-template-columns:auto auto; gap:4px 14px; font-size:clamp(11px,2.4vw,14px);
+    text-align:left; margin:0 auto 18px; width:max-content; color:#a9cfe2; }
+  .keys b { color:#e6f7ff; font-weight:600; }
+  .big { font-size:clamp(15px,3.4vw,20px); color:#7dffd0; animation:pulse 1.6s ease-in-out infinite; }
+  .stat { font-size:clamp(16px,3.4vw,22px); margin:6px 0; }
+  .rec { color:#ffd94a; font-size:clamp(12px,2.6vw,15px); }
+  @keyframes pulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+
+  #fatal { position:fixed; inset:0; z-index:9; display:none; align-items:center; justify-content:center;
+    background:#04040c; color:#ff9db4; font-size:18px; padding:30px; text-align:center; line-height:1.6; }
+</style>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div><div id="scan"></div>
+<div id="hud" aria-hidden="true">
+  <div>
+    <div id="score">0</div>
+    <div id="mult">&times;1</div>
+  </div>
+  <div id="best"></div>
+</div>
+<div id="ov"></div>
+<div id="fatal"></div>
+
+<script type="module">
+'use strict';
+import * as THREE from 'three';
+
+// ============================================================
+// 1. TUNING CONSTANTS — tweak the game here
+// ============================================================
+const SPEED_START    = 11;      // m/s at t=0
+const SPEED_MAX      = 30;      // hard cap
+const SPEED_ACCEL    = 0.05;    // m/s gained per metre travelled (after warmup)
+const WARMUP_DIST    = 160;     // metres of gentle intro (~15 s)
+const WARMUP_GAP_MUL = 1.6;     // pattern spacing multiplier during warmup
+const LANE_WIDTH     = 2.4;
+const LANE_SPEED     = 15;      // exponential approach rate for lane changes
+const GRAVITY        = -30;     // m/s^2
+const JUMP_V         = 11.5;    // apex ~2.2 m, airtime ~0.77 s
+const DIVE_V         = -26;     // downward boost when sliding in the air
+const SLIDE_TIME     = 0.4;     // s
+const JUMP_BUFFER    = 0.12;    // s of pre-landing jump buffering
+const HOVER          = 0.95;    // player centre height above surface
+const PLAYER_R       = 0.45;    // sphere hitbox radius
+const SLIDE_HALF     = 0.3;     // hitbox half-height while sliding
+const SPAWN_AHEAD    = 150;     // m of visible generation horizon
+const RECYCLE_Z      = 14;      // m behind the player where objects die
+const MIN_REACTION   = 0.95;    // s minimum between consecutive pattern starts
+const GAP_SAFETY     = 1.15;    // extra margin over MIN_REACTION (speed keeps rising)
+const MIN_GAP        = 17;      // m floor between patterns
+const STEP           = 1 / 120; // fixed simulation timestep
+const MAX_FRAME      = 0.1;     // clamped wall-clock delta
+const SEG_LEN        = 24;      // track segment length
+const SEG_COUNT      = 8;       // pooled segments (covers SPAWN_AHEAD + recycle)
+const TRACK_HALF     = 4.2;
+const GROUND_AMP     = 0.5, GROUND_F = 0.021;  // vertical curvature of the track
+const CAM_BACK       = 9.5, CAM_H = 3.4, CAM_LOOK_H = 1.7;
+const FOV_BASE       = 70, FOV_PUNCH = 9;
+const HIT_STOP       = 0.08;    // s of freeze on collision
+const DEATH_TIME     = 1.1;     // s of death animation before the overlay
+const SHARD_SCORE    = 10;
+const MULT_MAX       = 8;
+const OB_CAP = 24, SHARD_CAP = 90, PART_CAP = 140, PAT_CAP = 16;
+
+// ============================================================
+// 2. SMALL UTILITIES
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+const laneX = (l) => (l - 1) * LANE_WIDTH;
+const groundY = (z) => GROUND_AMP * Math.sin(z * GROUND_F);
+const rand = Math.random;
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode: ignore */ } },
+};
+
+// ============================================================
+// 3. GAME STATE (module scope — nothing else touches window)
+// ============================================================
+const TITLE = 'title', PLAYING = 'playing', PAUSED = 'paused', DEAD = 'dead';
+let state = TITLE;
+let dist = 0, speed = SPEED_START, score = 0, shardsN = 0, streak = 0, mult = 1, pickupIdx = 0;
+let best = parseInt(store.get('prism_best', '0'), 10) || 0;
+let freeze = 0;                       // hit-stop countdown
+let deathT = 0, deathSpeed = 0, deadOvShown = false, newBest = false;
+let nextPatternDist = 0, clockT = 0, hudT = 0;
+const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const player = { x: 0, vx: 0, y: HOVER, vy: 0, slideT: 0, jumpBuf: 0, lane: 1, laneTarget: 1, tumble: 0 };
+
+// ============================================================
+// 4. AUDIO — fully synthesized, starts only after a user gesture
+// ============================================================
+let AC = null, master = null, droneGain = null, noiseBuf = null;
+let muted = store.get('prism_muted', '0') === '1';
+
+function audioInit() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+  master = AC.createGain();
+  master.gain.value = muted ? 0 : 0.5;
+  master.connect(AC.destination);
+  // Music bed: two detuned saws through a slow-sweeping lowpass.
+  droneGain = AC.createGain(); droneGain.gain.value = 0.05; droneGain.connect(master);
+  const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 220; lp.Q.value = 6;
+  lp.connect(droneGain);
+  const o1 = AC.createOscillator(); o1.type = 'sawtooth'; o1.frequency.value = 52;
+  const o2 = AC.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = 52.7;
+  o1.connect(lp); o2.connect(lp); o1.start(); o2.start();
+  const lfo = AC.createOscillator(); lfo.frequency.value = 0.11;
+  const lfoG = AC.createGain(); lfoG.gain.value = 120;
+  lfo.connect(lfoG); lfoG.connect(lp.frequency); lfo.start();
+  // One shared noise buffer (created once, reused by every noise voice).
+  noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = rand() * 2 - 1;
+}
+
+function tone(f1, f2, dur, vol, type) {
+  if (!AC) return;
+  const t = AC.currentTime;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(1, f2), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function noise(dur, vol, freq) {
+  if (!AC) return;
+  const t = AC.currentTime;
+  const s = AC.createBufferSource(); s.buffer = noiseBuf;
+  const f = AC.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 1.2;
+  const g = AC.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f); f.connect(g); g.connect(master);
+  s.start(t); s.stop(t + dur + 0.02);
+}
+const sJump  = () => tone(300, 640, 0.16, 0.22, 'square');
+const sLane  = () => noise(0.12, 0.16, 1400);
+const sSlide = () => noise(0.2, 0.2, 500);
+const sShard = () => tone(523.25 * Math.pow(2, Math.min(pickupIdx, 12) / 12), 1046, 0.14, 0.2, 'triangle');
+const sClear = () => tone(700, 1100, 0.18, 0.16, 'triangle');
+const sCrash = () => { noise(0.5, 0.5, 300); tone(180, 40, 0.45, 0.4, 'sawtooth'); };
+
+function toggleMute() {
+  muted = !muted;
+  store.set('prism_muted', muted ? '1' : '0');
+  if (master) master.gain.value = muted ? 0 : 0.5;
+  renderHud();
+}
+
+// ============================================================
+// 5. RENDERER / SCENE / WORLD
+// ============================================================
+const cvs = $('c');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: false });
+} catch (e) {
+  renderer = null;
+}
+if (!renderer || !renderer.getContext()) {
+  const f = $('fatal');
+  f.style.display = 'flex';
+  f.textContent = 'PRISM RUNNER needs WebGL, and this browser did not provide it. Try a recent Chrome/Firefox/Safari with hardware acceleration enabled.';
+  throw new Error('no-webgl');
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const BG = 0x05060f;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(BG);
+scene.fog = new THREE.Fog(BG, 42, 138);
+const camera = new THREE.PerspectiveCamera(FOV_BASE, window.innerWidth / window.innerHeight, 0.1, 260);
+
+scene.add(new THREE.HemisphereLight(0x28406a, 0x090a12, 1.0));
+const dir = new THREE.DirectionalLight(0x86b8ff, 0.8);
+dir.position.set(4, 9, 2);
+scene.add(dir);
+
+function gridTexture() {
+  const s = 256, c = document.createElement('canvas');
+  c.width = c.height = s;
+  const g = c.getContext('2d');
+  g.fillStyle = '#0a1022'; g.fillRect(0, 0, s, s);
+  g.strokeStyle = 'rgba(70,225,255,0.9)'; g.lineWidth = 4;
+  g.strokeRect(1, 1, s - 2, s - 2);
+  g.strokeStyle = 'rgba(70,225,255,0.18)'; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(s / 2, 0); g.lineTo(s / 2, s); g.moveTo(0, s / 2); g.lineTo(s, s / 2); g.stroke();
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set((2 * TRACK_HALF) / 2.8, SEG_LEN / 2);
+  t.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+  return t;
+}
+
+// --- track segments (pooled, recycled; slight vertical curvature per segment) ---
+const segGeo = new THREE.PlaneGeometry(2 * TRACK_HALF, SEG_LEN);
+const segBaseMat = new THREE.MeshStandardMaterial({ color: 0x0a0f22, roughness: 1, metalness: 0 });
+const segGridMat = new THREE.MeshBasicMaterial({ map: gridTexture(), transparent: true, opacity: 0.9 });
+const railGeo = new THREE.BoxGeometry(0.14, 0.14, SEG_LEN);
+const railMat = new THREE.MeshBasicMaterial({ color: 0x28d8ff, toneMapped: false });
+const segs = [];
+for (let i = 0; i < SEG_COUNT; i++) {
+  const grp = new THREE.Group();
+  const base = new THREE.Mesh(segGeo, segBaseMat);
+  base.rotation.x = -Math.PI / 2;
+  const grid = new THREE.Mesh(segGeo, segGridMat);
+  grid.rotation.x = -Math.PI / 2; grid.position.y = 0.015;
+  const r1 = new THREE.Mesh(railGeo, railMat); r1.position.set(-TRACK_HALF + 0.1, 0.1, 0);
+  const r2 = new THREE.Mesh(railGeo, railMat); r2.position.set(TRACK_HALF - 0.1, 0.1, 0);
+  grp.add(base); grp.add(grid); grp.add(r1); grp.add(r2);
+  scene.add(grp);
+  segs.push(grp);
+}
+function resetSegs() {
+  // First segment center sits just ahead of the camera; the rest chain backwards.
+  for (let i = 0; i < SEG_COUNT; i++) {
+    const zc = SEG_LEN / 2 - SEG_LEN * i;
+    segs[i].position.set(0, groundY(zc), zc);
+  }
+}
+
+// --- player: glowing icosahedron on a magnetic hoverboard ---
+const playerGrp = new THREE.Group();
+const coreMat = new THREE.MeshStandardMaterial({ color: 0x8ff4ff, emissive: 0x2fd8ff, emissiveIntensity: 2.2, roughness: 0.25, metalness: 0.2 });
+const core = new THREE.Mesh(new THREE.IcosahedronGeometry(PLAYER_R, 0), coreMat);
+const board = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.14, 2.2),
+  new THREE.MeshStandardMaterial({ color: 0x2a0f3a, emissive: 0xd23bff, emissiveIntensity: 1.6, roughness: 0.4 }));
+board.position.y = -0.78;
+const halo = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.03, 6, 24),
+  new THREE.MeshBasicMaterial({ color: 0x54e8ff, transparent: true, opacity: 0.6, toneMapped: false }));
+halo.rotation.x = -Math.PI / 2; halo.position.y = -0.6;
+playerGrp.add(core); playerGrp.add(board); playerGrp.add(halo);
+scene.add(playerGrp);
+const playerLight = new THREE.PointLight(0x3fdcff, 1.4, 14);
+playerLight.position.set(0, 1.4, 0);
+scene.add(playerLight);
+
+// ground marker (the "shadow" that makes the jump readable)
+const marker = new THREE.Mesh(new THREE.CircleGeometry(0.75, 20),
+  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.38 }));
+marker.rotation.x = -Math.PI / 2;
+scene.add(marker);
+
+// ============================================================
+// 6. OBJECT POOLS — InstancedMesh + free lists; zero per-frame allocation
+// ============================================================
+const T_M4 = new THREE.Matrix4(), T_Q4 = new THREE.Quaternion(), T_V3 = new THREE.Vector3();
+const T_S3 = new THREE.Vector3(1, 1, 1), T_AX = new THREE.Vector3(0, 1, 0), T_COL = new THREE.Color();
+const ID_Q = new THREE.Quaternion();
+
+function makePool(geo, mat, cap) {
+  const mesh = new THREE.InstancedMesh(geo, mat, cap);
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  mesh.frustumCulled = false;
+  const entries = [], free = [], act = [];
+  for (let i = 0; i < cap; i++) { entries.push({ i, z: 0, lane: 1, h: 0, active: false, hit: false }); free.push(i); }
+  for (let i = 0; i < cap; i++) mesh.setMatrixAt(i, T_M4.compose(T_V3.set(0, -50, 0), ID_Q, T_S3.set(0, 0, 0)));
+  scene.add(mesh);
+  return { mesh, cap, entries, free, act };
+}
+function poolReset(p) {
+  p.act.length = 0; p.free.length = 0;
+  for (let i = 0; i < p.cap; i++) { p.entries[i].active = false; p.free.push(i); }
+}
+function poolSpawn(p, lane, z, h) {
+  if (p.free.length === 0) return null;
+  const idx = p.free.pop(), e = p.entries[idx];
+  e.active = true; e.lane = lane; e.z = z; e.h = h; e.hit = false;
+  p.act.push(idx);
+  return e;
+}
+// Moves every active entry by `scroll`; `cb` may mark e.hit; recycles past RECYCLE_Z.
+function poolAdvance(p, scroll, cb) {
+  const a = p.act;
+  let k = 0, m = a.length;
+  while (k < m) {
+    const idx = a[k], e = p.entries[idx];
+    e.z += scroll;
+    if (cb) cb(e);
+    if (e.hit || e.z > RECYCLE_Z) {
+      m--; a[k] = a[m]; a[m] = idx;
+      e.active = false; p.free.push(idx);
+    } else k++;
+  }
+  a.length = m;
+}
+function poolMatrices(p, cy, sx, sy, sz, spin) {
+  for (let i = 0; i < p.cap; i++) {
+    const e = p.entries[i];
+    if (!e.active) {
+      T_M4.compose(T_V3.set(0, -50, 0), ID_Q, T_S3.set(0, 0, 0));
+    } else {
+      T_V3.set(laneX(e.lane), groundY(e.z) + cy + e.h, e.z);
+      if (spin) T_Q4.setFromAxisAngle(T_AX, clockT * 2 + i * 0.7); else T_Q4.copy(ID_Q);
+      const s = spin ? 1 + 0.12 * Math.sin(clockT * 3.1 + i) : 1;
+      T_S3.set(sx * s, sy * s, sz * s);
+      T_M4.compose(T_V3, T_Q4, T_S3);
+    }
+    p.mesh.setMatrixAt(i, T_M4);
+  }
+  p.mesh.instanceMatrix.needsUpdate = true;
+}
+
+const barrier = makePool(new THREE.BoxGeometry(1.7, 1.0, 1.0),
+  new THREE.MeshStandardMaterial({ color: 0x3a0a18, emissive: 0xff3d6e, emissiveIntensity: 1.7, roughness: 0.4 }), OB_CAP);
+const gate = makePool(new THREE.BoxGeometry(1.9, 2.7, 0.5),
+  new THREE.MeshStandardMaterial({ color: 0x0a2a16, emissive: 0x2ee66e, emissiveIntensity: 1.7, roughness: 0.4 }), OB_CAP);
+const wall = makePool(new THREE.BoxGeometry(1.8, 4.0, 1.2),
+  new THREE.MeshStandardMaterial({ color: 0x1c0a33, emissive: 0xa45dff, emissiveIntensity: 1.7, roughness: 0.4 }), OB_CAP);
+const shard = makePool(new THREE.OctahedronGeometry(0.34, 0),
+  new THREE.MeshStandardMaterial({ color: 0xfff2a0, emissive: 0xffc22e, emissiveIntensity: 2.2, roughness: 0.3 }), SHARD_CAP);
+
+// obstacle collision geometry: half-height (from surface), half-depth
+const OB_DIM = [
+  { p: barrier, cy: 0.5,  hy: 0.5, hz: 0.5, sx: 1, sy: 1, sz: 1 },
+  { p: gate,    cy: 2.65, hy: 1.35, hz: 0.25, sx: 1, sy: 1, sz: 1 },
+  { p: wall,    cy: 2.0,  hy: 2.0, hz: 0.6, sx: 1, sy: 1, sz: 1 },
+];
+
+// --- particles (additive instanced tetrahedra) ---
+const part = makePool(new THREE.TetrahedronGeometry(0.09, 0),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, toneMapped: false }), PART_CAP);
+for (let i = 0; i < part.cap; i++) { part.entries[i].vx = 0; part.entries[i].vy = 0; part.entries[i].vz = 0; part.entries[i].life = 0; part.entries[i].x = 0; part.entries[i].y = 0; part.entries[i].z = 0; }
+function burst(x, y, z, n, r, g, b, spread, up) {
+  for (let k = 0; k < n; k++) {
+    if (part.free.length === 0) return;
+    const idx = part.free.pop(), e = part.entries[idx];
+    e.active = true; e.x = x; e.y = y; e.z = z;
+    e.vx = (rand() * 2 - 1) * spread;
+    e.vy = rand() * up;
+    e.vz = (rand() * 2 - 1) * spread;
+    e.life = 0.45 + rand() * 0.45;
+    part.act.push(idx);
+    T_COL.setRGB(r, g, b);
+    part.mesh.setColorAt(idx, T_COL);   // creates instanceColor on first use
+    part.mesh.instanceColor.needsUpdate = true;
+  }
+}
+function partAdvance(dt) {
+  const a = part.act;
+  let k = 0, m = a.length;
+  while (k < m) {
+    const idx = a[k], e = part.entries[idx];
+    e.life -= dt;
+    if (e.life <= 0) {
+      m--; a[k] = a[m]; a[m] = idx; e.active = false; part.free.push(idx);
+      continue;
+    }
+    e.vy += GRAVITY * 0.35 * dt;
+    e.x += e.vx * dt; e.y += e.vy * dt; e.z += e.vz * dt;
+    k++;
+  }
+  a.length = m;
+}
+function partMatrices() {
+  for (let i = 0; i < part.cap; i++) {
+    const e = part.entries[i];
+    if (!e.active) {
+      T_M4.compose(T_V3.set(0, -50, 0), ID_Q, T_S3.set(0, 0, 0));
+    } else {
+      T_V3.set(e.x, e.y, e.z);
+      T_Q4.setFromAxisAngle(T_AX, clockT * 7 + i);
+      const s = Math.max(0.05, e.life * 1.8);
+      T_S3.set(s, s, s);
+      T_M4.compose(T_V3, T_Q4, T_S3);
+    }
+    part.mesh.setMatrixAt(i, T_M4);
+  }
+  part.mesh.instanceMatrix.needsUpdate = true;
+}
+
+// --- pattern queue: ring buffer of pre-allocated entries (for clean-streak scoring) ---
+const pats = [];
+for (let i = 0; i < PAT_CAP; i++) pats.push({ z: 0, cleared: true });
+let patHead = 0, patCount = 0;
+function patPush(z) {
+  const e = pats[patHead];
+  e.z = z; e.cleared = false;
+  patHead = (patHead + 1) % PAT_CAP;
+  if (patCount < PAT_CAP) patCount++;
+}
+function patCheck() {
+  // Oldest-first scan: at most PAT_CAP entries, no allocation.
+  let idx = (patHead - patCount + PAT_CAP * 2) % PAT_CAP;
+  for (let i = 0; i < patCount; i++) {
+    const e = pats[idx];
+    if (!e.cleared && e.z > 2.5) {
+      e.cleared = true;
+      streak++; pickupIdx = 0;
+      mult = Math.min(MULT_MAX, 1 + (streak >> 1));
+      sClear();
+    }
+    idx = (idx + 1) % PAT_CAP;
+  }
+}
+function patReset() { patHead = 0; patCount = 0; for (let i = 0; i < PAT_CAP; i++) pats[i].cleared = true; }
+
+// --- horizon glow (one additive quad, no postprocessing) ---
+(function () {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const rg = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+  rg.addColorStop(0, 'rgba(90,200,255,0.9)');
+  rg.addColorStop(0.4, 'rgba(120,60,200,0.35)');
+  rg.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
+  const tex = new THREE.CanvasTexture(c);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.5, toneMapped: false }));
+  s.position.set(0, 5, -150); s.scale.set(70, 70, 1);
+  scene.add(s);
+})();
+
+// ============================================================
+// 7. PROCEDURAL GENERATION — fairness rules enforced here
+// ============================================================
+// Rules: a pattern never fills all 3 lanes; one designated lane stays fully open;
+// consecutive pattern starts are >= max(MIN_GAP, speed*MIN_REACTION*GAP_SAFETY) apart,
+// so even as speed rises the player always has ~0.9 s+ of reaction time.
+function patternGap() {
+  const warm = dist < WARMUP_DIST;
+  const g = Math.max(MIN_GAP, speed * MIN_REACTION * GAP_SAFETY);
+  return (warm ? g * WARMUP_GAP_MUL : g) + 8;   // +8 m of pattern depth
+}
+function genPattern() {
+  const z0 = -(nextPatternDist - dist);
+  const warm = dist < WARMUP_DIST;
+  const open = (rand() * 3) | 0;
+  const others = [];
+  for (let l = 0; l < 3; l++) if (l !== open) others.push(l);
+
+  let kind;
+  if (warm) kind = rand() < 0.5 ? 'jump' : 'slide';
+  else {
+    const r = rand();
+    kind = r < 0.32 ? 'jump' : r < 0.6 ? 'slide' : r < 0.78 ? 'wall' : 'mix';
+  }
+  const count = warm ? 1 : (rand() < 0.55 ? 1 : 2);
+
+  // Shuffle the two blocked lanes deterministically enough for gameplay.
+  if (others.length === 2 && rand() < 0.5) { const t = others[0]; others[0] = others[1]; others[1] = t; }
+
+  for (let c = 0; c < count; c++) {
+    const lane = others[c];
+    if (kind === 'jump') poolSpawn(barrier, lane, z0, 0);
+    else if (kind === 'slide') poolSpawn(gate, lane, z0, 0);
+    else if (kind === 'wall') poolSpawn(wall, lane, z0, 0);
+    else { // mix: gate on one lane, barrier on the other -> open lane, jump or slide all work
+      if (c === 0) poolSpawn(barrier, lane, z0, 0); else poolSpawn(gate, lane, z0, 0);
+    }
+  }
+  // Wall-only patterns during warmup are skipped by construction above.
+
+  // Reward line of shards along the open lane (sometimes an arc over a jumpable barrier).
+  if (rand() < 0.65) {
+    const arc = kind === 'jump' && rand() < 0.45;
+    const lane = arc ? others[0] : open;
+    for (let i = 0; i < 5; i++) {
+      const z = z0 + 2 - i * 3;
+      const h = arc ? 1.1 + 1.15 * Math.sin(Math.PI * (i / 4)) : 1.15;
+      poolSpawn(shard, lane, z, h);
+    }
+  }
+  patPush(z0);
+  nextPatternDist += patternGap();
+}
+function generate() {
+  // Spawn patterns as soon as they would enter the visible horizon.
+  let guard = 0;
+  while (nextPatternDist - dist < SPAWN_AHEAD && guard++ < 8) genPattern();
+}
+
+// ============================================================
+// 8. INPUT — keyboard + touch; no key-repeat spam
+// ============================================================
+function moveLane(d) {
+  const nt = clamp(player.laneTarget + d, 0, 2);
+  if (nt !== player.laneTarget) { player.laneTarget = nt; sLane(); }
+}
+function doJump() {
+  player.jumpBuf = JUMP_BUFFER;
+  if (player.y - groundY(0) <= HOVER + 0.02) tryJump();
+}
+function tryJump() {
+  if (player.jumpBuf <= 0) return;
+  player.jumpBuf = 0;
+  player.vy = JUMP_V;
+  player.slideT = 0;
+  sJump();
+}
+function doSlide() {
+  player.slideT = SLIDE_TIME;
+  if (player.y - groundY(0) > HOVER + 0.02) player.vy = Math.min(player.vy, DIVE_V);
+  sSlide();
+}
+function onKey(e) {
+  const c = e.code;
+  if (c === 'Space' || c === 'ArrowUp' || c === 'ArrowDown' || c === 'ArrowLeft' || c === 'ArrowRight') e.preventDefault();
+  if (c === 'KeyM') { audioInit(); toggleMute(); return; }
+  if (c === 'KeyR') {
+    if (state !== TITLE) { audioInit(); resetRun(); state = PLAYING; showOverlay(null); }
+    return;
+  }
+  if (c === 'KeyP' || c === 'Escape') {
+    if (state === PLAYING) doPause(); else if (state === PAUSED) doResume();
+    return;
+  }
+  if (state === TITLE || state === DEAD) {
+    if (c === 'Enter' || c === 'Space') startGame();
+    return;
+  }
+  if (state !== PLAYING || e.repeat) return;
+  if (c === 'ArrowLeft' || c === 'KeyA') moveLane(-1);
+  else if (c === 'ArrowRight' || c === 'KeyD') moveLane(1);
+  else if (c === 'ArrowUp' || c === 'KeyW' || c === 'Space') doJump();
+  else if (c === 'ArrowDown' || c === 'KeyS') doSlide();
+}
+window.addEventListener('keydown', onKey); // lives for the page lifetime (documented: single registration)
+
+let touchStartX = 0, touchStartY = 0, touchTracked = false;
+cvs.addEventListener('touchstart', (e) => {
+  audioInit();
+  const t = e.changedTouches[0];
+  touchStartX = t.clientX; touchStartY = t.clientY; touchTracked = true;
+}, { passive: true });
+cvs.addEventListener('touchend', (e) => {
+  if (!touchTracked) return;
+  touchTracked = false;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+  if (Math.abs(dx) < 26 && Math.abs(dy) < 26) {
+    if (state === TITLE || state === DEAD) startGame();
+    return;
+  }
+  if (state !== PLAYING) return;
+  if (Math.abs(dx) > Math.abs(dy)) moveLane(dx > 0 ? 1 : -1);
+  else if (dy < 0) doJump();
+  else doSlide();
+}, { passive: false });
+
+// Overlay taps: start / restart from title or death screens (click works with mouse too).
+$('ov').addEventListener('click', () => {
+  if (state === TITLE || state === DEAD) startGame();
+});
+
+document.addEventListener('visibilitychange', () => { if (document.hidden && state === PLAYING) doPause(); });
+window.addEventListener('blur', () => { if (state === PLAYING) doPause(); });
+
+// ============================================================
+// 9. HUD / OVERLAYS / STATE TRANSITIONS
+// ============================================================
+const hud = $('hud'), scoreEl = $('score'), multEl = $('mult'), bestEl = $('best'), ov = $('ov');
+function renderHud() {
+  scoreEl.textContent = String(Math.floor(score));
+  multEl.textContent = '\u00d7' + mult + (muted ? '  \u00b7 muted' : '');
+  bestEl.textContent = 'best ' + best + (state === PLAYING ? '\nspeed ' + speed.toFixed(0) + ' m/s' : '');
+}
+const CONTROLS_HTML =
+  '<div class="keys">' +
+  '<b>&larr; A / &rarr; D</b><span>switch lane</span>' +
+  '<b>&uarr; W / Space</b><span>jump</span>' +
+  '<b>&darr; S</b><span>slide / dash</span>' +
+  '<b>P / Esc</b><span>pause &nbsp;&nbsp; R restart &nbsp;&nbsp; M mute</span>' +
+  '<b>Touch</b><span>swipe left/right/up/down, tap to start</span>' +
+  '</div>';
+function showOverlay(which) {
+  if (!which) { ov.classList.add('hidden'); return; }
+  ov.classList.remove('hidden');
+  if (which === 'title') {
+    ov.innerHTML = '<div class="panel"><h1 class="ttl">PRISM RUNNER</h1>' +
+      '<div class="sub">ride the light &middot; collect the shards &middot; one hit ends the run</div>' +
+      CONTROLS_HTML +
+      '<div class="big">PRESS ENTER &nbsp;·&nbsp; TAP</div>' +
+      (best ? '<div class="rec">best ' + best + '</div>' : '') + '</div>';
+  } else if (which === 'paused') {
+    ov.innerHTML = '<div class="panel"><h1 class="ttl">PAUSED</h1>' +
+      '<div class="stat">score ' + Math.floor(score) + '</div>' +
+      '<div class="big">P / Esc to resume &nbsp;·&nbsp; R to restart</div></div>';
+  } else if (which === 'dead') {
+    ov.innerHTML = '<div class="panel"><h1 class="ttl">SIGNAL LOST</h1>' +
+      '<div class="stat">score <b>' + Math.floor(score) + '</b> &nbsp;·&nbsp; shards ' + shardsN + ' &nbsp;·&nbsp; ' + dist.toFixed(0) + ' m</div>' +
+      '<div class="rec">' + (newBest ? 'NEW BEST ' + best : 'best ' + best) + '</div>' +
+      '<div class="big">PRESS R &nbsp;·&nbsp; TAP TO RUN AGAIN</div></div>';
+  }
+  renderHud();
+}
+function startGame() {
+  audioInit();
+  resetRun();
+  state = PLAYING;
+  showOverlay(null);
+}
+function doPause() { if (state !== PLAYING) return; state = PAUSED; showOverlay('paused'); }
+function doResume() { if (state !== PAUSED) return; state = PLAYING; showOverlay(null); }
+
+function resetRun() {
+  poolReset(barrier); poolReset(gate); poolReset(wall); poolReset(shard); poolReset(part);
+  patReset();
+  resetSegs();
+  dist = 0; speed = SPEED_START; score = 0; shardsN = 0; streak = 0; mult = 1; pickupIdx = 0;
+  freeze = 0; deathT = 0; deathSpeed = 0; deadOvShown = false; newBest = false;
+  nextPatternDist = 48;                       // first pattern gives a calm opening
+  player.x = 0; player.vx = 0; player.lane = 1; player.laneTarget = 1;
+  player.y = groundY(0) + HOVER; player.vy = 0; player.slideT = 0; player.jumpBuf = 0; player.tumble = 0;
+  shakeMag = 0; shakeX = 0; shakeY = 0; camX = 0; rollCur = 0; fovCur = FOV_BASE;
+  playerGrp.rotation.set(0, 0, 0);
+  playerGrp.scale.set(1, 1, 1);
+  playerGrp.visible = true;
+  renderHud();
+}
+
+// ============================================================
+// 10. SIMULATION — fixed 1/120 s step; all motion in metres per step
+// ============================================================
+function die() {
+  state = DEAD;
+  deathT = 0; deathSpeed = speed;
+  freeze = HIT_STOP;                            // hit-stop: the sim skips for 80 ms
+  shakeMag = reducedMotion ? 0.5 : 2.4;         // screen shake (scaled below)
+  player.vy = 5.5; player.tumble = 1;
+  burst(player.x, player.y, 0, 26, 1.0, 0.35, 0.65, 7, 5);
+  burst(player.x, player.y, 0, 18, 0.3, 0.95, 1.0, 5, 4);
+  sCrash();
+  const sc = Math.floor(score);
+  newBest = sc > best;
+  if (newBest) { best = sc; store.set('prism_best', String(best)); }
+}
+
+function step() {
+  clockT += STEP;
+  if (freeze > 0) { freeze -= STEP; return; }
+
+  if (state === TITLE) {
+    scrollWorld(SPEED_START * 0.6 * STEP);       // idle drift behind the title card
+    player.y = groundY(0) + HOVER + 0.08 * Math.sin(clockT * 2);
+    playerGrp.position.set(0, player.y, 0);
+    core.rotation.y += 2 * STEP; core.rotation.x += 1.1 * STEP;
+    return;
+  }
+  if (state === DEAD) {
+    deathT += STEP;
+    const scroll = deathSpeed > 0.2 ? deathSpeed * Math.exp(-2.2 * deathT) * STEP : 0;
+    deathSpeed = Math.max(0, deathSpeed - 14 * STEP);
+    scrollWorld(scroll);
+    advanceObstacles(scroll, false);             // world (incl. obstacles/shards) keeps sliding out
+    poolAdvance(shard, scroll, null);
+    player.vy += GRAVITY * STEP;
+    player.y += player.vy * STEP;
+    core.rotation.x += 9 * STEP; core.rotation.z += 5 * STEP;
+    playerGrp.position.set(player.x, player.y, 0);
+    if (deathT > DEATH_TIME && !deadOvShown) { deadOvShown = true; showOverlay('dead'); }
+    return;
+  }
+  if (state !== PLAYING) return;
+
+  // --- speed / distance ---
+  if (dist > WARMUP_DIST) speed = Math.min(SPEED_MAX, SPEED_START + (dist - WARMUP_DIST) * SPEED_ACCEL);
+  if (!(speed > 0) || !isFinite(speed)) speed = SPEED_START;   // NaN / negative guard
+  const scroll = speed * STEP;
+  dist += scroll;
+
+  // --- lane interpolation with snap on arrive ---
+  const tx = laneX(player.laneTarget);
+  const k = 1 - Math.exp(-LANE_SPEED * STEP);
+  const prevX = player.x;
+  player.x += (tx - player.x) * k;
+  if (Math.abs(tx - player.x) < 0.01) { player.x = tx; player.lane = player.laneTarget; }
+  if (!isFinite(player.x)) player.x = 0;
+  player.vx = (player.x - prevX) / STEP;
+
+  // --- vertical: jump / gravity / slide ---
+  player.jumpBuf = Math.max(0, player.jumpBuf - STEP);
+  player.slideT = Math.max(0, player.slideT - STEP);
+  player.vy += GRAVITY * STEP;
+  player.y += player.vy * STEP;
+  const g0 = groundY(0);
+  if (player.y <= g0 + HOVER) {
+    player.y = g0 + HOVER;
+    player.vy = 0;
+    tryJump();                                   // buffered jump fires the moment we land
+  }
+
+  // --- world ---
+  scrollWorld(scroll);
+  advanceObstacles(scroll, true);
+  poolAdvance(shard, scroll, onShard);
+  generate();
+  patCheck();
+
+  score = dist + shardsN * SHARD_SCORE * mult;
+
+  // --- player visuals ---
+  playerGrp.position.set(player.x, player.y, 0);
+  const spin = 1.6 + speed * 0.12;
+  core.rotation.y += spin * STEP;
+  core.rotation.x += spin * 0.6 * STEP;
+  board.rotation.z = clamp(-player.vx * 0.03, -0.35, 0.35);
+  if (player.slideT > 0) {
+    playerGrp.scale.set(1.15, 0.55, 1.15);
+  } else if (playerGrp.scale.y !== 1) {
+    playerGrp.scale.set(1, 1, 1);
+  }
+
+  // --- HUD (throttled; string allocation only a few times per second) ---
+  hudT -= STEP;
+  if (hudT <= 0) { hudT = 0.15; renderHud(); }
+}
+
+function scrollWorld(s) {
+  for (let i = 0; i < SEG_COUNT; i++) {
+    const p = segs[i].position;
+    p.z += s;
+    if (p.z > SEG_LEN) {
+      p.z -= SEG_COUNT * SEG_LEN;
+      p.y = groundY(p.z);
+    }
+  }
+}
+function advanceObstacles(s, collide) {
+  for (let t = 0; t < 3; t++) {
+    const d = OB_DIM[t];
+    if (collide) {
+      const a = d.p.act;
+      for (let j = 0; j < a.length; j++) {
+        const e = d.p.entries[a[j]];
+        const dx = Math.abs(player.x - laneX(e.lane));
+        const hz = d.hz + PLAYER_R;
+        if (e.z < hz && e.z > -hz && dx < LANE_WIDTH * 0.62) {
+          const topOff = player.slideT > 0 ? SLIDE_HALF : PLAYER_R;
+          const surf = groundY(e.z) + d.cy;
+          const py = player.y, ph = topOff;
+          if (py + ph > surf - d.hy && py - ph < surf + d.hy) { e.hit = true; die(); }
+        }
+      }
+    }
+    poolAdvance(d.p, s, null);
+  }
+}
+function onShard(e) {
+  if (e.hit) return;
+  if (Math.abs(e.z) < 1.1 && Math.abs(player.x - laneX(e.lane)) < 1.2) {
+    const sy = groundY(e.z) + e.h;
+    if (Math.abs(player.y - sy) < 1.0) {
+      e.hit = true;
+      shardsN++; pickupIdx++;
+      score = dist + shardsN * SHARD_SCORE * mult;
+      burst(laneX(e.lane), sy, e.z, 8, 1.0, 0.85, 0.25, 3.5, 3);
+      sShard();
+    }
+  }
+}
+
+// ============================================================
+// 11. CAMERA & FX — spring follow, lane roll, FOV punch, shake
+// ============================================================
+let shakeMag = 0, shakeX = 0, shakeY = 0, camX = 0, rollCur = 0, fovCur = FOV_BASE;
+const T_LOOK = new THREE.Vector3();
+function updateFx(dt) {
+  if (state === PAUSED) return;
+  // screen shake
+  if (shakeMag > 0.001) {
+    shakeMag *= Math.exp(-6 * dt);
+    const amp = shakeMag * 0.045;
+    shakeX = (rand() * 2 - 1) * amp;
+    shakeY = (rand() * 2 - 1) * amp;
+  } else { shakeMag = 0; shakeX = 0; shakeY = 0; }
+
+  // spring camera follow (x is damped; slight roll toward lane change)
+  camX += (player.x * 0.55 - camX) * (1 - Math.exp(-5 * dt));
+  const rollTarget = reducedMotion ? 0 : clamp(-player.vx * 0.012, -0.06, 0.06);
+  rollCur += (rollTarget - rollCur) * (1 - Math.exp(-8 * dt));
+
+  // FOV punch scales with speed (disabled for reduced motion)
+  const spd01 = clamp((speed - SPEED_START) / (SPEED_MAX - SPEED_START), 0, 1);
+  const fovT = FOV_BASE + (reducedMotion ? 0 : FOV_PUNCH) * spd01;
+  fovCur += (fovT - fovCur) * (1 - Math.exp(-2.5 * dt));
+  if (Math.abs(fovCur - camera.fov) > 0.01) {
+    camera.fov = fovCur;
+    camera.updateProjectionMatrix();
+  }
+
+  const cz = CAM_BACK;
+  camera.position.set(camX + shakeX, groundY(cz) + CAM_H + shakeY, cz);
+  T_LOOK.set(player.x * 0.35, groundY(0) + CAM_LOOK_H, -14);
+  camera.lookAt(T_LOOK);
+  camera.rotateZ(rollCur);
+
+  // marker shrinks/fades with jump height; player light rides along
+  const h = Math.max(0, player.y - groundY(0) - HOVER);
+  const ms = clamp(1.15 - h * 0.18, 0.35, 1.15);
+  marker.position.set(player.x, groundY(0) + 0.02, 0);
+  marker.scale.set(ms, ms, 1);
+  marker.material.opacity = 0.38 * ms;
+  playerLight.position.set(player.x, player.y + 0.4, 0);
+}
+
+// ============================================================
+// 12. MAIN LOOP — clamped delta + fixed-timestep accumulator
+// ============================================================
+let lastT = performance.now(), acc = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  let dt = (now - lastT) / 1000;
+  lastT = now;
+  if (dt > MAX_FRAME) dt = MAX_FRAME;
+  if (!(dt >= 0)) dt = 0;
+
+  acc += dt;
+  let guard = 0;
+  while (acc >= STEP && guard++ < 20) { step(); acc -= STEP; }
+  if (state !== PAUSED) partAdvance(dt);         // particles keep flying on title/death too
+  updateFx(dt);
+
+  poolMatrices(barrier, 0.5, 1, 1, 1, false);
+  poolMatrices(gate, 2.65, 1, 1, 1, false);
+  poolMatrices(wall, 2.0, 1, 1, 1, false);
+  poolMatrices(shard, 0, 1, 1, 1, true);
+  partMatrices();
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onResize); // page-lifetime listener (single registration)
+
+// ============================================================
+// 13. TEST HOOK — the only global the game exposes
+// ============================================================
+Object.defineProperty(window, '__prism', {
+  value: Object.freeze({
+    get state() { return state; },
+    get score() { return Math.floor(score); },
+    get speed() { return speed; },
+    get distance() { return dist; },
+  }),
+  writable: false,
+  configurable: false,
+});
+
+// ============================================================
+// 14. BOOT
+// ============================================================
+resetRun();
+showOverlay('title');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

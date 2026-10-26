@@ -1,0 +1,23 @@
+PRISM RUNNER SMOKE REPORT
+============================================================
+[PASS] boot: page loads, __prism hook, state == 'title'
+[PASS] start: Enter -> state == 'playing'
+[PASS] play: state still alive after 10 s  (state=playing)
+[PASS] play: distance increased  (distance=224.3)
+[PASS] play: score increased  (score=249.3)
+[PASS] play: speed finite and positive  (speed=20.11)
+[PASS] pause: P -> state == 'paused'
+[PASS] pause: score frozen for 1 s  (before=250.63 after=250.63)
+[PASS] resume: P again -> state == 'playing'
+[PASS] death: reaches state 'dead' within 60 s  (state=dead)
+[PASS] death: score accumulated  (score=428.6)
+[PASS] restart: R -> state == 'playing', score reset  (score=0.00)
+
+console errors: 0
+page errors   : 0
+failed requests: 0
+warnings (informational, swiftshader): 0
+
+avg frame time: 16.6 ms over 150 frames (headless SwiftShader software rendering)
+
+OVERALL: PASS

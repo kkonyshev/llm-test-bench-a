@@ -248,6 +248,53 @@ Suggested additions from these runs: "edit with `replace_file_content` instead o
 whole file", "tests print a ≤20-line summary", and "think and write in English". Russian costs ~1.6×
 the tokens on DeepSeek's tokenizer.
 
+## Prompt v2 runs (2026-10-26)
+
+Same task with [`prompts/prism-runner-v2.md`](prompts/prism-runner-v2.md), each in a new Open WebUI
+chat. Machine state: RAM 6400 EXPO, both GPUs at PCIe Gen5 x8. Files are in
+[`runs-v2/`](runs-v2/): `model-files/` is what the model left in its working directory, `review/`
+holds the reviewer's headless-Chrome screenshots.
+
+| # | Model | Context | Wall time | Decode tok/s | Saved the file | Ran its own test | Lines | Game works |
+|---|---|---|---|---|---|---|---|---|
+| 11 | Nanbeige4.3-33B Q4_K_M (Ollama) | 120K, then 32K in a new chat | ~40 min, no result | 27 at 46K deep, ~45 short | ❌ | ❌ | — | ❌ no tool call at all |
+| 12 | Qwen3-Coder 30B-A3B (Ollama) | 120K | **~2 min** | not measured | ✅ first try, absolute path | ❌ wrote `smoke_test.py`, never ran it | 1050 | ❌ `let audioContext` declared twice |
+| 13 | **Qwen3.8-Flash-Next IQ3_S** (Strata) | 64K → **262K** | **~6 min** (2nd attempt) | 143–172 | ✅ | ✅ **12/12 PASS**, 6 screenshots | 888 | ✅ |
+
+**11. Nanbeige4.3-33B.** In the 120K chat the first step already had a 32K prompt and the model
+generated ~16K tokens without a tool call. A new chat started with Open WebUI's default 32K
+context: one reply ran to **~69.5K tokens** while Ollama's context shift dropped half the window
+five times; the model never called a tool and the directory stayed empty. With four failed attempts
+over v1 and v2, this model does not do agentic tool use in this setup.
+
+**12. Qwen3-Coder 30B.** Prompt v2 fixed what broke run 7: the file was saved on the first try to
+`/home/user/workspace/qwen3-coder-30b/`, and a Playwright `smoke_test.py` was written. The model
+then stopped without running the test, so it never saw the error. Deleting the second
+`let audioContext = null;` (line 204) is enough to start the game (reviewer's check; the HUD
+shows no score after start).
+
+**13. Qwen3.8-Flash-Next (Strata).** The first attempt ran out of Strata's `--max-context 65536`
+after saving a working 907-line game (`attempt1-64k/`, no errors in the reviewer's check). After
+raising it to 262144 in `strata-iq3_s.json` (`--kv-resident 32768` keeps only 32K positions in VRAM,
+so the larger window costs ~3.5 GB of RAM and no VRAM), the rerun took ~6 minutes, peaked at an
+81K-token prompt, and finished every step of v2: the game, `smoke_test.py` through the
+`window.__prism` hook (boot, start, 10 s of play, score and distance growth, pause freezes the
+score, resume, death within 60 s, restart resets), `smoke-report.txt` with **OVERALL: PASS**, and
+six screenshots. Compared with run 3 under v1 (27 min, Node installed but never run on the game),
+v2 cut the time 4.5× and added a real browser test. Strata warned of only 272 MiB of free VRAM at
+request start (`--vision` keeps ~1.4 GB for the image encoder); decode did not suffer here.
+
+| # | RAM / links | Process RAM peak | CPU median | 5090: W / VRAM peak | Bound by |
+|---|---|---|---|---|---|
+| 11 | 6400 / Gen5 | 2.3 GB | ~465% | ~348 W / 30.3 GB at 120K | 5090 + 5070 Ti VRAM; attention at depth |
+| 12 | 6400 / Gen5 | ~1 GB | ~420% | ~349 W / 29.9 GB | 5090 VRAM |
+| 13 | 6400 / Gen5 | 54 GB | ~520% | ~373 W / 32.0 GB | 5090 VRAM (full) |
+
+What v2 changed, in short: absolute paths and "check every write" removed the `Permission denied`
+failures; asking for a test made two of three models write one, but only the strongest ran it.
+A missing `num_ctx` in a new Open WebUI chat silently means 32K, and Strata's own
+`--max-context` is a second, separate limit: set both before a run.
+
 ## Cost if run on paid APIs
 
 From the Open WebUI database (2026-09-06 to 10-25: 203M input tokens, of which 146M cached, and
@@ -256,6 +303,9 @@ Claude Sonnet 5.5**. All local usage over those seven weeks would have cost abou
 or GLM APIs and about $170–200 on Sonnet 5.5.
 
 ## Files
+
+- `runs-v2/<NN-model>/`: prompt v2 runs (see above): `model-files/` as left by the model,
+  `review/` the reviewer's screenshots, `samples.csv` resource samples.
 
 - `runs/<NN-model>/prism-runner*.html`: the game as the model left it.
   - `*.fixed-by-reviewer.html` and `*.import-added-by-reviewer.html` are the reviewer's minimal
