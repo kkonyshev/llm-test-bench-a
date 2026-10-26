@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>PRISM RUNNER</title>
+<style>
+  :root { --ui:#b6fbff; }
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#04030c; }
+  #c { display:block; width:100%; height:100%; touch-action:none; }
+  #hud { position:fixed; inset:0; pointer-events:none; z-index:5;
+         font:600 15px/1.5 ui-monospace,Menlo,Consolas,monospace; color:var(--ui);
+         letter-spacing:.08em; text-shadow:0 0 8px rgba(80,220,255,.55); }
+  #hud .corner { position:absolute; top:14px; right:16px; text-align:right; }
+  #hud .corner div { white-space:pre; }
+  #laneHud { position:absolute; left:16px; top:14px; }
+  #msg { position:fixed; inset:0; z-index:6; display:flex; flex-direction:column; align-items:center;
+         justify-content:center; text-align:center; color:var(--ui);
+         font:600 17px/1.7 ui-monospace,Menlo,Consolas,monospace; letter-spacing:.1em;
+         background:radial-gradient(ellipse at 50% 45%, rgba(8,5,22,.70), rgba(2,2,8,.93)); }
+  #msg h1 { margin:0 0 12px; font-size:min(9vw,56px); font-weight:800; letter-spacing:.14em; color:#fff;
+            text-shadow:0 0 6px #5ff, 0 0 22px #4cf, 0 0 48px #2af; }
+  #msg h1 .pr { color:#ff9ad5; text-shadow:0 0 8px #f6c, 0 0 26px #e2a; }
+  #msg h1 .sm { color:#9df6ff; text-shadow:0 0 8px #7ef, 0 0 26px #5ad; }
+  #msg p { margin:4px 0; }
+  #msg .sub { font-size:12px; opacity:.75; letter-spacing:.16em; }
+  #msg .blink { animation:bl 1.4s steps(2) infinite; }
+  @keyframes bl { to { opacity:.15; } }
+  #msg.hidden { display:none; }
+  .vig { position:fixed; inset:0; pointer-events:none; z-index:4;
+         box-shadow:inset 0 0 130px 40px rgba(2,2,10,.85); }
+  #scan { position:fixed; inset:0; pointer-events:none; z-index:4; opacity:.12;
+          background:repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 3px); }
+  @media (prefers-reduced-motion: reduce) { #scan { display:none; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="vig"></div>
+<div id="scan"></div>
+<div id="hud">
+  <div id="laneHud">LANE 2</div>
+  <div class="corner">
+    <div id="hudScore">SCORE 0</div>
+    <div id="hudMult">MULT x1</div>
+    <div id="hudBest">BEST 0</div>
+  </div>
+</div>
+<div id="msg">
+  <h1><span class="pr">PRISM</span> <span class="sm">RUNNER</span></h1>
+  <p class="sub" id="msgTop">HOVER THE NEON VOID — DODGE THE GATES</p>
+  <p id="msgMain" class="blink">PRESS ENTER OR TAP TO START</p>
+  <p class="sub" id="msgCtl">&#8592; &#8594; / A D — LANE &nbsp;&#183;&nbsp; &#8593; W SPACE — JUMP &nbsp;&#183;&nbsp;
+     &#8595; S — DASH &nbsp;&#183;&nbsp; P — PAUSE &nbsp;&#183;&nbsp; R — RESTART &nbsp;&#183;&nbsp; M — MUTE</p>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+/* =====================================================================
+   PRISM RUNNER — single-file three.js endless runner, one render pass.
+   Sections: tuning / state / storage / audio / scene / road segments /
+             obstacles / shards / particles / player / spawning+fairness /
+             flow / input / simulation / render / loop / test hook
+   Pinned dep: three@0.160.0 via importmap (unpkg sends CORS headers, so
+   this also runs from file:// in Chrome/Firefox).
+   ===================================================================== */
+import * as THREE from 'three';
+
+/* ============================ TUNING ============================ */
+const SPEED_START  = 20;      // world units / s at run start
+const SPEED_MAX    = 58;
+const SPEED_RAMP   = 0.55;    // units/s of extra speed per second
+const SPEED_EASE_S = 15;      // gentle ramp + easy patterns for first N seconds
+const LANE_WIDTH   = 3.0;
+const GRAVITY      = 62;
+const JUMP_V       = 15.5;    // apex ~1.94u, airtime ~0.5s
+const DASH_TIME    = 0.4;     // slide duration
+const DASH_COOL    = 0.25;    // cooldown AFTER the dash ends
+const SPAWN_AHEAD  = 190;     // generate track/patterns this far in front
+const DESPAWN_Z    = 14;      // behind camera -> recycle
+const SEG_START_AHEAD = 20;   // segments initially span +20 back to -SPAWN_AHEAD
+const MIN_PATTERN_GAP = 1.0;  // fairness: >=1s of travel between pattern starts
+const FIXED_DT     = 1/120;
+const MAX_FRAME_DT = 0.1;
+const SEG_LEN      = 10;      // world length of one road segment
+const SEG_SUB      = 8;       // depth subdivisions (for vertical bending)
+const SEG_W        = 10;      // road width
+const N_SEG        = Math.ceil(SPAWN_AHEAD / SEG_LEN) + 8;
+const HOVER        = 1.15;    // prism centre height above road when grounded
+const HB           = 0.72;    // player half-height for collisions (forgiving)
+const DASH_TOP     = 0.35;    // player top above centre while dashing
+const X_HIT        = 1.5;     // lateral collision window
+const Z_HIT        = 1.2;     // longitudinal collision window
+const OB_W         = 2.4;     // obstacle footprint (one lane)
+const SHARD_MULT_CAP = 12;
+const CAMERA_DIST  = 7.4;
+const CAMERA_HEIGHT = 3.9;
+const LANE_X = i => (i - 1) * LANE_WIDTH;
+
+/* ============================ STATE ============================ */
+const S = { TITLE:0, PLAYING:1, PAUSED:2, DEAD:3 };
+let state = S.TITLE;
+
+let distance = 0, score = 0, speed = SPEED_START, elapsed = 0;
+let playerLane = 1, targetLane = 1;      // playerLane lerps toward targetLane
+let jumpVel = 0, onGround = true, dashing = 0, dashCool = 0;
+let shardCount = 0, streak = 0, mult = 1;
+let bestScore = 0, muted = false;
+let shakeT = 0, hitStopT = 0, fovPunch = 0;
+let camX = 0, rollAngle = 0, acc = 0;
+
+const laneHud  = document.getElementById('laneHud');
+const hudScore = document.getElementById('hudScore');
+const hudMult  = document.getElementById('hudMult');
+const hudBest  = document.getElementById('hudBest');
+const msgEl    = document.getElementById('msg');
+const msgTop   = document.getElementById('msgTop');
+const msgMain  = document.getElementById('msgMain');
+const msgCtl   = document.getElementById('msgCtl');
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============================ STORAGE ============================ */
+// Corrupt / blocked storage must never crash the game.
+function storeGet(key) {
+  try { const v = localStorage.getItem(key); return v === null ? null : JSON.parse(v); }
+  catch (e) { return null; }
+}
+function storeSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* private mode */ }
+}
+bestScore = storeGet('prism.best') || 0;
+muted = !!storeGet('prism.muted');
+
+/* ============================ AUDIO (all synthesized) ============================ */
+let AC = null, master = null, music = null;
+function audioInit() {
+  if (AC) return;
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+  master = AC.createGain();
+  master.gain.value = muted ? 0 : 0.5;
+  master.connect(AC.destination);
+  music = startMusic();
+}
+function resumeAudio() { audioInit(); if (AC && AC.state === 'suspended') AC.resume(); }
+function setMuted(m) { muted = m; storeSet('prism.muted', m); if (master) master.gain.value = m ? 0 : 0.5; }
+
+function env(g, t0, a, peak, d, end) {           // simple AD envelope on a gain
+  const T = AC.currentTime;
+  g.gain.setValueAtTime(0, T + t0);
+  g.gain.linearRampToValueAtTime(peak, T + t0 + a);
+  g.gain.exponentialRampToValueAtTime(Math.max(end, 1e-4), T + t0 + a + d);
+}
+function tone(type, f0, f1, dur, vol, delay = 0) {
+  if (!AC) return;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(f0, AC.currentTime + delay);
+  o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), AC.currentTime + delay + dur);
+  o.connect(g); g.connect(master);
+  env(g, delay, 0.008, vol, dur, 0.0002);
+  o.start(AC.currentTime + delay); o.stop(AC.currentTime + delay + dur + 0.05);
+}
+function noiseBurst(dur, vol, f0, f1, delay = 0) {
+  if (!AC) return;
+  const b = AC.createBuffer(1, Math.max(1, AC.sampleRate * dur | 0), AC.sampleRate);
+  const d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const n = AC.createBufferSource(); n.buffer = b;
+  const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2;
+  bp.frequency.setValueAtTime(f0, AC.currentTime + delay);
+  bp.frequency.exponentialRampToValueAtTime(Math.max(f1, 10), AC.currentTime + delay + dur);
+  const g = AC.createGain();
+  n.connect(bp); bp.connect(g); g.connect(master);
+  env(g, delay, 0.005, vol, dur, 0.0002);
+  n.start(AC.currentTime + delay); n.stop(AC.currentTime + delay + dur + 0.05);
+}
+function sfxJump()  { tone('sine', 300, 900, 0.18, 0.30); tone('triangle', 150, 450, 0.12, 0.12); }
+function sfxDash()  { noiseBurst(0.16, 0.22, 2400, 300); tone('sawtooth', 500, 140, 0.15, 0.10); }
+function sfxLane()  { noiseBurst(0.10, 0.13, 1600, 500); }
+function sfxStart() { tone('sine', 220, 440, 0.30, 0.20); tone('sine', 330, 660, 0.30, 0.15, 0.06); }
+function sfxCrash() {
+  noiseBurst(0.5, 0.5, 2000, 120);
+  tone('sawtooth', 180, 38, 0.55, 0.35);
+  tone('square', 90, 28, 0.50, 0.22);
+}
+function sfxShard(combo) {                        // pitch rises one semitone per combo step
+  const f = 620 * Math.pow(1.0595, Math.min(combo, 14));
+  tone('sine', f, f * 1.6, 0.14, 0.22);
+  tone('triangle', f * 2, f * 3, 0.08, 0.08);
+}
+function startMusic() {                           // low drone + sub + slow LFO bed
+  const drone = AC.createOscillator(), lp = AC.createBiquadFilter(), dg = AC.createGain();
+  drone.type = 'sawtooth'; drone.frequency.value = 41.2;
+  lp.type = 'lowpass'; lp.frequency.value = 140; lp.Q.value = 0.8;
+  dg.gain.value = 0.11;
+  drone.connect(lp); lp.connect(dg); dg.connect(master); drone.start();
+  const sub = AC.createOscillator(), sg = AC.createGain();
+  sub.type = 'sine'; sub.frequency.value = 82.4; sg.gain.value = 0.06;
+  sub.connect(sg); sg.connect(master); sub.start();
+  const lfo = AC.createOscillator(), lg = AC.createGain();
+  lfo.type = 'sine'; lfo.frequency.value = 0.13; lg.gain.value = 0.05;
+  lfo.connect(lg); lg.connect(dg.gain); lfo.start();
+  return { drone, sub, lfo };
+}
+
+/* ============================ RENDERER / SCENE ============================ */
+const canvas = document.getElementById('c');
+let renderer = null, glOk = true;
+try {
+  if (!document.createElement('canvas').getContext('webgl2')) throw new Error('no webgl2');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+} catch (e) {
+  glOk = false;
+  msgMain.classList.remove('blink');
+  msgMain.textContent = 'WEBGL2 UNAVAILABLE — THIS GAME NEEDS GPU OR SWIFTSHADER';
+  msgMain.style.color = '#ff6a9a';
+  msgCtl.style.display = 'none';
+}
+if (renderer) {
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+}
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04030c);
+scene.fog = new THREE.Fog(0x05030f, 30, 165);
+
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.1, 400);
+camera.position.set(0, CAMERA_HEIGHT, CAMERA_DIST);
+
+scene.add(new THREE.HemisphereLight(0x3355ff, 0xff2b8a, 0.55));
+const key = new THREE.DirectionalLight(0x88aaff, 1.0);
+key.position.set(-6, 12, 8);
+scene.add(key);
+const rim = new THREE.PointLight(0xff3b9e, 55, 60, 1.6);
+rim.position.set(0, 4, -18);
+scene.add(rim);
+const rim2 = new THREE.PointLight(0x35e7ff, 45, 55, 1.6);
+rim2.position.set(0, 5, 30);
+scene.add(rim2);
+
+/* ---- road height field: one global continuous function, so segments
+   always join seamlessly and the horizon visibly undulates ---- */
+function roadY(z) { return 0.8 * Math.sin(z * 0.055) + 0.35 * Math.sin(z * 0.021 + 1.3); }
+const ROAD_BASE = roadY(0);           // road height exactly under the player (constant)
+
+/* ============================ MATERIALS ============================ */
+const MAT = {
+  deck:      new THREE.MeshStandardMaterial({ color:0x0b1b2e, roughness:0.4, metalness:0.6 }),
+  deckGlow:  new THREE.MeshBasicMaterial({ color:0x38e0ff }),
+  deckEdge:  new THREE.MeshBasicMaterial({ color:0xff3b9e }),
+  wall:      new THREE.MeshBasicMaterial({ color:0x101a2e, transparent:true, opacity:0.55 }),
+  wallTop:   new THREE.MeshBasicMaterial({ color:0x2bd6ff }),
+  prism:     new THREE.MeshStandardMaterial({ color:0x141428, emissive:0x66f0ff, emissiveIntensity:1.6, roughness:0.25, metalness:0.9 }),
+  prismWire: new THREE.MeshBasicMaterial({ color:0xaffcff, wireframe:true }),
+  board:     new THREE.MeshStandardMaterial({ color:0x1b2340, emissive:0xff3b9e, emissiveIntensity:0.85, roughness:0.35, metalness:0.85 }),
+  shard:     new THREE.MeshStandardMaterial({ color:0x120a20, emissive:0xff4fd8, emissiveIntensity:2.2, roughness:0.2, metalness:0.6 }),
+  shardWire: new THREE.MeshBasicMaterial({ color:0xffc8ee, wireframe:true, transparent:true, opacity:0.7 }),
+  block:     new THREE.MeshStandardMaterial({ color:0x2a0f22, emissive:0xff2b6a, emissiveIntensity:1.5, roughness:0.45, metalness:0.5 }),
+  gate:      new THREE.MeshStandardMaterial({ color:0x241a30, emissive:0xffb02b, emissiveIntensity:1.7, roughness:0.4, metalness:0.5 }),
+  gateLow:   new THREE.MeshStandardMaterial({ color:0x182438, emissive:0x3bff8f, emissiveIntensity:1.7, roughness:0.4, metalness:0.5 }),
+  shadow:    new THREE.MeshBasicMaterial({ color:0x35e0ff, transparent:true, opacity:0.5 }),
+};
+
+/* ============================ ROAD SEGMENTS (pooled) ============================ */
+// Bend a subdivided box so its long axis follows roadY(worldZ). The mesh's
+// z position must be set first; vertices store road height in local Y.
+// Bend a subdivided box so its long axis follows roadY(worldZ). The mesh's
+// z position must be set first. Original Y is cached on first call so that
+// re-bending a recycled segment (or a geometry shared by two meshes) can
+// never accumulate drift.
+function bendY(mesh, baseY) {
+  const pos = mesh.geometry.attributes.position;
+  let orig = mesh.geometry.userData.origY;
+  if (!orig) { orig = new Float32Array(pos.count); for (let i = 0; i < pos.count; i++) orig[i] = pos.getY(i); mesh.geometry.userData.origY = orig; }
+  const pz = mesh.position.z;
+  for (let i = 0; i < pos.count; i++)
+    pos.setY(i, baseY + orig[i] + roadY(pz + pos.getZ(i)));   // keep slab thickness
+  pos.needsUpdate = true;
+  mesh.geometry.computeVertexNormals();
+}
+
+class TrackSegment {
+  constructor() {
+    this.group = new THREE.Group();
+    this.deck = new THREE.Mesh(new THREE.BoxGeometry(SEG_W, 0.35, SEG_LEN, 1, 1, SEG_SUB), MAT.deck);
+    // L/R partners share one bent geometry each (same world-z span).
+    this.edgeGeo = new THREE.BoxGeometry(0.07, 0.04, SEG_LEN, 1, 1, SEG_SUB);
+    this.wallGeo = new THREE.BoxGeometry(0.08, 2.6, SEG_LEN, 1, 1, SEG_SUB);
+    this.topGeo  = new THREE.BoxGeometry(0.12, 0.06, SEG_LEN, 1, 1, SEG_SUB);
+    this.edgeL = new THREE.Mesh(this.edgeGeo, MAT.deckEdge);
+    this.edgeR = new THREE.Mesh(this.edgeGeo, MAT.deckEdge);
+    this.wallL = new THREE.Mesh(this.wallGeo, MAT.wall);
+    this.wallR = new THREE.Mesh(this.wallGeo, MAT.wall);
+    this.topL  = new THREE.Mesh(this.topGeo, MAT.wallTop);
+    this.topR  = new THREE.Mesh(this.topGeo, MAT.wallTop);
+    this.lip = new THREE.Mesh(new THREE.BoxGeometry(SEG_W, 0.06, 0.35), MAT.deckGlow);
+    this.group.add(this.deck, this.edgeL, this.edgeR, this.wallL, this.wallR, this.topL, this.topR, this.lip);
+    scene.add(this.group);
+    this.z0 = 0;   // near (camera-facing) edge in world z
+  }
+  place(z0) {
+    this.z0 = z0;
+    const zm = z0 - SEG_LEN * 0.5;
+    this.deck.position.set(0, 0, zm);
+    this.edgeL.position.set(-SEG_W / 2 + 0.05, 0, zm);
+    this.edgeR.position.set( SEG_W / 2 - 0.05, 0, zm);
+    this.wallL.position.set(-SEG_W / 2, 0, zm);
+    this.wallR.position.set( SEG_W / 2, 0, zm);
+    this.topL.position.set(-SEG_W / 2, 0, zm);
+    this.topR.position.set( SEG_W / 2, 0, zm);
+    bendY(this.deck, 0);
+    bendY(this.edgeL, 0.05); bendY(this.edgeR, 0.05);
+    bendY(this.wallL, 1.3);  bendY(this.wallR, 1.3);
+    bendY(this.topL, 2.66);  bendY(this.topR, 2.66);
+    this.lip.position.set(0, roadY(z0) - 0.04, z0);
+  }
+}
+const segments = [];
+for (let i = 0; i < N_SEG; i++) segments.push(new TrackSegment());
+
+/* ============================ OBSTACLES (pooled) ============================ */
+// kind 0: low block  -> jump over
+// kind 1: gate bar   -> dash under (bar bottom at 1.6u above road)
+// kind 2: tall wall  -> change lane
+class Obstacle {
+  constructor() {
+    this.group = new THREE.Group();
+    this.block = new THREE.Mesh(new THREE.BoxGeometry(OB_W, 2.6, OB_W * 0.6), MAT.block);
+    this.bar   = new THREE.Mesh(new THREE.BoxGeometry(OB_W, 0.5, 0.5), MAT.gate);
+    this.plate = new THREE.Mesh(new THREE.BoxGeometry(OB_W, 0.08, 0.9), MAT.gateLow);
+    this.bar.position.y = 1.85;      // bar spans 1.6..2.1 above the road
+    this.plate.position.y = 0.06;
+    this.group.add(this.block, this.bar, this.plate);
+    this.group.visible = false;
+    scene.add(this.group);
+    this.active = false; this.kind = 0; this.lane = 1; this.z = 0;
+  }
+  spawn(kind, lane, z) {
+    this.active = true; this.kind = kind; this.lane = lane; this.z = z;
+    this.block.visible = kind !== 1;
+    this.bar.visible = this.plate.visible = kind === 1;
+    if (kind === 0) { this.block.scale.set(1, 0.45, 1);  this.block.position.y = 0.55; }
+    if (kind === 2) { this.block.scale.set(1, 1.7, 0.8); this.block.position.y = 1.2; }
+    this.group.position.set(LANE_X(lane), roadY(z), z);
+    this.group.visible = true;
+  }
+  despawn() { this.active = false; this.group.visible = false; }
+  update() { this.group.position.z = this.z; this.group.position.y = roadY(this.z); }
+}
+const obstacles = [];
+const OBST_POOL = 24;
+for (let i = 0; i < OBST_POOL; i++) obstacles.push(new Obstacle());
+
+/* ============================ SHARDS (pooled) ============================ */
+class Shard {
+  constructor() {
+    this.group = new THREE.Group();
+    this.core = new THREE.Mesh(new THREE.OctahedronGeometry(0.4, 0), MAT.shard);
+    this.wire = new THREE.Mesh(new THREE.OctahedronGeometry(0.6, 0), MAT.shardWire);
+    this.group.add(this.core, this.wire);
+    this.group.visible = false;
+    scene.add(this.group);
+    this.active = false; this.lane = 1; this.z = 0; this.baseY = 1; this.phase = 0;
+  }
+  spawn(lane, z, baseY = 1.0) {
+    this.active = true; this.lane = lane; this.z = z; this.baseY = baseY;
+    this.phase = Math.random() * 6.283;
+    this.group.position.set(LANE_X(lane), roadY(z) + baseY, z);
+    this.group.visible = true;
+  }
+  despawn() { this.active = false; this.group.visible = false; }
+  update() {
+    this.group.position.set(LANE_X(this.lane),
+      roadY(this.z) + this.baseY + Math.sin(elapsed * 3 + this.phase) * 0.26, this.z);
+    this.group.rotation.y = elapsed * 2.6 + this.phase;
+  }
+}
+const shards = [];
+const SHARD_POOL = 60;
+for (let i = 0; i < SHARD_POOL; i++) shards.push(new Shard());
+
+/* ============================ PARTICLES (pooled additive sprites) ============================ */
+function makeSpriteTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.35, 'rgba(255,255,255,0.55)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+const spriteTex = makeSpriteTex();
+class Particle {
+  constructor() {
+    // one material per particle, created ONCE here — nothing allocated on spawn
+    this.mat = new THREE.SpriteMaterial({ map: spriteTex, color: 0xffffff,
+      blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
+    this.spr = new THREE.Sprite(this.mat);
+    this.spr.visible = false;
+    scene.add(this.spr);
+    this.p = new THREE.Vector3();
+    this.v = new THREE.Vector3();
+    this.active = false; this.t = 0; this.life = 1; this.size = 1;
+  }
+  spawn(x, y, z, vx, vy, vz, life, size, color) {
+    this.active = true;
+    this.p.set(x, y, z); this.v.set(vx, vy, vz);
+    this.life = life; this.t = 0; this.size = size;
+    this.mat.color.copy(color);
+    this.mat.opacity = 1;
+    this.spr.visible = true;
+    this.spr.position.set(x, y, z);
+    this.spr.scale.setScalar(size);
+  }
+  update(dt) {
+    if (!this.active) return;
+    this.t += dt;
+    if (this.t >= this.life) { this.active = false; this.spr.visible = false; return; }
+    this.p.addScaledVector(this.v, dt);
+    this.v.y -= 22 * dt;
+    this.v.multiplyScalar(1 - 1.4 * dt);
+    this.spr.position.copy(this.p);
+    const f = 1 - this.t / this.life;
+    this.mat.opacity = f;
+    this.spr.scale.setScalar(this.size * (0.4 + 0.6 * f));
+  }
+}
+const particles = [];
+for (let i = 0; i < 90; i++) particles.push(new Particle());
+const COL_SHARD = new THREE.Color(0xff8fe0);
+const COL_DEATH = new THREE.Color(0xff4a6a);
+const COL_DUST  = new THREE.Color(0x7fd8ff);
+function burst(x, y, z, n, color, spd, size, life = 0.75) {
+  let spawned = 0;
+  for (const p of particles) {
+    if (p.active) continue;
+    const a = Math.random() * 6.283, b = Math.random() * 1.2;
+    p.spawn(x, y, z,
+      Math.cos(a) * Math.cos(b) * spd,
+      Math.abs(Math.sin(b)) * spd + 3,
+      Math.sin(a) * Math.cos(b) * spd,
+      life * (0.6 + Math.random() * 0.7), size * (0.7 + Math.random() * 0.8), color);
+    if (++spawned >= n) break;
+  }
+}
+
+/* ============================ PLAYER ============================ */
+const playerGroup = new THREE.Group();
+scene.add(playerGroup);
+const prism = new THREE.Mesh(new THREE.IcosahedronGeometry(1.05, 0), MAT.prism);
+const prismWire = new THREE.Mesh(new THREE.IcosahedronGeometry(1.4, 0), MAT.prismWire);
+const board = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.12, 2.5), MAT.board);
+const boardNose = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.7, 4), MAT.board);
+boardNose.rotation.x = -Math.PI / 2;
+boardNose.position.set(0, -0.95, -1.5);
+board.position.y = -0.95;
+playerGroup.add(prism, prismWire, board, boardNose);
+const playerShadow = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.9), MAT.shadow);
+playerShadow.rotation.x = -Math.PI / 2;
+playerGroup.add(playerShadow);
+const pLight = new THREE.PointLight(0x66e6ff, 30, 18, 1.8);
+pLight.position.set(0, 1.4, 0);
+playerGroup.add(pLight);
+
+/* ============================ BACKGROUND ============================ */
+{
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(400 * 3);
+  for (let i = 0; i < 400; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 260;
+    pos[i * 3 + 1] = Math.random() * 70 + 2;
+    pos[i * 3 + 2] = -Math.random() * 300;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const m = new THREE.PointsMaterial({ color: 0x77ccff, size: 1.4, sizeAttenuation: true,
+    transparent: true, opacity: 0.7, depthWrite: false });
+  const pts = new THREE.Points(g, m);
+  pts.frustumCulled = false;
+  scene.add(pts);
+}
+const glowPlane = new THREE.Mesh(new THREE.PlaneGeometry(300, 60),
+  new THREE.MeshBasicMaterial({ color: 0x2b0f3d, transparent: true, opacity: 0.5,
+    blending: THREE.AdditiveBlending, depthWrite: false }));
+glowPlane.position.set(0, 12, -220);
+scene.add(glowPlane);
+
+/* ============================ SPAWNING + FAIRNESS ============================ */
+let nextZ = -60;          // frontier: where the next pattern may start
+let lastPatternZ = -60;   // near edge of the last spawned pattern
+// Precomputed open-lane sets (avoids per-spawn array allocation).
+const ALT = [[1, 2], [0, 2], [0, 1]];
+
+function spawnObstacle(kind, lane, z) {
+  for (const o of obstacles) if (!o.active) { o.spawn(kind, lane, z); return; }
+}
+function spawnShard(lane, z, baseY = 1.0) {
+  for (const s of shards) if (!s.active) { s.spawn(lane, z, baseY); return; }
+}
+
+// Every pattern leaves at least one lane passable by some mechanic;
+// gens return the pattern's length so gap accounting stays exact.
+const PATTERNS = [
+  { gen(z) {                                    // single wall, shards mark the open side
+      const wl = (Math.random() * 3) | 0;
+      spawnObstacle(2, wl, z);
+      const open = ALT[wl];
+      for (let k = 0; k < 3; k++) spawnShard(open[k % 2], z - 2 - k * 2.2);
+      return 8;
+    } },
+  { gen(z) {                                    // two walls, one open lane with a trail
+      const open = (Math.random() * 3) | 0;
+      for (let l = 0; l < 3; l++) if (l !== open) spawnObstacle(2, l, z);
+      for (let k = 0; k < 3; k++) spawnShard(open, z - 2 - k * 2.2);
+      return 10;
+    } },
+  { gen(z) {                                    // 2 dash-gates + 1 jump block: all lanes passable
+      const l1 = (Math.random() * 3) | 0;
+      const l2 = (l1 + 1 + ((Math.random() * 2) | 0)) % 3;
+      const l3 = 3 - l1 - l2;
+      spawnObstacle(1, l1, z); spawnObstacle(1, l2, z); spawnObstacle(0, l3, z);
+      for (let k = 0; k < 4; k++) spawnShard(Math.random() < 0.5 ? l1 : l2, z - 1.5 - k * 2.0, 0.55);
+      return 12;
+    } },
+  { gen(z) {                                    // slalom: lane 1 is safe through both walls
+      const sp = Math.max(1, speed / 30);       // intra-pattern spacing scales with speed
+      spawnObstacle(2, 0, z - 2);
+      spawnObstacle(2, 2, z - 2 - 7 * sp);
+      for (let k = 0; k < 3; k++) spawnShard(1, z - 3 - 2 * sp - k * 2.2);
+      return 6 + 7 * sp;
+    } },
+  { gen(z) {                                    // staggered jump blocks
+      const sp = Math.max(1, speed / 30);
+      spawnObstacle(0, (Math.random() * 3) | 0, z - 2);
+      spawnObstacle(0, (Math.random() * 3) | 0, z - 2 - 6 * sp);
+      for (let k = 0; k < 4; k++) spawnShard((Math.random() * 3) | 0, z - 3 - k * 2.4);
+      return 6 + 6 * sp;
+    } },
+  { gen(z) {                                    // gate + wall combo, shards in the third lane
+      const gl = (Math.random() * 3) | 0;
+      const bl = (gl + 1 + ((Math.random() * 2) | 0)) % 3;
+      const sl = 3 - gl - bl;
+      spawnObstacle(1, gl, z); spawnObstacle(2, bl, z);
+      for (let k = 0; k < 3; k++) spawnShard(sl, z - 2 - k * 2.2);
+      return 12;
+    } },
+];
+const EASY_PATTERNS = [PATTERNS[0], PATTERNS[1]];   // walls only, for the easing window
+
+function trySpawnPattern() {
+  // Fairness: the next pattern may not start until MIN_PATTERN_GAP seconds of
+  // travel have passed since the previous one's start.
+  let z = Math.min(nextZ, lastPatternZ - speed * MIN_PATTERN_GAP);
+  if (z >= -SPAWN_AHEAD) {
+    const pool = elapsed < SPEED_EASE_S ? EASY_PATTERNS : PATTERNS;
+    const used = pool[(Math.random() * pool.length) | 0].gen(z);
+    lastPatternZ = z;
+    z -= used + 6;                    // breathing room after the pattern's end
+  }
+  nextZ = z;                          // always strictly decreases -> loop terminates
+}
+
+/* ============================ GAME FLOW ============================ */
+function clearWorld() {
+  for (const o of obstacles) o.despawn();
+  for (const s of shards) s.despawn();
+  for (const p of particles) { p.active = false; p.spr.visible = false; }
+}
+function resetRun() {
+  clearWorld();
+  distance = 0; score = 0; speed = SPEED_START; elapsed = 0;
+  playerLane = 1; targetLane = 1;
+  jumpVel = 0; onGround = true; dashing = 0; dashCool = 0;
+  shardCount = 0; streak = 0; mult = 1;
+  shakeT = 0; hitStopT = 0; fovPunch = 0;
+  camX = 0; rollAngle = 0; acc = 0;
+  nextZ = -60; lastPatternZ = -60;
+  for (let i = 0; i < N_SEG; i++) segments[i].place(SEG_START_AHEAD - i * SEG_LEN);
+  playerGroup.position.set(0, ROAD_BASE + HOVER, 0);
+  playerGroup.visible = true;
+  camera.fov = 62;
+  camera.updateProjectionMatrix();
+  updateHud();
+}
+function startGame() {
+  if (!glOk) return;
+  resumeAudio();
+  resetRun();
+  state = S.PLAYING;
+  msgEl.classList.add('hidden');
+  sfxStart();
+}
+function togglePause() {
+  if (state === S.PLAYING) {
+    state = S.PAUSED;
+    msgTop.textContent = 'PAUSED';
+    msgMain.textContent = 'PRESS P OR TAP TO RESUME';
+    msgMain.classList.add('blink');
+    msgEl.classList.remove('hidden');
+  } else if (state === S.PAUSED) {
+    state = S.PLAYING;
+    msgEl.classList.add('hidden');
+  }
+}
+let deathTimer = 0;                    // single-fire setTimeout handle
+function die() {
+  if (state !== S.PLAYING) return;
+  state = S.DEAD;
+  hitStopT = 0.08;                     // 80 ms hit-stop
+  shakeT = 0.5;
+  burst(playerGroup.position.x, playerGroup.position.y + 0.8, 0, 26, COL_DEATH, 14, 1.5, 0.9);
+  playerGroup.visible = false;
+  if (score > bestScore) { bestScore = score; storeSet('prism.best', bestScore); }
+  updateHud();
+  sfxCrash();
+  clearTimeout(deathTimer);
+  deathTimer = setTimeout(() => {      // single-fire, guarded by state check
+    if (state === S.DEAD) {
+      msgTop.textContent = 'WIPEOUT';
+      msgMain.textContent = 'PRESS R, ENTER OR TAP TO RESTART';
+      msgMain.classList.add('blink');
+      msgEl.classList.remove('hidden');
+    }
+  }, 700);
+}
+let hudCache = '';
+function updateHud() {
+  const k = (score | 0) + '|' + mult + '|' + (bestScore | 0) + '|' + targetLane;
+  if (k === hudCache) return;
+  hudCache = k;
+  hudScore.textContent = 'SCORE ' + (score | 0);
+  hudMult.textContent = 'MULT x' + mult;
+  hudBest.textContent = 'BEST ' + (bestScore | 0);
+  laneHud.textContent = 'LANE ' + targetLane;
+}
+
+/* ============================ INPUT ============================ */
+function moveLane(dir) {
+  if (state !== S.PLAYING) return;
+  const nt = THREE.MathUtils.clamp(targetLane + dir, 0, 2);
+  if (nt === targetLane) return;       // ±1 lane per press, no wrap
+  targetLane = nt;
+  sfxLane();
+}
+function doJump() {
+  if (state === S.TITLE) { startGame(); return; }   // Space starts from title
+  if (state !== S.PLAYING || !onGround) return;
+  dashing = 0;                     // jumping cancels a dash (no gate phasing)
+  jumpVel = JUMP_V; onGround = false;
+  sfxJump();
+  fovPunch = 3;
+  burst(playerGroup.position.x, playerGroup.position.y - 0.9, 0.8, 6, COL_DUST, 4, 0.6, 0.4);
+}
+function doDash() {
+  if (state !== S.PLAYING || dashCool > 0) return;
+  dashing = DASH_TIME;
+  dashCool = DASH_TIME + DASH_COOL;
+  sfxDash();
+}
+addEventListener('keydown', e => {
+  if (e.repeat) return;                // no key-repeat spam
+  switch (e.key) {
+    case 'ArrowLeft': case 'a': case 'A': moveLane(-1); break;
+    case 'ArrowRight': case 'd': case 'D': moveLane(1); break;
+    case 'ArrowUp': case 'w': case 'W': case ' ': doJump(); break;
+    case 'ArrowDown': case 's': case 'S': doDash(); break;
+    case 'p': case 'P': case 'Escape': togglePause(); break;
+    case 'r': case 'R': if (state !== S.TITLE) startGame(); break;
+    case 'm': case 'M': setMuted(!muted); break;
+    case 'Enter': if (state === S.TITLE || state === S.DEAD) startGame(); break;
+  }
+  if (e.key === ' ' || e.key.startsWith('Arrow')) e.preventDefault();
+});
+// Touch: swipe left/right/up/down, tap to start / restart / resume.
+let tx = 0, ty = 0, tt = 0, tActive = false;
+canvas.addEventListener('pointerdown', e => {
+  resumeAudio();
+  tActive = true; tx = e.clientX; ty = e.clientY; tt = performance.now();
+}, { passive: true });
+canvas.addEventListener('pointerup', e => {
+  if (!tActive) return;
+  tActive = false;
+  const dx = e.clientX - tx, dy = e.clientY - ty, dt = performance.now() - tt;
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  if (state === S.TITLE || state === S.DEAD) { if (dt < 600 && ax < 24 && ay < 24) startGame(); return; }
+  if (state === S.PAUSED) { togglePause(); return; }
+  if (Math.max(ax, ay) < 24) return;                 // tap while playing: no-op
+  if (ax > ay) moveLane(dx > 0 ? 1 : -1);
+  else if (dy < 0) doJump(); else doDash();
+}, { passive: true });
+msgEl.addEventListener('pointerdown', () => {
+  resumeAudio();
+  if (state === S.TITLE || state === S.DEAD) startGame();
+  else if (state === S.PAUSED) togglePause();
+});
+// Auto-pause on tab switch / focus loss (page-lifetime listeners, never removed).
+addEventListener('blur', () => { if (state === S.PLAYING) togglePause(); });
+addEventListener('visibilitychange', () => { if (document.hidden && state === S.PLAYING) togglePause(); });
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  if (renderer) renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ============================ SIMULATION (fixed step) ============================ */
+function checkCollisions() {
+  const px = LANE_X(playerLane);
+  const rel = playerGroup.position.y - ROAD_BASE;    // prism centre above road
+  const top = dashing > 0 ? DASH_TOP : HB;
+  for (const o of obstacles) {
+    if (!o.active) continue;
+    if (Math.abs(o.z) > Z_HIT) continue;
+    if (Math.abs(LANE_X(o.lane) - px) > X_HIT) continue;
+    if (o.kind === 0) {                              // low block: top at 1.135
+      if (rel - HB < 1.14) { die(); return; }
+    } else if (o.kind === 1) {                       // gate bar spans 1.6..2.1
+      if (rel - HB < 2.1 && rel + top > 1.6) { die(); return; }
+    } else {                                         // wall: top at 3.4
+      if (rel - HB < 3.4) { die(); return; }
+    }
+  }
+}
+function collectShards() {
+  const px = LANE_X(playerLane);
+  const py = playerGroup.position.y;
+  for (const s of shards) {
+    if (!s.active) continue;
+    if (Math.abs(s.z) > 1.3) continue;
+    if (Math.abs(LANE_X(s.lane) - px) > 1.65) continue;
+    if (Math.abs(s.group.position.y - py) > 1.6) continue;
+    s.despawn();
+    streak++; shardCount++;
+    mult = Math.min(SHARD_MULT_CAP, 1 + (streak / 5 | 0));
+    score += 50 * mult;
+    sfxShard(streak);
+    burst(s.group.position.x, s.group.position.y, 0, 8, COL_SHARD, 6, 0.7, 0.5);
+  }
+}
+function step(dt) {
+  if (state !== S.PAUSED) elapsed += dt;   // world clock freezes while paused
+  if (state === S.PLAYING) {
+    const ramp = elapsed < SPEED_EASE_S ? 0.4 : 1.0;
+    speed = Math.min(SPEED_MAX, speed + SPEED_RAMP * ramp * dt);
+    if (!(speed > 0) || !isFinite(speed)) speed = SPEED_START;   // NaN/negative guard
+    distance += speed * dt;
+    score += speed * dt;
+    if (!isFinite(distance)) distance = 0;
+    if (!isFinite(score)) score = 0;
+    if (dashing > 0) dashing = Math.max(0, dashing - dt);
+    if (dashCool > 0) dashCool = Math.max(0, dashCool - dt);
+    // lane lerp toward target, snap on arrival
+    playerLane += (targetLane - playerLane) * (1 - Math.exp(-7 * dt));
+    if (Math.abs(targetLane - playerLane) < 0.02) playerLane = targetLane;
+    // vertical physics (ground plane is constant under the player)
+    const groundY = ROAD_BASE + HOVER;
+    if (onGround) {
+      playerGroup.position.y = groundY;
+    } else {
+      jumpVel -= GRAVITY * dt;
+      playerGroup.position.y += jumpVel * dt;
+      if (playerGroup.position.y <= groundY) {
+        playerGroup.position.y = groundY;
+        jumpVel = 0; onGround = true;
+      }
+    }
+  }
+  // world scroll (frozen while paused; world stays put on death)
+  const dz = state === S.PLAYING ? speed * dt : 0;
+  if (dz > 0) {
+    let backmost = Infinity;
+    for (const s of segments) if (s.z0 < backmost) backmost = s.z0;
+    for (const s of segments) {
+      s.z0 += dz;
+      if (s.z0 - SEG_LEN > DESPAWN_Z) { s.place(backmost - SEG_LEN); backmost = s.z0; }
+    }
+    for (const o of obstacles) {
+      if (!o.active) continue;
+      o.z += dz; o.update();
+      if (o.z > DESPAWN_Z) o.despawn();
+    }
+    for (const s of shards) {
+      if (!s.active) continue;
+      s.z += dz; s.update();
+      if (s.z > DESPAWN_Z) s.despawn();
+    }
+    nextZ += dz;
+  }
+  if (state === S.PLAYING || state === S.TITLE) {
+    let guard = 0;
+    while (nextZ > -SPAWN_AHEAD && guard++ < 40) trySpawnPattern();
+  }
+  if (state === S.PLAYING) {
+    checkCollisions();
+    if (state === S.PLAYING) collectShards();   // die() may have changed state
+  }
+  for (const p of particles) p.update(dt);
+  if (shakeT > 0) shakeT = Math.max(0, shakeT - dt * 2.2);
+  fovPunch *= Math.exp(-4 * dt);
+}
+
+/* ============================ RENDER / CAMERA ============================ */
+function render(dt) {
+  playerGroup.position.x = LANE_X(playerLane);
+  prism.rotation.x += dt * 3.1;
+  prism.rotation.y += dt * 2.2;
+  prismWire.rotation.copy(prism.rotation);
+  const dashOff = dashing > 0 ? -0.3 : 0;
+  prism.position.y = dashOff;
+  prismWire.position.y = dashOff;
+  prism.scale.setScalar(dashing > 0 ? 0.85 : 1);
+  prismWire.scale.setScalar(dashing > 0 ? 0.85 : 1);
+  board.rotation.z = (playerLane - targetLane) * 0.14;
+  playerShadow.position.y = (ROAD_BASE + 0.03) - playerGroup.position.y;
+  playerShadow.material.opacity =
+    THREE.MathUtils.clamp(0.55 - (playerGroup.position.y - ROAD_BASE - HOVER) * 0.14, 0.08, 0.55);
+
+  // spring-damped camera: follow lane x, slight roll, FOV scales with speed
+  camX += (LANE_X(playerLane) * 0.62 - camX) * Math.min(1, 7 * dt);
+  const shake = reducedMotion ? 0 : shakeT * shakeT * 7;
+  camera.position.set(
+    camX + (Math.random() - 0.5) * shake,
+    CAMERA_HEIGHT + ROAD_BASE + (Math.random() - 0.5) * shake,
+    CAMERA_DIST);
+  camera.lookAt(camX * 0.4, 1.6 + ROAD_BASE, -14);
+  rollAngle += ((targetLane - playerLane) * 0.06 - rollAngle) * Math.min(1, 6 * dt);
+  camera.rotateZ(rollAngle);                    // applied after lookAt so it survives
+  if (!reducedMotion) {
+    const targetFov = 62 + (speed - SPEED_START) / (SPEED_MAX - SPEED_START) * 10 + fovPunch;
+    camera.fov += (targetFov - camera.fov) * Math.min(1, 3 * dt);
+  } else {
+    camera.fov = 62;
+  }
+  camera.updateProjectionMatrix();
+  renderer.render(scene, camera);
+}
+
+/* ============================ MAIN LOOP ============================ */
+let lastT = performance.now();
+function loop(now) {
+  requestAnimationFrame(loop);
+  const dtMs = now - lastT;
+  lastT = now;
+  let dt = dtMs / 1000;
+  if (!isFinite(dt) || dt < 0) dt = FIXED_DT;
+  if (dt > MAX_FRAME_DT) dt = MAX_FRAME_DT;
+  if (hitStopT > 0) {                            // 80 ms hit-stop: freeze sim, keep drawing
+    hitStopT = Math.max(0, hitStopT - dt);
+    renderer.render(scene, camera);
+    return;
+  }
+  acc += dt;
+  let steps = 0;
+  while (acc >= FIXED_DT && steps < 24) { step(FIXED_DT); acc -= FIXED_DT; steps++; }
+  if (acc > 0.25) acc = 0;                       // spiral-of-death guard
+  render(Math.min(dt, 0.05));
+  if (state === S.PLAYING) updateHud();
+}
+
+/* ============================ BOOT ============================ */
+resetRun();
+updateHud();
+if (glOk) requestAnimationFrame(loop);
+
+/* ============================ TEST HOOK (read-only) ============================ */
+window.__prism = {
+  get state()    { return ['title', 'playing', 'paused', 'dead'][state]; },
+  get score()    { return score; },
+  get speed()    { return speed; },
+  get distance() { return distance; },
+};
+</script>
+</body>
+</html>

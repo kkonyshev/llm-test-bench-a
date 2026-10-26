@@ -260,6 +260,7 @@ holds the reviewer's headless-Chrome screenshots.
 | 11 | Nanbeige4.3-33B Q4_K_M (Ollama) | 120K, then 32K in a new chat | ~40 min, no result | 27 at 46K deep, ~45 short | ❌ | ❌ | — | ❌ no tool call at all |
 | 12 | Qwen3-Coder 30B-A3B (Ollama) | 120K | **~2 min** | not measured | ✅ first try, absolute path | ❌ wrote `smoke_test.py`, never ran it | 1050 | ❌ `let audioContext` declared twice |
 | 13 | **Qwen3.8-Flash-Next IQ3_S** (Strata) | 64K → **262K** | **~6 min** (2nd attempt) | 143–172 | ✅ | ✅ **12/12 PASS**, 6 screenshots | 888 | ✅ |
+| 14 | **GLM-5.3-Flash Maya-M IQ2_S** (Maya v1.1.28, 2 GPUs) | 512K | ~36 min | 37.3 avg (64.8K tokens in 29 min) | ✅ | ⚠️ wrote it, the run hung | 877 | ✅ |
 
 **11. Nanbeige4.3-33B.** In the 120K chat the first step already had a 32K prompt and the model
 generated ~16K tokens without a tool call. A new chat started with Open WebUI's default 32K
@@ -284,14 +285,28 @@ six screenshots. Compared with run 3 under v1 (27 min, Node installed but never 
 v2 cut the time 4.5× and added a real browser test. Strata warned of only 272 MiB of free VRAM at
 request start (`--vision` keeps ~1.4 GB for the image encoder); decode did not suffer here.
 
+**14. GLM-5.3-Flash (Maya, both GPUs).** Saved the game four minutes in, then revised it three
+times over ~23 minutes and wrote a Playwright `smoke_test.py`. It ran the test as
+`timeout 180 python3 smoke_test.py 2>&1 | tail -40`. The test produced no report or screenshots,
+and the tool call hung for ~8 minutes: the test starts `http.server` in a thread with
+`subprocess.run` and never stops it, so after `timeout` killed the test the orphaned server kept
+the pipe open and `tail` never got EOF. Open WebUI's tool timeout finally returned and GLM wrote a
+short final answer. The game itself is fine: no errors in the reviewer's check, score 10 → 76 in
+3 s, lanes, multiplier and best on the HUD. Against run 4 under v1 (48 min, ~33 tok/s, no
+browser), v2 at RAM 6400 + Gen5 was faster per token (37 tok/s) and nearly reached a real test.
+Lesson for prompt v3: "start servers with `Popen` and kill them in `finally`; never pipe a
+command that can leave a child behind into `tail`".
+
 | # | RAM / links | Process RAM peak | CPU median | 5090: W / VRAM peak | Bound by |
 |---|---|---|---|---|---|
 | 11 | 6400 / Gen5 | 2.3 GB | ~465% | ~348 W / 30.3 GB at 120K | 5090 + 5070 Ti VRAM; attention at depth |
 | 12 | 6400 / Gen5 | ~1 GB | ~420% | ~349 W / 29.9 GB | 5090 VRAM |
 | 13 | 6400 / Gen5 | 54 GB | ~520% | ~373 W / 32.0 GB | 5090 VRAM (full) |
+| 14 | 6400 / Gen5 | 93 GB | ~705% | ~245 W / 31.6 GB (5070 Ti 15.4 GB) | CPU experts + both GPUs |
 
 What v2 changed, in short: absolute paths and "check every write" removed the `Permission denied`
-failures; asking for a test made two of three models write one, but only the strongest ran it.
+failures; asking for a test made three of four models write one; Strata ran it to a PASS report, GLM ran it
+but the test hung on its own orphaned web server.
 A missing `num_ctx` in a new Open WebUI chat silently means 32K, and Strata's own
 `--max-context` is a second, separate limit: set both before a run.
 
