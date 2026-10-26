@@ -1,0 +1,28 @@
+PRISM RUNNER smoke report
+============================================================
+[PASS] test hook __prism exists  
+[PASS] state is title  
+[PASS] state playing after Enter  
+[PASS] distance increased  distance=79.0
+[PASS] score increased  score=79.0
+[PASS] speed finite & positive  speed=20.85
+[PASS] no NaN/inf in sim  finite
+[PASS] restart after random-play death  
+[PASS] state paused  
+[PASS] score frozen while paused  6.344654166666669 vs 6.344654166666669
+[PASS] resumed to playing  
+[PASS] reached dead state  got 'dead'
+[PASS] restarted to playing  got 'playing'
+[PASS] score reset on restart  before=199.1 after=2.2
+[PASS] average frame time measured  16.7 ms
+[PASS] no console errors/warnings  
+[PASS] no pageerrors  
+[PASS] no failed requests  
+
+console messages (error/warning):
+  (none)
+pageerrors:
+  (none)
+failed requests:
+  (none)
+average frame time: 16.7 ms
