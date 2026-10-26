@@ -50,7 +50,7 @@ means no errors, a rendered scene, and score and distance that grow after start.
 | 7 | Qwen3-Coder 30B-A3B (Ollama) | 5090 | 85K peak | ~15 min | 70K | 62–73 | ❌ 7 × `Permission denied`, then claimed success | ❌ none | 1376 | ❌ black screen |
 | 8 | Devstral Small 2 24B (Ollama), best of 3 attempts | 5090 | 40K, q8_0 KV | ~2.5 min | — | 70.9 | ⚠️ wrote to `/tmp` | ❌ none | 1005 | ❌ `THREE is not defined` |
 | 9 | Devstral 2 125B dense (Ollama) | mostly CPU | 64K | 2 h 24 min | 13.6K | **0.81** | ❌ 2 × `Permission denied`, gave up | ❌ none | 677 | ❌ black screen |
-| 10 | Nanbeige4.3-33B Q4_K_M (Ollama, bartowski GGUF) | 5090 + 5070 Ti | 512K → 64K | in progress | — | 3 → 45 | — | — | — | in progress |
+| 10 | Nanbeige4.3-33B Q4_K_M (Ollama, bartowski GGUF) | 5090 + 5070 Ti | 512K → 64K | ~2.5 h, then failed | ~64K per attempt | 3 → 45 | ❌ nothing written | ❌ none | — | ❌ context full |
 
 Working games: **DeepSeek (both runs), Strata and GLM**. Every model at 30B or below, and both dense
 Mistral-family models, shipped a game that does not start.
@@ -140,32 +140,42 @@ most layers ran on the CPU at ~790% CPU with the 5090 at ~4% load. Decode was **
 "let me try another way" and stopped. The last tool-call code has 677 lines and renders a black
 screen.
 
-**10. Nanbeige4.3-33B (dense, released 2026-10-24), in progress.**
+**10. Nanbeige4.3-33B (dense, released 2026-10-24), failed.**
 - Attempt 1 ran with `num_ctx` 524288. The KV cache was ~112 GB (~208 KB per token, 52 layers,
   8 KV heads), so only ~17 of 52 layers fit in 44 GB of VRAM. The CPU did the rest at 3 tok/s with
   both GPUs at 0%.
 - Attempt 2 used 64K, temperature 1.0, top_p 0.95 and top_k 0 (the model card's agentic
   settings). Everything fit in VRAM and decode was **45 tok/s**. But its first reply ran 66K tokens
   without a single tool call. At 64K Ollama's `--context-shift --keep 4` silently dropped half the
-  history, including the task. The user then restarted the turn. Results will be added when it
-  finishes.
+  history, including the task. The user then restarted the turn.
+- Attempt 3 filled the 64K window again without writing a file and stopped with
+  `request (65536 tokens) exceeds the available context size (65536 tokens)`. Context shift only
+  trims during generation; a request larger than the window is rejected. The working directory
+  stayed empty. 96K would fit in VRAM (~20 GB of KV at bf16), but the model spends its budget on
+  reasoning and drafts in chat; prompt v2 (write the file first, report only path and hash) is the
+  better retry.
 
 ## Resources
 
 Medians over the active samples (30 s interval); peaks are maxima.
 
-| # | Model | Process RAM peak | CPU median | 5090: load / W / VRAM peak | 5070 Ti: load / W / VRAM peak | Bound by |
-|---|---|---|---|---|---|---|
-| 1 | DeepSeek (Maya), 1 GPU | 111 GB | ~600% | 99% / 159 W / 31.0 GB | miner | CPU experts + RAM + NVMe |
-| 2 | DeepSeek (Maya), 2 GPUs | 110 GB | ~890% | 44% / 153 W / 31.0 GB | 99% / 88 W / 15.1 GB | CPU experts + NVMe reads (~0.8 GB/s); 5070 Ti |
-| 3 | Qwen3.8 (Strata) | 51 GB | ~210% | ~100% / ~376 W while decoding / 31.3 GB (275 MB free) | miner | 5090 VRAM |
-| 4 | GLM-5.3 (Maya) | 94 GB | ~800% | 80% / 222 W / 31.0 GB | 94% / 104 W / 15.1 GB | CPU experts + PCIe; 5070 Ti at PCIe 3.0 x8 |
-| 5 | Nemotron Super 120B | 70 GB | ~690% | 4% / 81 W / 30.3 GB | miner, later ~10 GB | CPU |
-| 6 | Nemotron Lightning 30B | 5.8 GB | ~380% | 35% / 206 W / 17.8 GB | 52% / 146 W / 11.6 GB | both GPUs in turn |
-| 7 | Qwen3-Coder 30B | 1.1 GB | ~450% | 96% / 500 W / 24.6 GB | idle | 5090 VRAM (KV at 85K) |
-| 8 | Devstral Small 2, attempt 1 / 3 | 24 GB / 14.5 GB | ~790% / ~410% | 6% / 95 W, then 95% / 500 W | 5%, then idle | CPU, then 5090 VRAM |
-| 9 | Devstral 2 125B | 82 GB | ~800% | 0–4% / 79 W / 30.4 GB | 0% / 43 W / 14.5 GB | CPU + RAM (~40 GB/s) |
-| 10 | Nanbeige 33B, 64K | 2.2 GB | ~450% | 50% / 339 W / 23.5 GB | 44% / 142 W / 11.3 GB | both GPUs in turn |
+| # | Model | RAM / 5070 Ti link | Process RAM peak | CPU median | 5090: load / W / VRAM peak | 5070 Ti: load / W / VRAM peak | Bound by |
+|---|---|---|---|---|---|---|---|
+| 1 | DeepSeek (Maya), 1 GPU | 3600 / Gen5 | 111 GB | ~600% | 99% / 159 W / 31.0 GB | miner | CPU experts + RAM + NVMe |
+| 2 | DeepSeek (Maya), 2 GPUs | 3600 / Gen5 | 110 GB | ~890% | 44% / 153 W / 31.0 GB | 99% / 88 W / 15.1 GB | CPU experts + NVMe reads (~0.8 GB/s); 5070 Ti |
+| 3 | Qwen3.8 (Strata) | 3600 / Gen5 | 51 GB | ~210% | ~100% / ~376 W while decoding / 31.3 GB (275 MB free) | miner | 5090 VRAM |
+| 4 | GLM-5.3 (Maya) | 6400 / **Gen3** | 94 GB | ~800% | 80% / 222 W / 31.0 GB | 94% / 104 W / 15.1 GB | CPU experts + PCIe; 5070 Ti at PCIe 3.0 x8 |
+| 5 | Nemotron Super 120B | 3600 / Gen5 | 70 GB | ~690% | 4% / 81 W / 30.3 GB | miner, later ~10 GB | CPU |
+| 6 | Nemotron Lightning 30B | 3600 / Gen5 | 5.8 GB | ~380% | 35% / 206 W / 17.8 GB | 52% / 146 W / 11.6 GB | both GPUs in turn |
+| 7 | Qwen3-Coder 30B | 3600 / Gen5 | 1.1 GB | ~450% | 96% / 500 W / 24.6 GB | idle | 5090 VRAM (KV at 85K) |
+| 8 | Devstral Small 2, attempt 1 / 3 | 3600 / Gen5 | 24 GB / 14.5 GB | ~790% / ~410% | 6% / 95 W, then 95% / 500 W | 5%, then idle | CPU, then 5090 VRAM |
+| 9 | Devstral 2 125B | 3600 / Gen5 | 82 GB | ~800% | 0–4% / 79 W / 30.4 GB | 0% / 43 W / 14.5 GB | CPU + RAM (~40 GB/s) |
+| 10 | Nanbeige 33B, 64K | 6400 / **Gen3** | 2.2 GB | ~450% | 50% / 339 W / 23.5 GB | 44% / 142 W / 11.3 GB | both GPUs in turn |
+
+RAM is the memory clock in MT/s (3600 before EXPO was enabled on 2026-10-25 22:04). The 5070 Ti
+link is from `nvidia-smi`: "Gen5" for runs before that reboot is inferred from `gen.max 5` on
+2026-10-22. Runs 4 and 10 had the 5070 Ti at PCIe 3.0 x8; with Gen5 forced, GLM's benchmark rose
+from ~40 to ~45 tok/s ([`../engine-bench-maya/`](../engine-bench-maya/)).
 
 CPU around 400–450% for a model that is fully on the GPU is llama.cpp threads busy-waiting. CPU
 around 800% means 8 threads doing real work.
@@ -205,7 +215,7 @@ rewrites.
    is worse than failing.
 5. **Context settings matter more than the model for speed.**
    - Devstral Small 2: 6.5 tok/s at 256K → 70.9 tok/s at 40K q8_0.
-   - Nanbeige 33B: 3 tok/s at 512K → 45 tok/s at 64K.
+   - Nanbeige 33B: 3 tok/s at 512K → 45 tok/s at 64K, and 64K then ran out before it wrote a file.
 
    An oversized `num_ctx` turns into a KV cache that pushes whole layers to the CPU.
 6. **Ollama silently drops history when the context is full** (`--context-shift --keep 4`). The

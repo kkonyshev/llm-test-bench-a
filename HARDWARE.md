@@ -24,7 +24,7 @@ further hardware, record the same fields below for the new machine.
 | Field | Value |
 |---|---|
 | CPU | AMD Ryzen 7 9800X3D (8 cores / 16 threads) |
-| System RAM | 123 GB |
+| System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel. **3600 MT/s** until 2026-10-25; since then **6400 MT/s** with the EXPO I profile (CL40-40-40-84, VDD/VDDQ 1.35 V; `dmidecode`: Speed 5600, Configured 6400). Four DIMMs at 6400 is aggressive: stability-test before trusting long runs. Every coding and reasoning result in `RESULTS.md` was measured at 3600. A 6000 MT/s setting made by hand (EXPO timings lost) was ~20% slower for CPU-side expert work than 6400 EXPO (`engine-bench-maya/`) |
 | GPU | NVIDIA GeForce RTX 5070 Ti, 16 GB VRAM |
 | GPU driver | 610.57.04 |
 | Storage | NVMe SSD, 1.8 TB |
@@ -40,7 +40,7 @@ comparable to Machine 2 for the shared model set.
 | Field | Value |
 |---|---|
 | CPU | AMD Ryzen 7 9800X3D (8 cores / 16 threads) |
-| System RAM | 123 GB |
+| System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel. **3600 MT/s** until 2026-10-25; since then **6400 MT/s** with the EXPO I profile (CL40-40-40-84, VDD/VDDQ 1.35 V; `dmidecode`: Speed 5600, Configured 6400). Four DIMMs at 6400 is aggressive: stability-test before trusting long runs. Every coding and reasoning result in `RESULTS.md` was measured at 3600. A 6000 MT/s setting made by hand (EXPO timings lost) was ~20% slower for CPU-side expert work than 6400 EXPO (`engine-bench-maya/`) |
 | GPU 0 | NVIDIA GeForce RTX 5090, 32 GB VRAM (**new**) |
 | GPU 1 | NVIDIA GeForce RTX 5070 Ti, 16 GB VRAM (carried over from Machine 2) |
 | Combined VRAM | 48 GB across both GPUs |
@@ -61,11 +61,11 @@ first Machine 3 runs. These are the numbers to use when comparing against other 
 | Motherboard | ASUS ProArt X870E-CREATOR WIFI |
 | CPU | AMD Ryzen 7 9800X3D, 8 cores / 16 threads, up to 5.27 GHz, 96 MB L3 (3D V-Cache) |
 | System RAM | 4 x 32 GB DDR5 (123 GB usable), dual channel. **3600 MT/s** until 2026-10-25; since then **6400 MT/s** with the EXPO I profile (CL40-40-40-84, VDD/VDDQ 1.35 V; `dmidecode`: Speed 5600, Configured 6400). Four DIMMs at 6400 is aggressive: stability-test before trusting long runs. Every coding and reasoning result in `RESULTS.md` was measured at 3600 |
-| RAM bandwidth, effective | **~40 GB/s** (~70% of theoretical), derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s (at 3600 MT/s). At 6400 MT/s it was not re-measured directly; Maya's DeepSeek decode rose +12% and prefill +30-36% (`engine-bench-maya/`) |
+| RAM bandwidth, effective | **~40 GB/s** at 3600 MT/s (~70% of theoretical), derived from the CPU-bound runs: Devstral 2 reads ~30 GB of weights from RAM per token at 1.25 tok/s, Mistral Medium 3.5 ~46 GB at 0.9 tok/s. Maya's start-up read probe: **62-64 GB/s at 6400 EXPO** (54 in one later start), **51 GB/s** at 6000 with lost EXPO timings. Maya's DeepSeek decode rose +12% and prefill +30-36% from 3600 to 6400 |
 | RAM bandwidth ceiling | The 9800X3D has a single CCD; its Infinity Fabric link reads about 60-65 GB/s whatever the memory speed. EXPO at 5200-5600 MT/s would bring the effective figure close to that (+20-35% for models spilling to RAM); two DIMMs at 6000-6400 would add only ~5-10% more while halving capacity |
 | GPU 0 | NVIDIA GeForce RTX 5090: 32 GB GDDR7, 512-bit, **1,792 GB/s**, 21,760 CUDA cores, Blackwell (SM 12.0) |
 | GPU 1 | NVIDIA GeForce RTX 5070 Ti: 16 GB GDDR7, 256-bit, **896 GB/s**, 8,960 CUDA cores, Blackwell (SM 12.0) |
-| PCIe | With two cards the board splits the slots x8/x8. Under load `nvidia-smi` shows the **5090 at PCIe 5.0 x8** and the **5070 Ti at PCIe 3.0 x8**. Maya measured host-to-card copies at **26.6 GB/s vs 6.7 GB/s**. This is why GLM's prefill drops 29-49% when the 5070 Ti joins (`engine-bench-maya/`) |
+| PCIe | With two cards the board splits the CPU slots x8/x8. The **5090 runs at PCIe 5.0 x8** (26.6 GB/s host-to-card in Maya). The **5070 Ti trained at PCIe 3.0 x8 (6.7 GB/s) after EXPO was enabled with the slot speed on Auto**; at 3600 and at 6000 it ran at Gen5. Since 2026-10-26 the second slot is **set to Gen5 by hand**: Gen5 x8 at 6400 EXPO, 26.5 GB/s, zero AER errors, links still drop to Gen1 at idle. This lifted GLM's two-card prefill +44% and decode +12-14% (`engine-bench-maya/`). With one card in the board the 5090 would get x16 (not measured) |
 | GPU driver | 615.71.09 |
 | Ollama | 0.40.5, native install, `OLLAMA_CONTEXT_LENGTH=65536`; the benchmarks pass `num_ctx=32768` |
 | Other engines | Strata 0.1.44 / 0.1.45 (Qwen3.8-Flash-Next), PrismML llama.cpp fork (Ternary Bonsai) |
@@ -151,7 +151,7 @@ Expect ±20%.
 | CPU | AMD Threadripper PRO 3995WX: 64 cores, 8 CCDs, 256 MB L3 (confirmed from the seller's screenshots) |
 | RAM | Ships with 2 x 16 GB DDR4-3200 RDIMM. The plan is **8 x 32 GB DDR4-3200 RDIMM (256 GB)**, one per channel: 204.8 GB/s theoretical, ~110-130 GB/s expected for llama.cpp and Maya expert reads. Mixed sizes (2 x 16 + 6 x 32 = 224 GB) would interleave over 8 channels only for the first 128 GB and over 6 above that: ~88% of the bandwidth and ~5-8% slower decode |
 | PSU | 1000 W: enough for one 5090 plus the CPU (~855 W), tight with a second card |
-| PCIe | 4.0 x16 per slot: the same bandwidth the 5090 has now, ~4x what the 5070 Ti has |
+| PCIe | 4.0 x16 per slot: the same bandwidth each card has now at Gen5 x8 |
 | Storage | 500 GB NVMe (Kingston NV3, new) |
 
 Expected decode, tok/s:
@@ -159,7 +159,7 @@ Expected decode, tok/s:
 | Model | Machine 3, measured | P620 + 5090 | P620 + 5090 + 5070 Ti |
 |---|---|---|---|
 | DeepSeek-V4.1-Flash (Maya), fits in RAM | 20.7 | ~35-40 | ~35-40 (the second card is within the error) |
-| GLM-5.3-Flash Maya-M (Maya) | 31.9 / 40 | ~38-45 | ~45-55, and prefill is no longer penalised |
+| GLM-5.3-Flash Maya-M (Maya) | 31.9 / 45 | ~38-45 | ~50-58 |
 | GLM-5.3-Flash Maya-L (156 GB) | does not fit | ~28-35 | - |
 | Mistral Large 3 675B UD-Q2_K_XL (llama.cpp, experts in RAM) | ~2-4 (NVMe-bound) | ~10-12 | ~11-14 |
 | Dense 120B+ (Devstral 2, CPU-bound) | 0.8 | ~2.5-3 | - |
