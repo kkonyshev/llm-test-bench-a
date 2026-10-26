@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#05070f">
+<title>PRISM RUNNER — a neon endless runner</title>
+<style>
+  :root{--cyan:#35e6ff;--magenta:#ff3fd0;--ink:#e8f6ff;--dim:#7f93ad}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#05070f;overflow:hidden;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink)}
+  #stage{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:crosshair}
+  #gl{display:block;width:100%;height:100%}
+  /* cinematic overlays (pure CSS, no canvas) */
+  #fx-vignette{position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 38%,rgba(20,0,40,.55) 72%,rgba(0,0,0,.84) 100%)}
+  #fx-scan{position:fixed;inset:0;pointer-events:none;opacity:.5;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,rgba(0,0,0,.11) 1px 3px)}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;padding:14px 16px;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    font-size:13px;text-shadow:0 0 8px rgba(53,230,255,.5)}
+  #hud .grp{display:flex;flex-direction:column;gap:1px}
+  #hud .k{color:var(--dim);letter-spacing:.14em;font-size:10px}
+  #hud .v{font-size:19px;letter-spacing:.04em}
+  #hud-score{color:var(--cyan)}
+  #hud .right{text-align:right}
+  #hudbar{position:fixed;left:0;right:0;bottom:0;height:3px;pointer-events:none}
+  #hudbar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--magenta));
+    box-shadow:0 0 10px rgba(53,230,255,.7)}
+  /* screens */
+  .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 40%,rgba(5,7,15,.55),rgba(3,4,10,.93));
+    backdrop-filter:blur(3px);padding:20px;text-align:center}
+  .screen.active{display:flex}
+  .panel{max-width:580px;display:flex;flex-direction:column;gap:13px}
+  h1{margin:0;font-size:clamp(30px,7vw,56px);letter-spacing:.18em;font-weight:700;color:#fff;
+    text-shadow:0 0 18px rgba(53,230,255,.85),0 0 42px rgba(255,63,208,.5)}
+  h1 .thin{color:var(--cyan)}
+  h2{margin:0;font-size:14px;letter-spacing:.5em;color:var(--magenta);text-transform:uppercase}
+  p{margin:0;color:#b9c9dd;font-size:13px;line-height:1.8}
+  ul{margin:0;padding-left:20px;color:#b9c9dd;font-size:13px;line-height:1.85}
+  li{margin:2px 0}
+  kbd{background:rgba(53,230,255,.12);border:1px solid rgba(53,230,255,.45);border-bottom-width:2px;
+    border-radius:4px;padding:1px 6px;color:#dffaff;font:inherit;font-size:11px}
+  #final-score{font-size:26px;color:var(--cyan);text-shadow:0 0 14px rgba(53,230,255,.7)}
+  #best{color:var(--magenta)}
+  .hint{margin-top:4px;color:var(--dim);letter-spacing:.14em;font-size:11px}
+  /* touchpad (phones) */
+  #touchpad{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);display:none;
+    gap:10px;flex-wrap:wrap;justify-content:center}
+  body.touch #touchpad{display:flex}
+  #touchpad button{width:66px;height:66px;border-radius:14px;border:1px solid rgba(53,230,255,.5);
+    background:rgba(8,14,28,.75);color:var(--cyan);font:inherit;font-size:11px;letter-spacing:.1em;
+    touch-action:none;user-select:none;-webkit-user-select:none}
+  #touchpad button:active{background:rgba(53,230,255,.25)}
+  #fatal{display:none}
+  #fatal.active{display:flex}
+  @media (max-height:560px){#hud .v{font-size:15px}}
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="fx-vignette"></div>
+  <div id="fx-scan"></div>
+
+  <div id="hud">
+    <div class="grp">
+      <span class="k">SCORE</span><span class="v" id="hud-score">0</span>
+      <span class="k">DIST</span><span class="v" id="hud-dist">0</span>
+    </div>
+    <div class="grp right">
+      <span class="k">SPEED</span><span class="v" id="hud-speed">0.0</span>
+      <span class="k">SHARD × MULT</span><span class="v" id="hud-mult">1</span>
+      <span class="k">STREAK</span><span class="v" id="hud-streak">0</span>
+    </div>
+  </div>
+  <div id="hudbar"><i id="hudbar-fill"></i></div>
+
+  <div id="touchpad">
+    <button data-act="left">◀ LANE</button>
+    <button data-act="right">LANE ▶</button>
+    <button data-act="jump">JUMP</button>
+    <button data-act="slide">SLIDE</button>
+  </div>
+
+  <section id="scr-title" class="screen active">
+    <div class="panel">
+      <h2>PRISM RUNNER</h2>
+      <h1><span class="thin">PRISM</span> RUNNER</h1>
+      <p>Ride the magnetic hoverboard through a neon void. Shift lanes, jump blocks, slide under gates, collect shards.</p>
+      <ul>
+        <li><kbd>←</kbd> <kbd>A</kbd> / <kbd>→</kbd> <kbd>D</kbd> — switch lane (±1 per press, no repeat spam)</li>
+        <li><kbd>↑</kbd> <kbd>W</kbd> <kbd>Space</kbd> — jump (short arc, shadow marker)</li>
+        <li><kbd>↓</kbd> <kbd>S</kbd> — slide / dash (0.4s, passes under high gates)</li>
+        <li><kbd>P</kbd> / <kbd>Esc</kbd> — pause · <kbd>R</kbd> — restart · <kbd>M</kbd> — mute</li>
+        <li><kbd>Enter</kbd> / <kbd>Space</kbd> — start · swipe or tap on phone</li>
+      </ul>
+      <div class="hint">PRESS ENTER / TAP TO START</div>
+    </div>
+  </section>
+
+  <section id="scr-pause" class="screen">
+    <div class="panel">
+      <h2>PAUSED</h2>
+      <h1 style="font-size:32px">PAUSE</h1>
+      <p>Simulation is frozen. Press <kbd>P</kbd> or <kbd>Esc</kbd> to resume.</p>
+      <div class="hint">TAP / P TO RESUME</div>
+    </div>
+  </section>
+
+  <section id="scr-dead" class="screen">
+    <div class="panel">
+      <h2>SIGNAL LOST</h2>
+      <h1 style="font-size:32px;color:#ff6b81;text-shadow:0 0 18px rgba(255,80,120,.7)">GAME OVER</h1>
+      <div id="final-score">0</div>
+      <p>BEST <span id="best">0</span></p>
+      <p>Press <kbd>R</kbd> or tap to run it again.</p>
+    </div>
+  </section>
+
+  <section id="fatal" class="screen">
+    <div class="panel">
+      <h2>WEBGL REQUIRED</h2>
+      <p id="fatal-msg">This browser could not initialise WebGL2. PRISM RUNNER needs a WebGL2-capable browser (Chrome, Firefox, Edge, Safari 15+).</p>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   1 · CONFIG — every tuning constant lives in one place
+   ============================================================ */
+const CFG = {
+  SPEED_START: 9,            // u/s at distance 0
+  SPEED_MAX: 22,             // u/s ceiling
+  ACCEL: 0.6,                // u/s² toward the ramp target
+  RAMP_DIST: 380,            // u over which SPEED_START ramps to SPEED_MAX
+  LANES: 3, LANE_WIDTH: 2.6,
+  LANE_RESP: 7.0,            // 1/s smoothing rate for lane changes
+  LANE_SNAP: 0.03,           // snap threshold (u)
+  GRAVITY: 20, JUMP_V: 9.2,
+  RIDE_Y: 1.15,              // hover height above the track
+  SLIDE_Y: 0.45, SLIDE_TIME: 0.40,
+  SEG_LEN: 16, SEG_COUNT: 12,
+  REGEN: 14,                 // recycle a slot once this far behind the player
+  MIN_REACTION: 0.95,        // s of travel between consecutive pattern starts
+  EASE_TIME: 15,             // s before the first obstacle may exist
+  SPAWN_AHEAD: 48,           // patterns only inside this many u ahead (reactable)
+  GATE_OPEN: 0.95,           // gates block above this height unless sliding
+  GATE_HEIGHT: 2.6, BLOCK_H: 1.05,
+  SHARD_VAL: 15, MAX_MULT: 8,
+  PARTICLES: 700,
+  CURVE_AMP: 0.9, CURVE_FREQ: 0.075,
+  BASE_FOV: 62, FOV_SPEED: 12,
+  HIT_STOP: 0.08, SHAKE: 0.16,
+  TRACK_W: 10.2,
+};
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+/* ============================================================
+   2 · UTILITIES
+   ============================================================ */
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let rng = mulberry32(20261026);
+const rnd = () => rng();
+const pick = arr => arr[Math.floor(rnd() * arr.length)];
+
+/* ============================================================
+   3 · RENDERER / SCENE / CAMERA / LIGHTS
+   ============================================================ */
+const canvas = $('gl'), stage = $('stage');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({canvas, antialias: true, powerPreference: 'high-performance'});
+} catch (err) {
+  $('fatal-msg').textContent = 'WebGL could not be created: ' + err.message;
+  $('fatal').classList.add('active');
+  throw err;
+}
+if (!renderer.capabilities.isWebGL2) {
+  $('fatal-msg').textContent = 'This browser only offers WebGL1. PRISM RUNNER needs WebGL2.';
+  $('fatal').classList.add('active');
+  throw new Error('WebGL2 unavailable');
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(window.innerWidth, window.innerHeight, false);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05070f);
+scene.fog = new THREE.FogExp2(0x05070f, 0.011);
+
+const camera = new THREE.PerspectiveCamera(CFG.BASE_FOV, window.innerWidth / window.innerHeight, 0.1, 400);
+scene.add(new THREE.AmbientLight(0x22304a, 1.4));
+const sun = new THREE.DirectionalLight(0x6fb6ff, 0.9); sun.position.set(0, 12, 6); scene.add(sun);
+
+/* ============================================================
+   4 · GENERATED TEXTURES / MATERIALS (no external assets)
+   ============================================================ */
+function softDotTexture(){
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.35, 'rgba(255,255,255,.55)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const dotTex = softDotTexture();
+const COL = {
+  base: new THREE.Color(0x0a0f1e),
+  rung: new THREE.Color(0x1d6f8f),
+  lane: new THREE.Color(0xff2fb8),
+  edge: new THREE.Color(0x7a4bff),
+  center: new THREE.Color(0x35e6ff),
+  cyan: new THREE.Color(0x35e6ff),
+  magenta: new THREE.Color(0xff3fd0),
+};
+
+/* ============================================================
+   5 · TRACK — procedural segment geometry + ring pool
+   The track is a ring of SEG_COUNT slots travelling with the player.
+   Slot i starts at (playerZ - SEG_LEN + i*SEG_LEN), so floor always
+   exists under the camera and SPAWN_AHEAD of track ahead; slots are
+   recycled behind (content regenerated, zero allocation).
+   ============================================================ */
+const NX = 10, NZ = 12;                 // grid resolution per segment
+const segGeo = [];                      // scratch buffers, allocated once
+const segments = [];
+for (let i = 0; i < CFG.SEG_COUNT; i++) {
+  const nv = (NX + 1) * (NZ + 1);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nv * 3), 3).setUsage(THREE.DynamicDrawUsage));
+  g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(nv * 3), 3).setUsage(THREE.DynamicDrawUsage));
+  g.setIndex(new THREE.BufferAttribute(new Uint16Array(NX * NZ * 6), 1));
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, CFG.SEG_LEN / 2),
+    Math.sqrt((CFG.TRACK_W / 2 + 1) ** 2 + (CFG.CURVE_AMP * 2) ** 2 + (CFG.SEG_LEN / 2 + 1) ** 2));
+  segGeo.push({g, pos: g.attributes.position.array, col: g.attributes.color.array});
+
+  const group = new THREE.Group();
+  const mesh = new THREE.Mesh(g, new THREE.MeshBasicMaterial({vertexColors: true}));
+  const glowMat = new THREE.MeshBasicMaterial({
+    map: dotTex, color: i % 2 ? COL.magenta : COL.cyan, transparent: true, opacity: 0.30,
+    blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(CFG.TRACK_W + 1.8, CFG.SEG_LEN + 1.8), glowMat);
+  glow.rotation.x = -Math.PI / 2; glow.position.y = 0.05;
+  const pillarMat = new THREE.MeshBasicMaterial({color: COL.lane, transparent: true, opacity: 0.85});
+  const pillars = [];
+  for (let s = 0; s < 2; s++) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.6, CFG.SEG_LEN + 0.8), pillarMat);
+    p.position.set(s ? 1 : -1 * (CFG.TRACK_W / 2 + 0.2), -1.8, CFG.SEG_LEN / 2);
+    pillars.push(p); group.add(p);
+  }
+  group.add(mesh, glow);
+  scene.add(group);
+
+  const s = {
+    group, mesh, glowMat, pillars, g, pos: segGeo[i].pos, col: segGeo[i].col,
+    curve: {amp: 1, freq: 1, phase: 0}, offset: -CFG.SEG_LEN + i * CFG.SEG_LEN,
+    bornZ: -Infinity, obs: [], shards: [],
+  };
+  segments.push(s);
+}
+
+// Refill a segment's scratch buffers: vertical curvature per segment.
+function rebuildSegment(s){
+  const {pos, col} = s, {g} = s, curve = s.curve;
+  let p = 0, c = 0;
+  for (let j = 0; j <= NZ; j++) {
+    const z = (j / NZ) * CFG.SEG_LEN;
+    const y = Math.sin(z * curve.freq + curve.phase) * curve.amp;
+    for (let i = 0; i <= NX; i++) {
+      const x = -CFG.TRACK_W / 2 + (i / NX) * CFG.TRACK_W;
+      pos[p] = x; pos[p + 1] = y; pos[p + 2] = z; p += 3;
+      let cr = COL.base;
+      const ax = Math.abs(x);
+      if (Math.abs(ax - LANE_W_SAFE()) < 0.16) cr = COL.lane;
+      else if (Math.abs(ax - (2 * CFG.LANE_WIDTH + 0.4)) < 0.16) cr = COL.edge;
+      if (Math.abs(z - Math.round(z / 2) * 2) < 0.14) cr = COL.rung;
+      if (Math.abs(z - CFG.SEG_LEN / 2) < 0.13) cr = COL.center;
+      col[c] = cr.r; col[c + 1] = cr.g; col[c + 2] = cr.b; c += 3;
+    }
+  }
+  g.attributes.position.needsUpdate = true;
+  g.attributes.color.needsUpdate = true;
+}
+const LANE_W_SAFE = () => CFG.LANE_WIDTH;   // local alias keeps hot loop readable
+
+// Analytic track surface sample (y + slope) — used for the player, marker, shards.
+const _sample = {y: 0, slope: 0};
+function trackSample(z){
+  const P = _sample;
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i], o = s.offset;
+    const lz = z - CFG.SEG_LEN + o;           // local z inside the slot
+    if (lz >= -0.001 && lz <= CFG.SEG_LEN + 0.001) {
+      P.y = Math.sin(lz * s.curve.freq + s.curve.phase) * s.curve.amp;
+      P.slope = Math.cos(lz * s.curve.freq + s.curve.phase) * s.curve.freq * s.curve.amp;
+      return P;
+    }
+  }
+  P.y = 0; P.slope = 0; return P;
+}
+
+/* ============================================================
+   6 · PLAYER — glowing spinning icosahedron on a hoverboard
+   ============================================================ */
+const playerGroup = new THREE.Group(); scene.add(playerGroup);
+const boardMat = new THREE.MeshStandardMaterial({color: 0x0a0f1c, roughness: 0.35, metalness: 0.7,
+  emissive: 0x1b6dd8, emissiveIntensity: 0.55});
+const board = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.22, 3.4), boardMat); board.position.y = 0;
+const stripMat = new THREE.MeshBasicMaterial({color: COL.cyan});
+const strip = new THREE.Mesh(new THREE.BoxGeometry(1.72, 0.06, 0.62), stripMat); strip.position.y = 0.14;
+const ringMesh = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.085, 6, 28),
+  new THREE.MeshBasicMaterial({color: COL.magenta, transparent: true, opacity: 0.9}));
+ringMesh.rotation.x = Math.PI / 2; ringMesh.position.y = -0.18;
+const bodyMat = new THREE.MeshStandardMaterial({color: 0x8ff6ff, emissive: 0x2ad4ff, emissiveIntensity: 1.1,
+  roughness: 0.18, metalness: 0.1});
+const body = new THREE.Mesh(new THREE.IcosahedronGeometry(0.52, 0), bodyMat); body.position.y = 0.42;
+const point = new THREE.PointLight(0x35e6ff, 2.4, 9, 2); point.position.y = 0.6;
+playerGroup.add(board, strip, ringMesh, body, point);
+
+const marker = new THREE.Mesh(
+  new THREE.RingGeometry(0.72, 1.02, 28),
+  new THREE.MeshBasicMaterial({color: COL.cyan, transparent: true, opacity: 0.85, depthWrite: false}));
+marker.rotation.x = -Math.PI / 2; scene.add(marker);
+
+/* ============================================================
+   7 · OBSTACLE + SHARD POOLS (object pooling, no per-frame alloc)
+   ============================================================ */
+const obstacles = [], shards = [];
+const gateGeo = new THREE.BoxGeometry(0.62, CFG.GATE_HEIGHT, 3.3);
+const gateBandGeo = new THREE.BoxGeometry(0.66, 0.16, 3.36);
+const blockGeo = new THREE.BoxGeometry(CFG.LANE_WIDTH * 0.86, CFG.BLOCK_H, 2.5);
+const blockTopGeo = new THREE.BoxGeometry(CFG.LANE_WIDTH * 0.9, 0.14, 2.56);
+const gateMat = new THREE.MeshBasicMaterial({color: 0x141038});
+const gateBandMat = new THREE.MeshBasicMaterial({color: COL.cyan});
+const blockMat = new THREE.MeshBasicMaterial({color: 0x2a1230});
+const blockTopMat = new THREE.MeshBasicMaterial({color: COL.magenta});
+const shardGeo = new THREE.OctahedronGeometry(0.26, 0);
+const shardMat = new THREE.MeshStandardMaterial({color: 0xdff3ff, emissive: 0x35e6ff, emissiveIntensity: 1.2,
+  roughness: 0.2, metalness: 0.1});
+
+function makeObstacle(){
+  const group = new THREE.Group();
+  const gate = new THREE.Mesh(gateGeo, gateMat), band = new THREE.Mesh(gateBandGeo, gateBandMat);
+  band.position.y = CFG.GATE_OPEN;
+  const block = new THREE.Mesh(blockGeo, blockMat), blockTop = new THREE.Mesh(blockTopGeo, blockTopMat);
+  blockTop.position.y = CFG.BLOCK_H;
+  group.add(gate, band, block, blockTop); scene.add(group);
+  return {active: false, kind: 'gate', group, x0: 0, x1: 0, z: 0, hz: 2};
+}
+function makeShard(){
+  const m = new THREE.Mesh(shardGeo, shardMat); scene.add(m);
+  return {active: false, mesh: m, x: 0, z: 0, phase: 0};
+}
+const OBS_POOL = 80, SHARD_POOL = 80;
+for (let i = 0; i < OBS_POOL; i++) obstacles.push(makeObstacle());
+for (let i = 0; i < SHARD_POOL; i++) shards.push(makeShard());
+function deactivateObstacle(o){ o.active = false; o.group.visible = false; }
+function deactivateShard(s){ s.active = false; s.mesh.visible = false; }
+function activateObstacle(o, kind, x0, x1, z, hz){
+  o.active = true; o.kind = kind; o.x0 = x0; o.x1 = x1; o.z = z; o.hz = hz;
+  o.group.visible = true;
+  o.group.children[kind === 'gate' ? 0 : 2].visible = true;
+  o.group.children[kind === 'gate' ? 1 : 3].visible = false;
+  o.group.position.set((x0 + x1) / 2, 0, z);
+  o.group.scale.set(Math.max(0.001, (x1 - x0) / 0.62), kind === 'gate' ? 1 : 1, 1);
+  if (kind === 'block') o.group.children[2].geometry.copy(blockGeo); // shared geo, width baked by scale
+}
+function activateShard(s, x, z){
+  s.active = true; s.x = x; s.z = z; s.phase = rnd() * Math.PI * 2; s.mesh.visible = true;
+}
+
+/* ============================================================
+   8 · PATTERN GENERATION — fairness is enforced here
+   *  union of blocked lanes is never all 3 lanes
+   *  next pattern start >= last pattern end + speed*MIN_REACTION
+   *  first EASE_TIME seconds contain shards only
+   ============================================================ */
+let lastPatternEnd = -Infinity;
+const easeLimit = CFG.SPEED_START * CFG.EASE_TIME;
+function ensureGap(z){ return Math.max(z, lastPatternEnd + speed * CFG.MIN_REACTION); }
+
+function pickLanes(n){
+  const out = [], used = [];
+  while (out.length < n && used.length < CFG.LANES) {
+    let l; do { l = Math.floor(rnd() * CFG.LANES); } while (used.includes(l));
+    used.push(l); out.push(l);
+  }
+  return out;
+}
+function laneX(i){ return (i - 1) * CFG.LANE_WIDTH; }
+function spanX(a, b){ return [laneX(a), laneX(b)]; }
+
+function populateSegment(s, z){
+  for (const o of s.obs) deactivateObstacle(o);
+  for (const sh of s.shards) deactivateShard(sh);
+  s.obs.length = 0; s.shards.length = 0;
+
+  s.curve.amp = CFG.CURVE_AMP * (0.55 + rnd() * 0.9);
+  s.curve.freq = CFG.CURVE_FREQ * (0.5 + rnd());
+  s.curve.phase = rnd() * Math.PI * 2;
+  rebuildSegment(s);
+
+  const zEnd = z + CFG.SEG_LEN;
+  const canHost = distance >= easeLimit;
+  const maxRel = Math.min(CFG.SPAWN_AHEAD - s.offset, CFG.SEG_LEN - 5);
+
+  let host = null;
+  if (canHost && maxRel > 4) {
+    const r = pick(['gate', 'gate', 'block', 'doublegate', 'none', 'none']);
+    if (r !== 'none') host = r;
+  }
+  if (!host) { spawnShardsOnly(s, z, zEnd); return; }
+
+  if (host === 'gate' || host === 'block') {
+    const lanes = host === 'gate' ? pickLanes(1 + (rnd() < 0.45 ? 1 : 0)) : pickLanes(1 + (rnd() < 0.35 ? 1 : 0));
+    const wz = ensureGap(z + 2.5 + rnd() * Math.max(1, maxRel - 2.5));
+    if (wz > zEnd - 6) { spawnShardsOnly(s, z, zEnd); return; }
+    const [x0, x1] = spanX(Math.min(...lanes), Math.max(...lanes));
+    addObstacle(s, 'gate' === host ? 'gate' : 'block', x0 - 0.3, x1 + 0.3, wz, host === 'gate' ? 1.7 : 1.3);
+    lastPatternEnd = wz + 3.4;
+  } else {
+    // double gate: two gates, never blocking all lanes, spaced by the reaction window
+    const a = pickLanes(1)[0];
+    const wz1 = ensureGap(z + 2.5 + rnd() * Math.max(1, maxRel - 6));
+    if (wz1 > zEnd - 16) { spawnShardsOnly(s, z, zEnd); return; }
+    const open = [0, 1, 2].filter(l => l !== a);
+    const b = open[Math.floor(rnd() * open.length)];
+    const wz2 = ensureGap(wz1 + speed * (CFG.MIN_REACTION + 0.5));
+    if (wz2 > zEnd - 6) { addObstacle(s, 'gate', laneX(a) - 0.3, laneX(a) + 0.3, wz1, 1.7);
+      lastPatternEnd = wz1 + 3.4; spawnShardsOnly(s, z, zEnd, wz1); return; }
+    addObstacle(s, 'gate', laneX(a) - 0.3, laneX(a) + 0.3, wz1, 1.7);
+    addObstacle(s, 'gate', laneX(b) - 0.3, laneX(b) + 0.3, wz2, 1.7);
+    lastPatternEnd = wz2 + 3.4;
+    spawnShardsOnly(s, z, zEnd, wz1, wz2);
+  }
+}
+function addObstacle(s, kind, x0, x1, z, hz){
+  for (const o of obstacles) if (!o.active) { activateObstacle(o, kind, x0, x1, z, hz); s.obs.push(o); return; }
+}
+function spawnShardsOnly(s, z, zEnd, wz1, wz2){
+  const blocked = [];
+  if (wz1) blocked.push([wz1 - 4, wz1 + 4]);
+  if (wz2) blocked.push([wz2 - 4, wz2 + 4]);
+  const candidates = [];
+  for (let l = 0; l < CFG.LANES; l++) {
+    const lx = laneX(l);
+    if (blocked.some(r => lx > r[0] - 1.5 && lx < r[1] + 1.5)) continue;
+    for (let k = 1; k <= 2; k++) {
+      const rel = 3 + rnd() * Math.max(2, (CFG.SPAWN_AHEAD - s.offset) - 8);
+      if (rel > CFG.SEG_LEN - 4) rel = CFG.SEG_LEN - 4;
+      if (blocked.some(r => rel > r[0] - 6 && rel < r[1] + 6)) continue;
+      candidates.push({l, rel});
+    }
+  }
+  if (!candidates.length) return;
+  const n = 1 + Math.floor(rnd() * 2);
+  for (let i = 0; i < n && i < candidates.length; i++) {
+    const c = candidates[i];
+    for (const sh of shards) if (!sh.active) { activateShard(sh, laneX(c.l), z + c.rel); s.shards.push(sh); break; }
+  }
+}
+
+/* ============================================================
+   9 · PARTICLES — single pooled Points buffer, additive glow
+   ============================================================ */
+const P = (() => {
+  const N = CFG.PARTICLES;
+  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), size = new Float32Array(N);
+  const vel = new Float32Array(N * 3), life = new Float32Array(N), max = new Float32Array(N);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage));
+  geo.setAttribute('size', new THREE.BufferAttribute(size, 1).setUsage(THREE.DynamicDrawUsage));
+  const mat = new THREE.PointsMaterial({size: 0.5, map: dotTex, vertexColors: true, transparent: true,
+    blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true, fog: false});
+  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; scene.add(pts);
+  let cursor = 0;
+  function burst(x, y, z, r, g, b, n, speed, spread, size, grav){
+    for (let i = 0; i < n; i++) {
+      const k = (cursor++) % N;
+      const a = rnd() * Math.PI * 2, e = Math.pow(rnd(), 0.6);
+      pos[k * 3] = x; pos[k * 3 + 1] = y; pos[k * 3 + 2] = z;
+      vel[k * 3] = Math.cos(a) * speed * e * (spread > 0 ? spread : 1);
+      vel[k * 3 + 1] = Math.sin(a) * speed * e * 0.6 + (grav || 0);
+      vel[k * 3 + 2] = Math.sin(a) * speed * e * (spread > 0 ? spread : 1) * 0.3;
+      life[k] = 0.55 + rnd() * 0.5; max[k] = life[k];
+      size[k] = size * (0.6 + rnd() * 0.8);
+      col[k * 3] = r; col[k * 3 + 1] = g; col[k * 3 + 2] = b;
+    }
+    cursor = 0;
+  }
+  function update(dt){
+    for (let k = 0; k < N; k++) {
+      if (life[k] <= 0) { col[k] = col[k + 1] = col[k + 2] = 0; continue; }
+      life[k] -= dt;
+      const f = Math.max(0, life[k] / max[k]);
+      const v = k * 3;
+      vel[v + 1] -= 40 * dt;
+      pos[v] += vel[v] * dt; pos[v + 1] += vel[v + 1] * dt; pos[v + 2] += vel[v + 2] * dt;
+      col[v] *= f; col[v + 1] *= f; col[v + 2] *= f;   // additive: fade to black = vanish
+    }
+    geo.attributes.position.needsUpdate = true;
+    geo.attributes.color.needsUpdate = true;
+    geo.attributes.size.needsUpdate = true;
+  }
+  return {burst, update, count: N};
+})();
+
+/* ============================================================
+   10 · AUDIO — fully synthesised with WebAudio (starts on gesture)
+   ============================================================ */
+const Snd = {
+  ctx: null, master: null, muted: false, drone: null, noise: null,
+  ensure(){
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = this.muted ? 0 : 0.55;
+    this.master.connect(this.ctx.destination);
+    const len = Math.floor(this.ctx.sampleRate);
+    this.noise = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const d = this.noise.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  },
+  setMuted(m){
+    this.muted = m;
+    try { localStorage.setItem('prism-muted', m ? '1' : '0'); } catch (e) {}
+    if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.55, this.ctx.currentTime, 0.05);
+  },
+  tone(f0, f1, dur, vol, type, delay){
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + (delay || 0);
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(f0, t);
+    if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + 0.05);
+  },
+  noiseHit(dur, vol, f0, f1, q, delay){
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + (delay || 0);
+    const src = this.ctx.createBufferSource(); src.buffer = this.noise;
+    const f = this.ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = q || 1;
+    f.frequency.setValueAtTime(f0, t);
+    if (f1) f.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(this.master);
+    src.start(t); src.stop(t + dur + 0.05);
+  },
+  jump(){ this.tone(190, 520, 0.20, 0.28, 'sine'); this.noiseHit(0.12, 0.10, 900, 2500, 2); },
+  whoosh(dir){ this.noiseHit(0.16, 0.12, dir > 0 ? 700 : 1600, dir > 0 ? 1600 : 700, 1.4);
+              this.tone(dir > 0 ? 300 : 260, dir > 0 ? 520 : 200, 0.14, 0.12, 'triangle'); },
+  shard(combo){ const f = 520 * Math.pow(2, Math.min(combo, 14) / 12); this.tone(f, f * 1.08, 0.11, 0.22, 'triangle'); },
+  slide(){ this.noiseHit(0.35, 0.16, 300, 2200, 0.8); this.tone(160, 90, 0.35, 0.18, 'sawtooth'); },
+  crash(){ this.noiseHit(0.6, 0.5, 2500, 120, 0.7); this.tone(140, 38, 0.7, 0.5, 'sine'); this.tone(90, 26, 0.9, 0.35, 'sine', 0.02); },
+  updateMusic(){
+    if (!this.ctx || !this.drone) return;
+    const t = this.ctx.currentTime;
+    if (state === 'playing') {
+      if (this.drone.g.gain.value < 0.06) this.drone.g.gain.setTargetAtTime(0.06, t, 0.6);
+    } else if (this.drone.g.gain.value > 0.001) {
+      this.drone.g.gain.setTargetAtTime(0.0001, t, 0.25);
+    }
+  },
+  startDrone(){
+    if (!this.ctx || this.drone) return;
+    const g = this.ctx.createGain(); g.gain.value = 0.0001;
+    const lp = this.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320; lp.Q.value = 0.7;
+    const o1 = this.ctx.createOscillator(), o2 = this.ctx.createOscillator();
+    o1.type = 'sawtooth'; o1.frequency.value = 55;
+    o2.type = 'sawtooth'; o2.frequency.value = 55.6;
+    o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(this.master);
+    const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain();
+    lfo.frequency.value = 0.07; lg.gain.value = 110;
+    lfo.connect(lg); lg.connect(lp.frequency);
+    o1.start(); o2.start(); lfo.start();
+    this.drone = {g, lp};
+  },
+};
+
+/* ============================================================
+   11 · INPUT — keyboard (edge-triggered) + touch (swipe/tap)
+   ============================================================ */
+let state = 'title';                 // title | playing | paused | dead
+let pendingDeath = false, hitStop = 0;
+
+function ensureAudio(){ if (Snd.ctx && Snd.ctx.state === 'suspended') Snd.ctx.resume(); }
+function startDrone(){ Snd.startDrone(); }
+
+function pressLane(dir){
+  if (state !== 'playing') return;
+  const d = laneTarget + dir;
+  if (d < 0 || d >= CFG.LANES || d === laneTarget) return;   // ±1 per press, no spam
+  laneTarget = d;
+  rollKick += dir * 0.55;
+  Snd.whoosh(dir);
+}
+function tryJump(){
+  if (state !== 'playing' || !grounded || jumpH > 0 || slide) return;
+  vy = CFG.JUMP_V; jumpH = 0; grounded = false;
+  Snd.jump(); fovPunch = Math.max(fovPunch, 0.12);
+}
+function trySlide(){
+  if (state !== 'playing' || !grounded || jumpH > 0 || slide) return;
+  slide = true; slideT = CFG.SLIDE_TIME;
+  Snd.slide(); fovPunch = Math.max(fovPunch, 0.08);
+}
+function togglePause(){
+  if (state === 'playing') setState('paused');
+  else if (state === 'paused') setState('playing');
+}
+function startGame(){ resetSim(); setState('playing'); startDrone(); }
+function restart(){ resetSim(); setState('playing'); startDrone(); }
+function toggleMute(){
+  Snd.ensure(); Snd.setMuted(!Snd.muted);
+  if (Snd.master) Snd.master.gain.setTargetAtTime(Snd.muted ? 0 : 0.55, Snd.ctx.currentTime, 0.05);
+}
+function dispatch(act){
+  switch (act) {
+    case 'left': pressLane(-1); break;
+    case 'right': pressLane(1); break;
+    case 'jump':
+      if (state === 'playing') tryJump();
+      else if (state === 'title') startGame();
+      else if (state === 'dead') restart();
+      break;
+    case 'slide': if (state === 'playing') trySlide(); break;
+    case 'pause': togglePause(); break;
+    case 'restart': if (state === 'dead' || state === 'title') restart(); break;
+    case 'mute': toggleMute(); break;
+    case 'start': if (state === 'title') startGame(); break;
+  }
+}
+window.addEventListener('keydown', e => {
+  if (e.repeat) return;                       // kills key-repeat spam
+  const c = e.code, k = (e.key || '').toLowerCase();
+  let act = null;
+  if (c === 'ArrowLeft' || k === 'a') act = 'left';
+  else if (c === 'ArrowRight' || k === 'd') act = 'right';
+  else if (c === 'ArrowUp' || k === 'w' || c === 'Space' || k === ' ') act = 'jump';
+  else if (c === 'ArrowDown' || k === 's') act = 'slide';
+  else if (c === 'KeyP' || c === 'Escape') act = 'pause';
+  else if (c === 'KeyR') act = 'restart';
+  else if (c === 'KeyM') act = 'mute';
+  else if (c === 'Enter' || k === 'enter') act = 'start';
+  if (!act) return;
+  e.preventDefault();
+  ensureAudio();
+  dispatch(act);
+}, {passive: false});
+
+// --- touch: swipe left/right/up/down, tap to start/restart/jump
+let touchRef = null;
+stage.addEventListener('touchstart', e => {
+  ensureAudio();
+  if (!touchRef) touchRef = {x: e.touches[0].clientX, y: e.touches[0].clientY, t: performance.now()};
+}, {passive: true});
+stage.addEventListener('touchmove', e => {
+  if (!touchRef) return;
+  const dx = e.touches[0].clientX - touchRef.x, dy = e.touches[0].clientY - touchRef.y;
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  if ((ax > 26 && ax > ay * 1.4) || (ay > 22 && ay > ax * 1.4)) {
+    e.preventDefault();
+    dispatch(dx > 0 ? 'right' : 'left');
+    touchRef = null;
+  }
+}, {passive: false});
+stage.addEventListener('touchend', e => {
+  if (!touchRef) return;
+  const moved = Math.hypot(e.changedTouches[0].clientX - touchRef.x, e.changedTouches[0].clientY - touchRef.y);
+  const dt = performance.now() - touchRef.t;
+  touchRef = null;
+  if (moved < 26 && dt < 320) dispatch('jump');   // tap: start / restart / jump
+  e.preventDefault();
+}, {passive: false});
+$('touchpad').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  ensureAudio(); dispatch(b.dataset.act);
+});
+window.addEventListener('blur', () => { if (state === 'playing') setState('paused'); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && state === 'playing') setState('paused');
+});
+
+/* ============================================================
+   12 · SIMULATION — fixed 1/120 s timestep, clamped delta
+   ============================================================ */
+const STEP = 1 / 120;
+let acc = 0, lastT = 0;
+let playerZ = 0, distance = 0, score = 0, speed = CFG.SPEED_START;
+let lane = 0, laneTarget = 0, laneX = 0, grounded = true, slide = false, slideT = 0;
+let jumpH = 0, vy = 0, rideLift = 0;
+let streak = 0, mult = 1, lastPatternEnd = -Infinity;
+let shake = 0, rollKick = 0, fovPunch = 0, pendingDeath = false, hitStop = 0;
+let bestScore = 0;
+try { bestScore = parseFloat(localStorage.getItem('prism-best')) || 0; } catch (e) { bestScore = 0; }
+
+function collectShard(sh){
+  deactivateShard(sh);
+  streak++;
+  mult = Math.min(CFG.MAX_MULT, 1 + Math.floor(streak / 2));
+  score += CFG.SHARD_VAL * mult;
+  const P_ = trackSample(playerZ);
+  P_.y += CFG.RIDE_Y;
+  P.burst(laneX, P_.y, playerZ, 0.45, 0.95, 1.0, 26, 5, 1.6, 0.34, 26);
+  Snd.shard(streak);
+  fovPunch = Math.max(fovPunch, 0.10);
+  updateHud(0);
+}
+function onCollision(){
+  hitStop = CFG.HIT_STOP; pendingDeath = true; shake = 1; rollKick = 0;
+  const P_ = trackSample(playerZ); P_.y += CFG.RIDE_Y;
+  P.burst(laneX, P_.y, playerZ, 1.1, 0.35, 0.55, 70, 9, 2.2, 0.42, 30);
+  P.burst(laneX, P_.y, playerZ, 0.7, 0.85, 1.0, 40, 6, 1.8, 0.30, 20);
+  Snd.crash();
+  updateHud(0);
+}
+function die(){
+  state = 'dead';
+  $('final-score').textContent = Math.floor(score);
+  $('best').textContent = Math.floor(bestScore);
+  if (score > bestScore) { bestScore = score; try { localStorage.setItem('prism-best', String(Math.floor(score))); } catch (e) {} }
+  showScreen('scr-dead');
+  Snd.updateMusic();
+}
+
+function step(dt){
+  if (state !== 'playing' || hitStop > 0) return;
+
+  // ---- speed ramp (distance based, smoothed)
+  const target = CFG.SPEED_START + (CFG.SPEED_MAX - CFG.SPEED_START) * Math.min(1, distance / CFG.RAMP_DIST);
+  speed += clamp(target - speed, -CFG.ACCEL * dt, CFG.ACCEL * dt);
+  speed = clamp(speed, CFG.SPEED_START * 0.9, CFG.SPEED_MAX);
+  distance += speed * dt;
+  score += speed * dt;                       // distance travelled == score
+
+  // ---- lane change: fast lerp, snap on arrive, ±1 per press
+  const targetX = laneTarget * CFG.LANE_WIDTH;
+  laneX += (targetX - laneX) * (1 - Math.exp(-CFG.LANE_RESP * dt));
+  if (Math.abs(targetX - laneX) < CFG.LANE_SNAP) { laneX = targetX; lane = laneTarget; }
+
+  // ---- jump / slide / gravity
+  if (grounded) {
+    if (slide) {
+      slideT -= dt;
+      if (slideT <= 0) { slide = false; slideT = 0; }
+    } else if (jumpH > 0) {
+      jumpH -= dt;
+      if (jumpH <= 0) { jumpH = 0; vy = 0; grounded = true; }
+    }
+  } else {
+    vy -= CFG.GRAVITY * dt;
+    jumpH += vy * dt;
+    if (jumpH <= 0) { jumpH = 0; vy = 0; grounded = true; }
+  }
+  const playerY = slide ? CFG.SLIDE_Y : CFG.RIDE_Y + Math.max(0, jumpH);
+  rideLift = playerY - CFG.RIDE_Y;
+  playerZ += speed * dt;
+
+  // ---- recycle track slots behind the player, generate ahead
+  for (let i = 0; i < segments.length; i++) {
+    const s = segments[i];
+    const z = playerZ + s.offset;
+    s.group.position.z = z;
+    if (playerZ - s.bornZ > CFG.SEG_LEN + CFG.REGEN) { s.bornZ = z; populateSegment(s, z); }
+  }
+
+  // ---- shards
+  for (const sh of shards) {
+    if (!sh.active) continue;
+    const dz = playerZ - sh.z;
+    if (dz < -1.1 || dz > 1.1) continue;
+    if (Math.abs(laneX - sh.x) > 1.15) continue;
+    collectShard(sh);
+  }
+
+  // ---- collisions (one hit = death)
+  const pvx = laneX, pvy = CFG.RIDE_Y + rideLift, pvz = playerZ;
+  for (const o of obstacles) {
+    if (!o.active) continue;
+    const dz = pvz - o.z;
+    if (dz < -o.hz || dz > o.hz) continue;
+    if (pvx < o.x0 - CFG.LANE_WIDTH * 0.72 || pvx > o.x1 + CFG.LANE_WIDTH * 0.72) continue;
+    if (o.kind === 'gate') { if (!slide && pvy > CFG.GATE_OPEN) { onCollision(); return; } }
+    else { if (pvy - 0.5 > CFG.BLOCK_H * 0.85) continue; onCollision(); return; }
+  }
+  updateHud(0);
+}
+
+/* ============================================================
+   13 · VISUALS — spring-damped camera, roll, FOV punch, shake, FX
+   ============================================================ */
+const camPos = new THREE.Vector3(), camVel = new THREE.Vector3(), _a = new THREE.Vector3(), _b = new THREE.Vector3();
+let roll = 0, rollVel = 0, fov = CFG.BASE_FOV, clock = 0, demoZ = 0;
+
+function updateCamera(dt, px, py, pz, spd){
+  _a.set(px - 7.3 + px * 0.35, py + 2.15, pz - 1.5);
+  const k = 60, damp = Math.exp(-7 * dt);
+  camVel.x += (_a.x - camPos.x) * k * dt; camVel.y += (_a.y - camPos.y) * k * dt; camVel.z += (_a.z - camPos.z) * k * dt;
+  camVel.multiplyScalar(damp); camPos.addScaledVector(camVel, dt);
+  if (shake > 0.002 && !REDUCED) {
+    shake *= Math.exp(-4.5 * dt);
+    _b.set((rnd() - 0.5) * CFG.SHAKE * shake, (rnd() - 0.5) * CFG.SHAKE * shake * 0.7, (rnd() - 0.5) * CFG.SHAKE * shake);
+    camPos.add(_b);
+  }
+  _b.set(px + px * 0.2, py + 1.25, pz + Math.min(spd, 22) * 0.8);
+  camera.position.copy(camPos);
+  camera.lookAt(_b);
+  // bank on lane change / velocity
+  const rollTarget = clamp(-camVel.x * 0.02, -0.34, 0.34) + rollKick;
+  rollVel += (rollTarget - roll) * (REDUCED ? 20 : 46) * dt;
+  rollVel *= Math.exp(-(REDUCED ? 14 : 8) * dt);
+  roll = clamp(roll + rollVel * dt, -0.4, 0.4);
+  camera.rotateZ(roll);
+  // FOV punch from speed + events (reduced motion keeps it calm)
+  const punch = REDUCED ? 0 : fovPunch;
+  fovPunch *= Math.exp(-6 * dt);
+  fov = CFG.BASE_FOV + ((spd - CFG.SPEED_START) / (CFG.SPEED_MAX - CFG.SPEED_START)) * CFG.FOV_SPEED * (REDUCED ? 0.35 : 1) + punch;
+  if (Math.abs(fov - camera.fov) > 0.05) { camera.fov = fov; camera.updateProjectionMatrix(); }
+}
+
+function updateVisuals(dt){
+  clock += dt;
+  const S = trackSample(playerZ);
+  const py = S.y + CFG.RIDE_Y + rideLift;
+
+  if (state === 'title') {
+    demoZ += dt * 3.4;
+    const dx = Math.sin(demoZ * 0.09) * CFG.LANE_WIDTH * 0.6;
+    playerGroup.position.set(dx, S.y + CFG.RIDE_Y, demoZ);
+    playerGroup.rotation.x = -S.slope * 0.25;
+    updateCamera(dt, dx, S.y + CFG.RIDE_Y, demoZ, 6);
+  } else {
+    playerGroup.position.set(laneX, S.y + py - CFG.RIDE_Y + CFG.RIDE_Y, playerZ);
+    playerGroup.position.y = S.y + rideLift * 1 + (slide ? CFG.SLIDE_Y - CFG.RIDE_Y : 0) + jumpH * 0;
+    playerGroup.position.y = S.y + (slide ? CFG.SLIDE_Y - CFG.RIDE_Y : CFG.RIDE_Y + jumpH) - CFG.RIDE_Y + CFG.RIDE_Y;
+    playerGroup.position.y = S.y + (slide ? CFG.SLIDE_Y : CFG.RIDE_Y + jumpH);
+    playerGroup.rotation.x = -S.slope * 0.3;
+    body.rotation.y += dt * 1.7; body.rotation.z += dt * 0.8;
+    ringMesh.rotation.z += dt * 3.2;
+    strip.rotation.y += dt * 0.6;
+    // shadow / ground marker during jump
+    marker.position.set(laneX, S.y + 0.04, playerZ);
+    const air = Math.max(0, rideLift);
+    marker.material.opacity = 0.85 * clamp(1 - air / 1.9, 0, 1);
+    marker.visible = air > 0.02 || slide;
+    // shards bob
+    for (const sh of shards) {
+      if (!sh.active) continue;
+      const T = trackSample(sh.z);
+      sh.mesh.position.set(sh.x, T.y + 1.05 + Math.sin(clock * 2 + sh.phase) * 0.26, sh.z);
+      sh.mesh.rotation.y += dt * 1.6; sh.mesh.rotation.x -= dt * 0.9;
+    }
+    // obstacle energy pulse
+    for (const o of obstacles) if (o.active) o.group.scale.z = 1 + Math.sin(clock * 3 + o.z) * 0.02;
+    updateCamera(dt, laneX, py, playerZ, speed);
+  }
+  P.update(dt);
+}
+
+/* ============================================================
+   14 · UI / STATE MACHINE
+   ============================================================ */
+const screens = {title: $('scr-title'), pause: $('scr-pause'), dead: $('scr-dead')};
+function showScreen(name){
+  for (const k in screens) screens[k].classList.toggle('active', k === name);
+}
+function setState(s){
+  state = s;
+  if (s === 'playing') { showScreen(null); Snd.updateMusic(); startDrone(); }
+  else if (s === 'paused') { showScreen('pause'); }
+  else if (s === 'dead') { showScreen('dead'); }
+  else if (s === 'title') { showScreen('title'); stopDrone(); }
+  else showScreen(null);
+}
+function stopDrone(){ if (Snd.drone && Snd.ctx) Snd.drone.g.gain.setTargetAtTime(0.0001, Snd.ctx.currentTime, 0.2); }
+let hudAcc = 0, lastScoreShown = -1, lastMultShown = -1, lastStreakShown = -1;
+function updateHud(dt){
+  hudAcc += dt || 0;
+  if (hudAcc < 0.1) return;
+  hudAcc = 0;
+  const s = Math.floor(score);
+  if (s !== lastScoreShown) { $('hud-score').textContent = s; lastScoreShown = s; }
+  $('hud-dist').textContent = Math.floor(distance);
+  $('hud-speed').textContent = speed.toFixed(1);
+  if (mult !== lastMultShown) { $('hud-mult').textContent = mult; lastMultShown = mult; }
+  if (streak !== lastStreakShown) { $('hud-streak').textContent = streak; lastStreakShown = streak; }
+  $('hudbar-fill').style.width = (clamp(speed / CFG.SPEED_MAX, 0, 1) * 100).toFixed(1) + '%';
+}
+
+/* ============================================================
+   15 · BOOT + MAIN LOOP + TEST HOOK
+   ============================================================ */
+function resetSim(){
+  playerZ = 0; distance = 0; score = 0; speed = CFG.SPEED_START;
+  lane = laneTarget = 0; laneX = 0; grounded = true; slide = false; slideT = 0;
+  jumpH = 0; vy = 0; rideLift = 0; streak = 0; mult = 1;
+  pendingDeath = false; hitStop = 0; shake = 0; rollKick = 0; fovPunch = 0;
+  lastPatternEnd = -Infinity; acc = 0;
+  for (const o of obstacles) deactivateObstacle(o);
+  for (const sh of shards) deactivateShard(sh);
+  camPos.set(-7.3, CFG.RIDE_Y + 2.15, -1.5); camVel.set(0, 0, 0);
+  roll = 0; rollVel = 0; fov = CFG.BASE_FOV; camera.fov = fov;
+  camera.updateProjectionMatrix();
+  // wake the ring: regenerate every slot right away (title screen / restart)
+  for (const s of segments) { s.bornZ = -Infinity; s.group.position.z = s.offset; populateSegment(s, s.offset); }
+  demoZ = 0;
+  updateHud(0);
+}
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / Math.max(1, h);
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
+}
+window.addEventListener('resize', resize);
+
+function frame(now){
+  requestAnimationFrame(frame);
+  const raw = (now - lastT) / 1000; lastT = now;
+  let dt = clamp(raw, 0, 0.1);                 // clamp delta: no spiral of death
+  if (state === 'playing') {
+    if (hitStop > 0) hitStop -= dt;            // hit-stop freeze
+    else {
+      acc += dt;
+      let n = 0;
+      while (acc >= STEP && n < 12) { step(STEP); acc -= STEP; n++; }
+      if (acc > STEP) acc = 0;
+      if (pendingDeath && hitStop <= 0) die();
+    }
+  } else acc = 0;
+  updateVisuals(state === 'paused' ? 0 : dt);
+  updateHud(dt);
+  renderer.render(scene, camera);
+}
+
+resetSim();
+setState('title');
+if (window.matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
+try { renderer.render(scene, camera); } catch (e) { /* first-frame guard */ }
+requestAnimationFrame(frame);
+
+// Test hook (read-only getters; the only global we expose)
+window.__prism = {
+  get state(){ return state; },
+  get score(){ return score; },
+  get speed(){ return speed; },
+  get distance(){ return distance; },
+};
+</script>
+</body>
+</html>

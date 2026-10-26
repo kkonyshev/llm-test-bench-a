@@ -261,6 +261,7 @@ holds the reviewer's headless-Chrome screenshots.
 | 12 | Qwen3-Coder 30B-A3B (Ollama) | 120K | **~2 min** | not measured | ✅ first try, absolute path | ❌ wrote `smoke_test.py`, never ran it | 1050 | ❌ `let audioContext` declared twice |
 | 13 | **Qwen3.8-Flash-Next IQ3_S** (Strata) | 64K → **262K** | **~6 min** (2nd attempt) | 143–172 | ✅ | ✅ **12/12 PASS**, 6 screenshots | 888 | ✅ |
 | 14 | **GLM-5.3-Flash Maya-M IQ2_S** (Maya v1.1.28, 2 GPUs) | 512K | ~62 min, of which ~23 min a hung tool call | ~37 | ✅ | ✅ **18/18 PASS** after the reviewer killed its orphaned server | 877 | ✅ |
+| 15 | Nanbeige4.3-33B Q4_K_M (Ollama), rerun | 32K → 131K → **98K** | ~85 min over three attempts, no working result | ~43 at 32K, **~16 at 131K** (3.4 GB on CPU), ~39 at 98K | ✅ 3rd attempt, after a 60K-token reply | ❌ stuck building its own `sysroot` | 975 | ❌ `laneX` declared twice |
 
 **11. Nanbeige4.3-33B.** In the 120K chat the first step already had a 32K prompt and the model
 generated ~16K tokens without a tool call. A new chat started with Open WebUI's default 32K
@@ -301,18 +302,47 @@ Gen5 decoded faster (~37 tok/s) and ended with a real browser test.
 Lesson for prompt v3: "start servers with `Popen` and kill them in `finally`; never pipe a
 command that can leave a child behind into `tail`".
 
+**15. Nanbeige4.3-33B, rerun.** Three attempts in one evening, all in the folder
+`workspace/nanbeuge-v2` (the model's own spelling):
+1. **32K** (a new chat without `num_ctx`). Two early tool calls (created the folder, wrote
+   `/tmp/webgl_check.py`, a Playwright WebGL probe), then one reply ran to **~47K tokens** over
+   18 minutes while Ollama's context shift dropped half the window three times. Stopped by the user.
+2. **131K.** Ollama could not fit the weights and a 131K cache on the two cards (5090 31.0 / 32 GB,
+   5070 Ti 14.2 / 16 GB): **3.4 GB of the model (7%) ran on the CPU**. Eight CPU threads at 100%,
+   GPU utilisation fell to ~20% and decode to **~16 tok/s** (from ~43). Again one long reply
+   (22K tokens in 20 minutes, no file). Stopped by the user. Not a disk problem: zero reads.
+3. **98K.** Everything in VRAM (39.6 GB), ~39 tok/s. After one **60K-token reply** (26 minutes)
+   the model saved a 975-line game. The reviewer's check: `Identifier 'laneX' has already been
+   declared` (`function laneX(i)` on line 406, `let ... laneX = 0` on line 714), so the script
+   never runs and Start does nothing. The model then started building its own Chromium `sysroot`
+   in `apt/` and `sysroot/` (21 MB each) instead of using the one already in `~/sysroot`; from
+   22:28 every step added ~6K tokens of tool output with ~100-token replies, the window filled to
+   98K three times, and each time the prompt was trimmed and reprocessed from scratch (59–78K
+   tokens). No file changed after 22:28; stopped by the user at ~22:45.
+
+With five failed attempts across v1 and v2 this model writes the game only as one huge reply and
+cannot run the edit-test loop. Ollama sizing rule: on 32 + 16 GB this 33B Q4_K_M fits fully up
+to ~98K context; at 131K a part goes to the CPU and decode drops 2.5×.
+
 | # | RAM / links | Process RAM peak | CPU median | 5090: W / VRAM peak | Bound by |
 |---|---|---|---|---|---|
 | 11 | 6400 / Gen5 | 2.3 GB | ~465% | ~348 W / 30.3 GB at 120K | 5090 + 5070 Ti VRAM; attention at depth |
 | 12 | 6400 / Gen5 | ~1 GB | ~420% | ~349 W / 29.9 GB | 5090 VRAM |
 | 13 | 6400 / Gen5 | 54 GB | ~520% | ~373 W / 32.0 GB | 5090 VRAM (full) |
 | 14 | 6400 / Gen5 | 93 GB | ~705% | ~245 W / 31.6 GB (5070 Ti 15.4 GB) | CPU experts + both GPUs |
+| 15 | 6400 / Gen5 | 1.9 GB (4.1 GB at 131K) | ~450% (**~790% at 131K**) | ~348 W / 28.2 GB at 98K; ~169 W / 31.0 GB at 131K | 98K: 5090 + 5070 Ti VRAM; 131K: CPU layers |
 
 What v2 changed, in short: absolute paths and "check every write" removed the `Permission denied`
 failures; asking for a test made three of four models write one, and both large MoE models (Strata, GLM)
 ended with a PASS report; GLM only after a human killed the web server its first test left behind.
 A missing `num_ctx` in a new Open WebUI chat silently means 32K, and Strata's own
-`--max-context` is a second, separate limit: set both before a run.
+`--max-context` is a second, separate limit: set both before a run. Too large a `num_ctx` is a
+trap too: Ollama then quietly puts layers on the CPU (check `ollama ps`: size vs size_vram).
+
+Fairness caveat: the terminal's home directory persists between runs. Playwright, Chromium,
+`~/sysroot` and `/tmp` scripts left by earlier models were available to later ones, and other
+models' folders were readable. Runs 13–15 benefited from that; later runs should start from a
+reset baseline.
 
 ## Cost if run on paid APIs
 
