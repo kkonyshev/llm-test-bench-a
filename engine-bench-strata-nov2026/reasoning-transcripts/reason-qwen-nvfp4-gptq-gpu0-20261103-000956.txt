@@ -1,0 +1,1070 @@
+=== THINKING ===
+We need solve logic puzzle in Russian. Need provide step-by-step, verify, final output exactly format. Need analyze thoroughly. Let's restate.
+
+Five sailors: Anna (А), Bram (Б), Cor (К? K), Dirk (Д), Eva (Э). Departure times: 8,9,10,11,12 each distinct. Lengths: 6,7,8,9,10 distinct. Colors: red, blue, green, white, yellow distinct.
+
+Clues:
+1. Anna's boat longer than Bram's, but shorter than green boat. So length(A) > length(B); length(A) < length(green). Green boat belongs to someone not Anna? Since Anna's boat shorter than green boat, cannot be green. Also green length > A > B.
+2. Red boat exactly 2 m longer than blue. So lengths red = blue+2. Possible pairs (blue,red): (6,8),(7,9),(8,10).
+3. Eva's boat not shortest and not longest, and not white. So length(E) in {7,8,9}; color(E) != white.
+4. Boats leave almost strictly from longest to shortest: if take any two boats, longer leaves earlier, except exactly one pair where shorter leaves earlier than longer. Interpret: Sort by length descending, departure times should be increasing? Let's formalize. For any pair of boats with lengths L_i > L_j, departure time t_i < t_j (longer earlier) except exactly one pair with L_i > L_j but t_i > t_j (shorter earlier? Actually "where shorter leaves earlier than longer" means shorter length has earlier time than longer length: L_i < L_j but t_i < t_j; equivalently longer leaves later than shorter). Since times all distinct 8-12, and lengths all distinct 6-10. Need exactly one inversion between length order and time order. So the permutation of lengths by departure time is almost descending (longest first) with exactly one inversion. Since 5 items, one inversion means permutation is descending except adjacent swap? Let's check: If order by departure time (earliest to latest) of lengths. Strict descending would be [10,9,8,7,6]. Exactly one pair shorter leaves earlier than longer means exactly one inversion relative to descending? Let's define permutation p_t = length at time 8,9,10,11,12. We want for all pairs i<j in time, if p_i < p_j? Actually longer leaves earlier normally: for time i<j (i earlier), normally p_i > p_j. Violation: shorter leaves earlier than longer: p_i < p_j. Exactly one pair (i,j) with i<j and p_i < p_j. So p has exactly one ascent (adjacent? Inversions? In sequence p, number of pairs i<j with p_i < p_j equals exactly 1). For a permutation of 5, exactly one ascent. Which permutations have exactly one ascent? It must be descending except one adjacent swap? Let's examine. If p = [10,9,8,7,6] zero ascents. Swap adjacent lengths in descending: [10,9,8,6,7] has one ascent at 6<7, but also check pairs: 6 after? sequence: 10>9,8,6,7; 9>8,6,7; 8>6,7; 6<7 only one. Yes. Could non-adjacent? [10,9,7,8,6] ascents: 7<8 only? 10>...,9>7,8,6; 7<8; 8>6. one. This is descending with adjacent swap of 7 and 8? Original [10,9,8,7,6]; swap positions 3 and 4 -> [10,9,7,8,6]. Yes adjacent swap. [10,8,9,7,6] swap 9 and8. [9,10,8,7,6] swap 10 and9. [10,9,8,6,7] swap 7 and6. So exactly one adjacent transposition in descending order. Thus departure order lengths must be one of four: swap adjacent pair in [10,9,8,7,6]:
+S1: 9,10,8,7,6 (times 8-12)
+S2: 10,8,9,7,6
+S3: 10,9,7,8,6
+S4: 10,9,8,6,7
+No other? Yes.
+
+5. Yellow boat leaves exactly one hour after Cor. So t_yellow = t_Cor + 1. Cor not yellow? If t_yellow after Cor, if Cor's boat yellow then t=t+1 impossible, so Cor not yellow. Times: Cor in 8-11, yellow in 9-12.
+6. Dirk leaves before noon (t_D < 12) and length(D) odd. Odd lengths {7,9}.
+7. Sum of departure hours of red and green boats equals length of white boat plus 12. t_red + t_green = length_white + 12. Since times 8-12 sum 16-23 (if distinct? red != green so distinct times; min 8+9=17 max 11+12=23). length_white 6-10 -> RHS 18-22. So sum 18-22.
+8. Bram does not leave first (t_B != 8).
+9. length(A) even. {6,8,10}. But clue 1 says A > B and A < green, so A cannot be 6? If A=6, no B shorter (lengths min 6 distinct) impossible. A cannot be 10? If A=10, no green longer impossible. So with 9, A=8. Then B<8, green>8. Good.
+10. Yellow boat longer than Anna's boat. length(Y) > length(A). With A=8, Y length 9 or 10.
+
+Need solve. Also parts: number of solutions without 9 and 10? And only without 9? Need count all solutions satisfying remaining clues. Need be careful count assignments of names, lengths, colors, times. Need maybe brute force mentally or systematic. Could write reasoning, but no actual code. We can simulate logically. Need final counts. Need ensure uniqueness.
+
+Let's denote variables:
+Names N = {A,B,C,D,E} (C for Cor? Russian Кор, use K maybe; but C could conflict color. Use K for Кор).
+Lengths L ∈ {6,7,8,9,10}. Colors Col ∈ {R,Bl,G,W,Y}. Times T ∈ {8,9,10,11,12}.
+
+Clue 4 gives possible length-time orders (permutations p):
+P1: t8=9, t9=10, t10=8, t11=7, t12=6.
+P2: t8=10, t9=8, t10=9, t11=7, t12=6.
+P3: t8=10, t9=9, t10=7, t11=8, t12=6.
+P4: t8=10, t9=9, t10=8, t11=6, t12=7.
+Let's label by swapped adjacent pair:
+Swap 10&9: order [9,10,8,7,6]
+Swap 9&8: [10,8,9,7,6]
+Swap 8&7: [10,9,7,8,6]
+Swap 7&6: [10,9,8,6,7]
+
+Clue 6: D odd length (7 or 9) and t_D < 12.
+Clue 3: E length 7,8,9; color not white.
+Clue 1: A > B; green length > A.
+Clue 9: A even -> A=8 as above. Then B length ∈ {6,7}; green length ∈ {9,10}. Also yellow length > A =8 -> Y length 9 or10.
+Clue 2: red = blue+2.
+Clue 7: t_R + t_G = L_W +12.
+Clue 5: t_Y = t_K +1.
+Clue 8: t_B !=8.
+
+First solve with 9,10.
+
+Since A=8. A's time depends on permutation: positions of length 8.
+P1: A at t10.
+P2: A at t9.
+P3: A at t11.
+P4: A at t10.
+B length <8: 6 or7.
+Green length >8: 9 or10.
+Yellow length >8: 9 or10. So green and yellow are lengths 9 and10 in some order? Since both length >8 and distinct. Yes {length(green), length(yellow)} = {9,10}. Could one same boat? A boat cannot be both green and yellow; clue 10 yellow boat longer than Anna; clue 1 green longer than Anna. There are two boats with lengths 9,10, one green, one yellow. Thus the boat of length 9 and boat of length 10 have colors green and yellow (one each). Remaining lengths 6,7,8 colors red, blue, white. But red-blue difference 2: possible among 6,7,8? red=8 blue=6 (since 7+2=9 but 9 is green/yellow not red/blue? Wait red and blue could be 9 and7 or 10 and8? But 9 and10 are green/yellow, so red/blue cannot be 9/10. Could red=8 blue=6 only. Yes. Then white length=7. So with 9,10:
+- A length 8.
+- B length 6 or7.
+- Green/Yellow lengths 9,10.
+- Red length 8, Blue length 6, White length 7? Check red=8 blue=6. If A length 8, A's color red? Since red length 8, yes Anna's boat red. Blue length 6. White length 7.
+Then B length <8: if B length 6 -> B blue; if B length7 -> B white.
+E length in {7,8,9}; color not white. A is red (8). If E length 7, color white -> forbidden. So E cannot be length 7. Thus E length 8 or9. But A length8, so E cannot be 8 (names distinct lengths) -> E length9. Therefore E's boat length9. Since 9/10 are green/yellow, E color green or yellow. D length odd (7 or9) and t_D<12. E length9, so D cannot 9 -> D length7. Then remaining B length6. Thus lengths: A8, B6, K? (Cor) length10? Since D7, E9, A8, B6 -> K length10. Colors: A red (8), B blue (6), D white (7). E and K are green/yellow in some order. E not white ok.
+
+Now times and colors. Length-time permutation options:
+P1: [9,10,8,7,6] times: 9:E, 10:K, 8:A, 7:D, 6:B.
+P2: [10,8,9,7,6]: 10:K, 8:A, 9:E, 7:D, 6:B.
+P3: [10,9,7,8,6]: 10:K, 9:E, 7:D, 8:A, 6:B.
+P4: [10,9,8,6,7]: 10:K, 9:E, 8:A, 6:B, 7:D.
+But D t<12: P4 D at 12? P4 length7 at t12 -> invalid. P1 D at 11 ok; P2 D at11; P3 D at10.
+B not first: P1 B at12; P2 B at12; P3 B at12. ok.
+Yellow boat leaves exactly one hour after Cor. Cor length10. So t_Y = t_K +1. Need yellow is either E (9) or K (10)? Wait K length10. But clue 5 yellow boat leaves after Cor. If K's boat yellow, then t_Y = t_K, impossible (needs +1). So Cor's boat cannot be yellow. Therefore Cor length10 is green. E length9 is yellow. So colors: K green, E yellow. Then clue 5: t_E (yellow) = t_K +1. Check permutations:
+P1: K t9, E t8 -> E not K+1 (8=10? no) invalid.
+P2: K t8, E t10 -> E=K+2 invalid.
+P3: K t8, E t9 -> E=K+1 valid.
+P4: K t8, E t9 -> E=K+1 valid but D t12 invalid (D before noon? t_D=12 not <12? "до полудня" means before noon, 12 is noon, not before; so invalid). If "до полудня" could include 12? Usually before noon means <12. It says Dirk leaves до полудня, likely not 12. We'll assume strict. Also clue times 8,9,10,11,12; до полудня = before 12. So P4 invalid. Thus P3 unique.
+Times: P3: t8=K length10 green; t9=E length9 yellow; t10=D length7 white; t11=A length8 red; t12=B length6 blue.
+Check clue 7: red t=11 (A), green t=8 (K), sum=19. white length=7, +12=19. ok.
+All clues satisfied. Unique.
+
+Need part a output.
+
+Part b proof uniqueness as above.
+
+Part c: How many solutions without clues 9 and 10? And only without clue 9? Need count all solutions satisfying clues 1-8 only (without 9,10) and satisfying 1-8,10 but not 9? "А только без условия 9?" means how many solutions would be without condition 9 only? Need count solutions with condition 10 present, condition 9 absent. Need careful: "Сколько решений было бы без условий 9 и 10? А только без условия 9?" likely: (i) omit both 9 and 10; (ii) omit only 9 (keep 10). Need count all assignments. Need ensure if omitting 9, condition 10 remains. If omitting both, condition 10 absent. Need count. Could be many. Need compute exactly.
+
+We need solve counting with clues 1-8, maybe with 10. Need consider all permutations of length-time with one inversion (4 possible), all assignments names/lengths/colors satisfying. Let's systematically enumerate. Could do by hand with combinatorics. Need be very careful. We can simulate by reasoning, maybe construct tables. Since only 5! * colors etc but manageable. Let's formalize constraints.
+
+Base constraints (1-8):
+- Length-time order p ∈ {P1-P4} as above.
+- Clue1: L_A > L_B; L_green > L_A. Thus L_A not 6,10? If green longer, A cannot 10; B shorter, A cannot 6. So L_A ∈ {7,8,9}. L_B < L_A; green length > L_A. Green boat not A. Green length ∈ {L_A+1..10}.
+- Clue2: red length = blue length +2. Possible (B,L? not Bram): (blue,red) length pairs: (6,8),(7,9),(8,10). Colors red/blue assigned to two boats with those lengths.
+- Clue3: L_E ∈ {7,8,9}; color_E != white.
+- Clue5: t_Y = t_Cor +1. Cor != yellow.
+- Clue6: L_D ∈ {7,9}; t_D !=12.
+- Clue7: t_R + t_G = L_W +12.
+- Clue8: t_B !=8.
+
+Without 9/10: A can be 7,8,9; yellow length > A absent.
+With 10 only: L_Y > L_A.
+
+Need count all solutions. Important: "solution" likely assignment of length, color, time to each named person. Times are tied to lengths by p, but names assigned to lengths. Colors assigned to lengths. Since p maps length to time uniquely. So a solution can be specified by: choose p (4), assign lengths to names (permutation of 5 lengths), assign colors to lengths (permutation of 5 colors) satisfying clues. Times determined by length via p. Need count distinct full assignments. If multiple p yield same? p differs length-time mapping, so distinct if times differ. Count all.
+
+Let's first count without 9 and 10. Then with 10 only. Need maybe use structured enumeration by length-time p and color possibilities.
+
+Maybe easiest: Enumerate possible color-length assignments satisfying clues 2,7 and clue1 green relative to A, clue3 E color not white, clue5 yellow time relation, clue6 D length/time, clue8, clue1. Since p small. Could enumerate by p and by lengths of A/B/E/D etc.
+
+Alternative: Build all possible color-length assignments independent of names? Clue 7 involves times of red/green which depend on p, and length of white. Clue 5 involves yellow time and Cor time (names). Need names.
+
+Let's define for each p: mapping length -> time:
+P1: 9->8, 10->9, 8->10, 7->11, 6->12.
+P2: 10->8, 8->9, 9->10, 7->11, 6->12.
+P3: 10->8, 9->9, 7->10, 8->11, 6->12.
+P4: 10->8, 9->9, 8->10, 6->11, 7->12.
+
+Check D t<12: D length cannot be the length with time 12. In P1-P3 time12 length6; in P4 time12 length7. So D length not 6 (already odd) and not 7 in P4. D length ∈ {7,9}; so P4 excludes D=7, D must 9.
+
+B t !=8: B not assigned to length with time8. Time8 length: P1 9, P2 10, P3 10, P4 10. So B cannot length9 in P1; cannot length10 in P2-P4.
+
+Cor yellow relation: t_Y = t_K +1. Since times consecutive. For each p, possible pairs (length of Cor, length of Yellow) such that time(Y)=time(C)+1.
+Let's list time order by length for each p (lengths at times 8,9,10,11,12):
+P1: t8:9, t9:10, t10:8, t11:7, t12:6. Consecutive time pairs (C length at t, Y length at t+1):
+C=9 -> Y=10
+C=10 -> Y=8
+C=8 -> Y=7
+C=7 -> Y=6
+(C=6 no)
+P2: t8:10, t9:8, t10:9, t11:7, t12:6.
+C=10 -> Y=8
+C=8 -> Y=9
+C=9 -> Y=7
+C=7 -> Y=6
+P3: t8:10, t9:9, t10:7, t11:8, t12:6.
+C=10 -> Y=9
+C=9 -> Y=7
+C=7 -> Y=8
+C=8 -> Y=6
+P4: t8:10, t9:9, t10:8, t11:6, t12:7.
+C=10 -> Y=9
+C=9 -> Y=8
+C=8 -> Y=6
+C=6 -> Y=7
+Cor not yellow so C length != Y length (true).
+
+Clue7: t_R + t_G = L_W +12. Since colors assigned to lengths. For each p, enumerate color-length assignments satisfying red=blue+2 and equation. Colors all distinct. Let's precompute possible color-length assignments (ignoring names) per p. Then add names.
+
+Let lengths 6-10. Red pair possibilities:
+RB1: blue6 red8.
+RB2: blue7 red9.
+RB3: blue8 red10.
+White is one of remaining lengths; green/yellow remaining two lengths. Need t_R + t_G = L_W +12.
+For each p and RB pair, choose white among remaining 3 lengths, green/yellow among remaining 2 (order matters for green/yellow because equation involves green; also clue1/3/5 names/colors). Equation uses green length. For each choice of white, green one of remaining, yellow last.
+
+Let's enumerate systematically. We'll need counts with names too. Maybe enumerate color assignments and then assign names to lengths satisfying constraints. Could combine.
+
+First, for each p, list possible color-length assignments (mapping each length to color) satisfying clue2 and clue7.
+
+Define time function t_p(L).
+P1 times: t(9)=8,t(10)=9,t(8)=10,t(7)=11,t(6)=12.
+Equation: t_R + t_G = L_W +12.
+R from pair:
+RB1: B=6,R=8. Remaining lengths for W,G,Y: {7,9,10}. t_R=t8=10. Need t_G = L_W +2. For W choices:
+W=7 -> RHS 19; need t_G=9. Among remaining {9,10}, t(9)=8,t(10)=9 => G=10. Then Y=9. Valid: colors: 6 blue,8 red,7 white,10 green,9 yellow.
+W=9 -> RHS21; need t_G=11. Remaining {7,10}: t7=11,t10=9 -> G=7. Y=10. Valid: 6B,8R,9W,7G,10Y.
+W=10 -> RHS22; need t_G=12. Remaining {7,9}: t7=11,t9=8 none. invalid.
+RB2: B=7,R=9. Remaining {6,8,10}. t_R=t9=8. Need t_G = L_W +4.
+W=6 -> RHS18; need t_G=14 none.
+W=8 -> RHS20; need t_G=16 none.
+W=10 -> RHS22; need t_G=18 none. invalid.
+RB3: B=8,R=10. Remaining {6,7,9}. t_R=t10=9. Need t_G = L_W +3.
+W=6 -> RHS18; need t_G=15 none.
+W=7 -> RHS19; need t_G=16 none.
+W=9 -> RHS21; need t_G=18 none. invalid.
+So P1 only 2 color assignments:
+C1P1a: W7,G10,Y9,R8,B6.
+C1P1b: W9,G7,Y10,R8,B6.
+Check red/blue pair only blue6 red8.
+
+P2 times: t10=8,t8=9,t9=10,t7=11,t6=12.
+RB1: B6,R8. Remaining {7,9,10}. t_R=9. Need t_G = L_W +3.
+W=7 -> RHS19; need t_G=16 none.
+W=9 -> RHS21; need t_G=18 none.
+W=10 -> RHS22; need t_G=19 none. invalid.
+RB2: B7,R9. Remaining {6,8,10}. t_R=10. Need t_G = L_W +2.
+W=6 -> RHS18; need t_G=15 none.
+W=8 -> RHS20; need t_G=17 none.
+W=10 -> RHS22; need t_G=19 none. invalid.
+RB3: B8,R10. Remaining {6,7,9}. t_R=8. Need t_G = L_W +4.
+W=6 -> RHS18; need t_G=14 none.
+W=7 -> RHS19; need t_G=15 none.
+W=9 -> RHS21; need t_G=17 none. invalid.
+P2 no color assignments? That would mean no solutions for P2 at all. But with unique solution P3. Is P2 impossible due clue7? Let's double-check P2: times [10,8,9,7,6]. Red-blue pairs. Equation tR+tG = W+12. Try RB1: R8 t9. Remaining 7,9,10. If G10 t8, sum17 -> W5 no; G9 t10 sum19 -> W7 (white 7) but remaining after W7? Wait if G=10, W=9? Let's recalc: Need t_R+t_G = W+12. t_R=9. If G=10 t=8 sum17 => W=5 invalid. If G=9 t=10 sum19 => W=7 valid! Did I set W choices wrong. For W=7, remaining {9,10}; need t_G = W+12 - t_R = 19-9=10. G=9 has t10, yes! I earlier computed need t_G = L_W+3? Since t_R=9, equation t_G = W+12-9 = W+3. For W=7 -> 10, yes t_G=10. Among remaining {9,10}, t9=10, t10=8. So G=9 valid. I mistakenly said none? I wrote W=7 need 16? Mist. Let's re-evaluate all P2 carefully.
+
+Let's create systematic table for each p.
+
+P1 re-evaluate too:
+P1 t: 9:8,10:9,8:10,7:11,6:12.
+RB1 R8 t10. Remaining {7,9,10}. t_G = W+12-10 = W+2.
+W=7 -> need9; among {9,10}: t9=8,t10=9 => G=10 valid, Y=9.
+W=9 -> need11; among {7,10}: t7=11,t10=9 => G=7 valid, Y=10.
+W=10 -> need12; among {7,9}: t7=11,t9=8 none. ok.
+RB2 R9 t8. Remaining {6,8,10}. t_G = W+12-8 = W+4.
+W=6 -> need10; among {8,10}: t8=10,t10=9 => G=8 valid, Y=10? Wait W=6, remaining for G/Y {8,10}; G=8, Y=10. Valid! I earlier said none. Check equation: tR=8, tG=10 sum18; W6+12=18. Yes valid.
+W=8 -> need12; among {6,10}: t6=12,t10=9 => G=6 valid, Y=10. Valid.
+W=10 -> need14; among {6,8}: t6=12,t8=10 none. invalid.
+RB3 R10 t9. Remaining {6,7,9}. t_G = W+12-9 = W+3.
+W=6 -> need9; among {7,9}: t7=11,t9=8 none.
+W=7 -> need10; among {6,9}: t6=12,t9=8 none.
+W=9 -> need12; among {6,7}: t6=12,t7=11 => G=6 valid, Y=7. Valid.
+So P1 has more: RB1 two, RB2 two, RB3 one =5. Need redo all p carefully.
+
+Let's do exhaustive color-length assignments per p.
+
+We'll create table. For each RB pair (blue b, red r), remaining set S = lengths not b,r. For each W in S, need t_G = W + 12 - t_R. Check if any G in S\{W} with that time. Then Y is remaining.
+
+P1 times mapping: 6:12,7:11,8:10,9:8,10:9.
+- RB1: b6,r8 (tR10), S={7,9,10}. W=7 -> need9 -> G=10 (t9) valid Y=9. W=9 -> need11 -> G=7 valid Y=10. W=10 -> need12 -> none (G? no 6 not in S). Total 2.
+  A: 6B,8R,7W,10G,9Y.
+  B: 6B,8R,9W,7G,10Y.
+- RB2: b7,r9 (tR8), S={6,8,10}. W=6 -> need10 -> G=8 valid Y=10. W=8 -> need12 -> G=6 valid Y=10. W=10 -> need14 none. Total 2.
+  C: 7B,9R,6W,8G,10Y.
+  D: 7B,9R,8W,6G,10Y.
+- RB3: b8,r10 (tR9), S={6,7,9}. W=6 -> need9 -> none? t9=8,t7=11. no. W=7 -> need10 -> none? t6=12,t9=8. no. W=9 -> need12 -> G=6 valid Y=7. Total 1.
+  E: 8B,10R,9W,6G,7Y.
+P1 total 5 color assignments.
+
+P2 times: 6:12,7:11,8:9,9:10,10:8.
+- RB1: b6,r8 (tR9), S={7,9,10}. W=7 -> need10 -> G=9 (t10) valid Y=10. W=9 -> need12 -> none? S without 9 {7,10}: t7=11,t10=8 no 12. W=10 -> need13 none. Total1.
+  P2a: 6B,8R,7W,9G,10Y.
+- RB2: b7,r9 (tR10), S={6,8,10}. W=6 -> need11 -> none? t8=9,t10=8 no. W=8 -> need13 none. W=10 -> need15 none. Total0.
+- RB3: b8,r10 (tR8), S={6,7,9}. W=6 -> need10 -> G=9 (t10) valid Y=7. W=7 -> need11 -> G=6 (t12? wait need 11? t6=12, t9=10; none with 11? Actually W=7 need tG = 7+12-8=11. S\W {6,9}: t6=12, t9=10 no. invalid.) W=9 -> need13 none. Total1.
+  P2b: 8B,10R,6W,9G,7Y.
+P2 total 2.
+
+P3 times: 6:12,7:10,8:11,9:9,10:8.
+- RB1: b6,r8 (tR11), S={7,9,10}. W=7 -> need8 -> G=10 (t8) valid Y=9. W=9 -> need10 -> G=7 (t10) valid Y=10. W=10 -> need11 -> none? S\{10} {7,9}: t7=10,t9=9 no. Total2.
+  P3a: 6B,8R,7W,10G,9Y.
+  P3b: 6B,8R,9W,7G,10Y.
+- RB2: b7,r9 (tR9), S={6,8,10}. W=6 -> need9 -> none? t8=11,t10=8 no. W=8 -> need11 -> G=8? W=8, G cannot 8; S\{8} {6,10}: t6=12,t10=8 no. W=10 -> need13 none. Total0.
+- RB3: b8,r10 (tR8), S={6,7,9}. W=6 -> need10 -> G=7 (t10) valid Y=9. W=7 -> need11 -> G? S\{7} {6,9}: t6=12,t9=9 none. W=9 -> need13 none. Total1.
+  P3c: 8B,10R,6W,7G,9Y.
+P3 total 3.
+
+P4 times: 6:11,7:12,8:10,9:9,10:8.
+- RB1: b6,r8 (tR10), S={7,9,10}. W=7 -> need9 -> G=9 (t9) valid Y=10. W=9 -> need11 -> G=7? t7=12, t10=8 no 11? Wait S\9 {7,10}: t7=12,t10=8 none. W=10 -> need12 -> G=7 (t12) valid Y=9. Total2.
+  P4a: 6B,8R,7W,9G,10Y.
+  P4b: 6B,8R,10W,7G,9Y.
+- RB2: b7,r9 (tR9), S={6,8,10}. W=6 -> need10 -> G=8 (t10) valid Y=10. W=8 -> need12 -> G=7? but 7 is blue not in S? Wait W=8, S\8 {6,10}: t6=11,t10=8 none. W=10 -> need14 none. Total1.
+  P4c: 7B,9R,6W,8G,10Y.
+- RB3: b8,r10 (tR8), S={6,7,9}. W=6 -> need11 -> G=7? t7=12, t9=9 no (t6=11 but W=6 cannot G=6). none. W=7 -> need12 -> G=6? t6=11, t9=9 none? Wait need tG=12; S\7 {6,9}: t6=11,t9=9 none. W=9 -> need13 none. Total0.
+P4 total 3.
+
+Total color-length assignments satisfying clue2&7 per p: P1 5, P2 2, P3 3, P4 3. Total 13.
+
+Now need incorporate names and other clues: clue1 (A/B/green), clue3 (E length 7-9 not white), clue5 (yellow time = Cor time+1), clue6 (D length 7/9 and t<12), clue8 (B not time8). Also clue10 if applicable.
+
+We can enumerate for each p and color assignment, assign lengths to names (i.e., choose which name has which length) satisfying:
+- A length L_A; B length L_B < L_A; green length > L_A.
+- E length ∈ {7,8,9}; color(E) != white.
+- D length ∈ {7,9}; t_D <12.
+- Cor length L_C; yellow length L_Y; t_Y = t_C +1.
+- B length not time8.
+Names distinct lengths. K=Cor.
+Colors fixed per length from assignment.
+
+Could enumerate by p and color assignment. Since only 13, manageable. Need count with conditions. Need be careful with names A,B,D,E,K. Let's define for each p, time of length. Also green length g, yellow length y from color assignment. Clue5 restricts Cor length c such that t_y = t_c +1. The possible c lengths list earlier. Cor cannot be yellow (not in list? t_y=t_c+1 ensures different). So Cor length determined as one of possible preimage lengths. For each color assignment, possible Cor lengths may be 0,1,2? Let's list for each color assignment.
+
+Also clue1: A must have length less than g and greater than B. So A length cannot be g or >=g; A length ∈ lengths < g, and B length < A. Since B length one of remaining. This imposes A not too large. Also green length > A. If A length =? A cannot be green. Since green length g. A ∈ {lengths < g}. B ∈ {lengths < L_A}. So need at least two lengths below g? Since A and B distinct below g. Thus g must be at least 8? If g=7, lengths below 7 only 6, cannot have A and B both below g. So green length cannot be 7. If g=8, below {6,7}; A must be7, B=6. If g=9, below {6,7,8}; A can be7 or8 (B lower). If g=10, below {6,7,8,9}; A can be7,8,9 (B lower).
+But clue1 also A longer than B. No constraint A not white/red etc except colors.
+
+Clue3: E length 7,8,9 and color not white. So E cannot length6,10; cannot white color.
+
+Clue6: D length 7 or9; time <12. So if p time12 length7 (P4), D cannot 7; D must9 if possible. Also if D length assigned to someone else? D is name.
+
+Clue8: B not time8: B length not time8 length.
+
+Let's enumerate systematically.
+
+Maybe create table of p/color assignments with g,y, blue,red,white, times. Then count name assignments.
+
+I'll label color assignments:
+P1:
+1a: B6,R8,W7,G10,Y9. (blue6, red8, white7, green10, yellow9)
+1b: B6,R8,W9,G7,Y10. green7 -> likely impossible due A/B below g? g=7 only one below 6, impossible. So 1b impossible (clue1). But maybe A length? Need A> B and A<7: A could? lengths <7 only 6; A cannot >B. impossible. So discard.
+1c: B7,R9,W6,G8,Y10. g=8.
+1d: B7,R9,W8,G6,Y10. g=6 impossible (no below). discard.
+1e: B8,R10,W9,G6,Y7. g=6 impossible. discard.
+So P1 viable color assignments: 1a,1c. Maybe 1b impossible.
+
+P2:
+2a: B6,R8,W7,G9,Y10. g=9.
+2b: B8,R10,W6,G9,Y7. g=9.
+Both viable.
+
+P3:
+3a: B6,R8,W7,G10,Y9. g=10.
+3b: B6,R8,W9,G7,Y10. g=7 impossible.
+3c: B8,R10,W6,G7,Y9. g=7 impossible.
+So only 3a viable? But unique solution uses 3a. Yes.
+
+P4:
+4a: B6,R8,W7,G9,Y10. g=9.
+4b: B6,R8,W10,G7,Y9. g=7 impossible.
+4c: B7,R9,W6,G8,Y10. g=8.
+So viable: 4a,4c.
+
+But wait clue10 absent: green can be yellow? No colors distinct. Good.
+
+Now for each viable p/color assignment, count name assignments satisfying all. Need also clue5 possible Cor lengths. Let's compute for viable ones.
+
+P1a: p P1 times: 9->8,10->9,8->10,7->11,6->12. Colors: 6 blue,8 red,7 white,10 green,9 yellow. g=10, y=9.
+Clue5: t_y = t_9=8. Need t_c =7 (since +1? t_y = t_c +1 => t_c=7). But no time 7. Wait if yellow at 8, Cor must leave at 7 hour, impossible (times start 8). So no Cor. Thus P1a impossible. Indeed unique solution yellow at 9 after Cor at8. P1a yellow at 8 cannot be after anyone. So discard.
+
+P1c: P1 colors: 7 blue,9 red,6 white,8 green,10 yellow. g=8, y=10. t_y = t_10=9. Need t_c=8 => c=9 (time8). So Cor length9.
+Clue1: g=8, A<B? A<8 and >B. Below 8: {6,7}. Thus A=7, B=6. (since A>B). So A length7, B length6. Cor length9. Remaining lengths for D,E: {8,10}. D length odd 7 or9; but 7=A,9=Cor -> D cannot? D must 7 or9, both taken. So impossible. Also D t<12. Thus P1c impossible.
+
+P2a: P2 times: 10->8,8->9,9->10,7->11,6->12. Colors: 6 blue,8 red,7 white,9 green,10 yellow. g=9,y=10. t_y=t10=8. Need t_c=7 impossible. So P2a impossible.
+
+P2b: P2 colors: 8 blue,10 red,6 white,9 green,7 yellow. g=9,y=7. t_y=t7=11. Need t_c=10 => c=9 (time10). So Cor length9. But g=9, green length 9; Cor could be green? Clue5 only yellow after Cor; Cor can be green, yes. Cor length9.
+Clue1: g=9, A<9 and >B. A can be7 or8? Lengths below 9: {6,7,8}. B<A.
+Names: Cor=9. Remaining lengths {6,7,8,10} for A,B,D,E. D length 7 or9; 9 taken by Cor, so D=7. t_D = t7=11 (<12) ok. E length 7,8,9; 7=D,9=Cor, so E=8 or? E could 8 (or? 7 taken,9 taken) only 8. E color? length8 blue, not white ok. Then remaining lengths for A,B: {6,10}. But A<9, so A cannot10; A=6? Need A>B, B<6 impossible. Thus no assignment. Wait could D=7, E=8, A/B 6/10 no. If E=7? D must? D=7 conflict. So P2b impossible.
+
+P3a: P3 times: 10->8,9->9,7->10,8->11,6->12. Colors: 6 blue,8 red,7 white,10 green,9 yellow. g=10,y=9. t_y=t9=9. Need t_c=8 => c=10. Cor length10 (green). Clue1: g=10, A<10 >B. A can be7,8,9 (not 6? could A=7 with B=6; A=8 with B=6/7; A=9 with B=6/7/8 but Cor=10, E etc). Need count.
+D length 7 or9, t<12 (both ok, time10/9). E length 7,8,9 not white; white length7, so E cannot7. Thus E ∈ {8,9}. B not time8: time8 length10 (Cor), so any B length not10, ok unless B=10 but Cor=10. So clue8 automatic.
+Cor=10. Remaining lengths {6,7,8,9} for A,B,D,E.
+D ∈ {7,9}. E ∈ {8,9}. A ∈ {7,8,9}? (A<10 and >B; A cannot6 because no B<6). B < A.
+Also names distinct. Let's enumerate.
+Case D=7, E=8 or9.
+- D=7, E=8: remaining for A,B {6,9}. A must >B and A<10. A=9,B=6 valid. (A=6,B=9 invalid). So one.
+- D=7, E=9: remaining {6,8}. A=8,B=6 valid. one.
+Case D=9, E=8 (E cannot7; if E=9 conflict D): remaining {6,7}. A=7,B=6 valid. one.
+D=9,E? if E=7 invalid (white). So total 3 name assignments for P3a without 9/10? Need check clue10 absent. Also clue9 absent. These 3. Let's list:
+1: A9,B6,D7,E8,K10. Colors: A9 yellow? Wait P3a colors: 9 yellow, 6 blue, 8 red, 7 white,10 green. E8 red, D7 white, A9 yellow, B6 blue, K10 green. Check clue3 E not white ok. Clue1 A9 >B6, green10 >9 ok. Clue6 D7 odd t10. Clue5 yellow9 time9 after Cor10 time8 ok. Clue7 red8 time11 + green10 time8 =19, white7+12=19. Good. But clue9 length A even? no (9 odd) would be excluded; clue10 yellow longer than Anna? yellow9 vs A9 not longer, excluded. So these are extra without 9/10.
+2: A8,B6,D7,E9,K10. A8 red, E9 yellow. Check clue10? yellow9 > A8 yes; clue9 A even yes -> this is unique solution? Wait unique solution had A8,B6,D7,E9,K10 with times: K8,E9,D10,A11,B12. Yes.
+3: A7,B6,D9,E8,K10. A7 white? P3a white7, so A white. Clue1 A7>B6, green10>7. D9 red? D length9 odd t9. E8 red? Wait colors: 8 red,9 red? Can't two red. Check P3a colors: 6 blue,8 red,7 white,10 green,9 yellow. If D=9 yellow, E=8 red, A=7 white. D length9 odd, t9<12. Clue5 yellow length9 (D) time9; Cor length10 time8; yellow after Cor yes. But clue1 green length10 > A7. All ok? E length8 color red not white. So valid without 9/10. With clue10? yellow length9 > A7 yes, so condition10 satisfied; clue9 A even no. So this is extra only without 9 (if keeping 10). Good.
+P3a total 3.
+
+P4a: P4 times: 10->8,9->9,8->10,6->11,7->12. Colors: 6 blue,8 red,7 white,9 green,10 yellow. g=9,y=10. t_y=t10=8. Need t_c=7 impossible. So P4a impossible.
+
+P4c: P4 colors: 7 blue,9 red,6 white,8 green,10 yellow. g=8,y=10. t_y=t10=8. Need t_c=7 impossible. Wait yellow length10 at time8, no earlier. So impossible. Did we compute P4c yellow=10 time8 yes impossible. Thus no P4 solutions? But maybe if yellow at later? P4a yellow10 time8, P4b yellow9 time9? but g7 impossible. P4c yellow10 time8. So no P4.
+
+Thus without 9/10, only P3a with 3 solutions? Need verify no other viable p/color assignments maybe green=7 could still satisfy clue1 if A length? Let's re-examine clue1: "Лодка Анны длиннее лодки Брама, но короче зелёной лодки." Means Anna longer than Bram, but shorter than green boat. If green length=7, Anna must be shorter than 7, so length6, but longer than Bram (length<6) impossible. yes.
+Green=6 impossible. So discarded.
+What about color assignments where green length=8 and A length? Need A<8 and >B; possible A=7,B=6. We handled P1c and P4c. P1c impossible due D; P4c impossible due yellow time. Good.
+What about color assignments with green=9/10 and yellow early impossible. Need ensure for P2a yellow10 time8 impossible; P4a yellow10 time8; P1a yellow9 time8. yes.
+Thus count without 9 and 10 = 3? But need be careful: Could there be solutions with color assignments that we discarded due clue7? We enumerated all satisfying clue2&7. Need double-check enumeration for P1 etc. Let's independently verify with alternative method to avoid missing. Since final counts crucial.
+
+Let's maybe brute force mentally more systematically. There are 4 p. For each p, clue7 restricts color assignments. We found total 13. Let's verify each p enumeration with equation perhaps using table.
+
+I'll recompute from scratch using formula. For each p, define t vector for lengths 6-10.
+P1: t6=12,t7=11,t8=10,t9=8,t10=9.
+RB possibilities:
+R8/B6: tR10. Remaining 7,9,10. For each G in remaining, W remaining third. Equation tR+tG = W+12 -> W = tR+tG-12.
+- G7 t11 -> W=10+11-12=9, remaining Y=10? Wait if G=7, W=9, Y=10. This corresponds P1b (W9,G7,Y10) valid.
+- G9 t8 -> W=6? But W must be remaining 7 or10? 6 is blue not remaining. invalid. (I earlier for W=7 G10; let's use G approach.)
+- G10 t9 -> W=7, Y=9. valid P1a.
+So RB1 two.
+R9/B7: tR8. Remaining 6,8,10.
+- G6 t12 -> W=8, Y=10 valid P1d? Wait P1d was W8,G6,Y10 yes.
+- G8 t10 -> W=6, Y=10 valid P1c.
+- G10 t9 -> W=5 invalid. two.
+R10/B8: tR9. Remaining 6,7,9.
+- G6 t12 -> W=9, Y=7 valid P1e.
+- G7 t11 -> W=8? 8 is blue not remaining invalid.
+- G9 t8 -> W=5 invalid. one. Total5. ok.
+
+P2: t6=12,t7=11,t8=9,t9=10,t10=8.
+R8/B6 tR9 rem 7,9,10:
+G7 t11 -> W=8? 8 red not rem invalid.
+G9 t10 -> W=7 valid, Y10 (P2a).
+G10 t8 -> W=5 invalid. one.
+R9/B7 tR10 rem 6,8,10:
+G6 t12 -> W=10 valid? 10 rem, Y8. Wait I earlier said RB2 P2 none? Let's check: tR=10, G=6 t=12 sum22, W=10, +12=22. W=10 is remaining. This is a valid color assignment: blue7, red9, white10, green6, yellow8. I missed! Need include.
+G8 t9 -> W=7? 7 blue invalid.
+G10 t8 -> W=6 valid, Y8? Wait if W=6, Y=8. tR10+tG8=18, W6+12=18. Valid: blue7, red9, white6, green10, yellow8. I missed? Let's recalc G10 t8 -> W=10+8-12=6, remaining Y=8. valid. So RB2 has two? But check W=10 with G6 Y8; W=6 with G10 Y8. Both valid. I earlier said none due wrong. Need update counts! Important.
+R10/B8 tR8 rem 6,7,9:
+G6 t12 -> W=8? 8 blue invalid.
+G7 t11 -> W=7? W equals G? Actually G7, W=7 invalid because same; formula W=8+11-12=7 but W cannot G. invalid.
+G9 t10 -> W=6 valid, Y7. P2b. one.
+P2 total 1+2+1=4. Need revisit viability.
+
+P3: t6=12,t7=10,t8=11,t9=9,t10=8.
+R8/B6 tR11 rem7,9,10:
+G7 t10 -> W=9 valid Y10 (P3b? W9,G7,Y10)
+G9 t9 -> W=8? 8 red invalid.
+G10 t8 -> W=7 valid Y9 (P3a)
+=>2.
+R9/B7 tR9 rem6,8,10:
+G6 t12 -> W=9? 9 red invalid.
+G8 t11 -> W=8? same invalid.
+G10 t8 -> W=5 invalid. 0. ok.
+R10/B8 tR8 rem6,7,9:
+G6 t12 -> W=8? 8 blue invalid.
+G7 t10 -> W=6 valid Y9 (P3c)
+G9 t9 -> W=5 invalid. 1. total3. ok.
+
+P4: t6=11,t7=12,t8=10,t9=9,t10=8.
+R8/B6 tR10 rem7,9,10:
+G7 t12 -> W=10 valid Y9 (P4b? W10,G7,Y9)
+G9 t9 -> W=7 valid Y10 (P4a)
+G10 t8 -> W=6? 6 blue invalid. =>2.
+R9/B7 tR9 rem6,8,10:
+G6 t11 -> W=8 valid Y10 (P4c? W8? Wait P4c earlier was W6,G8,Y10 for RB2? Let's check: RB2 blue7 red9, remaining 6,8,10. If G6, W=8, Y=10. Colors: 7B,9R,8W,6G,10Y. I earlier listed P4c as 7B,9R,6W,8G,10Y. That was from W=6 -> need10 -> G=8. Let's use G approach:
+G6 t11 -> W=8 valid (W8,G6,Y10)
+G8 t10 -> W=9? 9 red invalid.
+G10 t8 -> W=7? 7 blue invalid.
+So only one: W8,G6,Y10. But earlier P4c had G8,W6. Let's verify equation for earlier P4c: blue7, red9, white6, green8, yellow10. tR=t9=9, tG=t8=10 sum19; W6+12=18 -> not valid! I earlier made error. So P4c should be W8,G6,Y10. But green6 impossible clue1. Need update.
+R10/B8 tR8 rem6,7,9:
+G6 t11 -> W=7 valid? 7 rem, Y9. Colors: 8B,10R,7W,6G,9Y. Green6 impossible.
+G7 t12 -> W=8? 8 blue invalid.
+G9 t9 -> W=5 invalid. So one with G6. P4 total 3 but different: P4a (G9), P4b (G7), P4d (G6), maybe no G8. Need revisit viability.
+
+P1 maybe check with G approach:
+P1 R9/B7 tR8 rem6,8,10:
+G6 t12 -> W=6? same? 8+12-12=8? Wait formula W=tR+tG-12. tR=8, G6 t12 => W=8. But 8 is remaining? Remaining {6,8,10}; W=8 valid, Y=10. That's P1d? blue7,red9,white8,green6,yellow10 (G6). Earlier P1d W8,G6,Y10 yes.
+G8 t10 -> W=6 valid, Y10 (P1c)
+G10 t9 -> W=5 invalid. ok.
+
+Need redo all viable considering new P2 assignments and P4.
+
+Let's list all color assignments by p accurately.
+
+P1 (5):
+1a: B6,R8,W7,G10,Y9. (from G10)
+1b: B6,R8,W9,G7,Y10. (G7)
+1c: B7,R9,W6,G8,Y10. (G8)
+1d: B7,R9,W8,G6,Y10. (G6)
+1e: B8,R10,W9,G6,Y7. (G6 for RB3)
+Check 1e: blue8, red10, white9, green6, yellow7.
+
+P2 (4):
+2a: B6,R8,W7,G9,Y10. (RB1 G9)
+2b: B7,R9,W10,G6,Y8. (RB2 G6)
+2c: B7,R9,W6,G10,Y8. (RB2 G10)
+2d: B8,R10,W6,G9,Y7. (RB3 G9)
+Need verify 2b: colors: 7 blue,9 red,10 white,6 green,8 yellow. Equation tR=t9=10, tG=t6=12 sum22, W10+12=22. ok.
+2c: 7B,9R,6W,10G,8Y: tR10 + tG8=18, W6+12=18. ok.
+
+P3 (3):
+3a: B6,R8,W7,G10,Y9.
+3b: B6,R8,W9,G7,Y10.
+3c: B8,R10,W6,G7,Y9. (blue8,red10,white6,green7,yellow9)
+
+P4 (3):
+4a: B6,R8,W7,G9,Y10.
+4b: B6,R8,W10,G7,Y9.
+4c: B7,R9,W8,G6,Y10. (new)
+4d: B8,R10,W7,G6,Y9. (from RB3 G6) Wait P4 total 4? Let's recalc P4: RB1 two (4a,4b), RB2 one (4c), RB3 one (4d) => total 4, not 3. I earlier total 3 but now 4. Let's verify RB3 P4: tR=t10=8, remaining {6,7,9}; G6 t11 -> W=7, Y9 valid. So yes one. P4 total 4. Did RB2 G8 invalid, G10 invalid. So P4 4. Total color assignments 5+4+3+4=16. Need ensure no other in P4 RB1? R8/B6 tR10 rem7,9,10: G7 t12 -> W10 valid (4b); G9 t9 -> W7 valid (4a); G10 t8 -> W6 (blue invalid). ok.
+
+Now clue1 viability: green length must be > A > B, so g at least 8. Discard assignments with g=6 or7. That removes:
+P1: 1b(g7),1d(g6),1e(g6) -> keep 1a(g10),1c(g8).
+P2: 2a(g9),2b(g6 discard),2c(g10),2d(g9). Keep 2a,2c,2d.
+P3: 3a(g10),3b(g7 discard),3c(g7 discard). Keep 3a only.
+P4: 4a(g9),4b(g7 discard),4c(g6 discard),4d(g6 discard). Keep 4a only.
+So viable color assignments: P1a, P1c; P2a, P2c, P2d; P3a; P4a. Total 7. Need count name assignments for each, considering clue5 etc.
+
+Let's compute each.
+
+P1a: P1 times: 9:8,10:9,8:10,7:11,6:12. Colors: 6B,8R,7W,10G,9Y. g10,y9. t_y=8 -> Cor time7 impossible. => 0.
+
+P1c: P1 colors: 7B,9R,6W,8G,10Y. g8,y10. t_y=t10=9 -> Cor time8 => Cor length9. Clue1 g8 -> A=7,B=6 as before. Cor=9. Remaining D,E {8,10}. D must 7/9, both taken -> 0. So P1c 0.
+
+P2a: P2 times: 10:8,8:9,9:10,7:11,6:12. Colors: 6B,8R,7W,9G,10Y. g9,y10. t_y=8 -> Cor time7 impossible. 0.
+
+P2c: P2 colors: 7B,9R,6W,10G,8Y. g10,y8. t_y=t8=9 -> Cor time8 => Cor length10. But g=10 green, Cor can be green length10. Clue1 g10 -> A<10 >B. A can 7,8,9? (not 6). Cor=10. Remaining lengths {6,7,8,9} for A,B,D,E. D length 7 or9, t_D<12 (both time11/10 ok). E length 7,8,9 not white; white=6, so E any of 7,8,9. B not time8: time8 length10 (Cor), so B not10 automatic. Need count name assignments with Cor=10, D∈{7,9}, E∈{7,8,9}, A∈{7,8,9}, B<A.
+Let's enumerate. Lengths available for A,B,D,E: 6,7,8,9.
+D choices: 7 or9.
+E choices: 7,8,9 distinct.
+A choices: 7,8,9 distinct, B remaining less than A.
+Could systematically enumerate assignments of D,E,A then B determined? Since B is remaining length from {6,7,8,9} not A,D,E. Need B < A.
+Let's list all permutations of D,E,A from {7,8,9} (3P3=6), B gets 6. Since only four lengths and A,D,E all from {7,8,9}, B necessarily 6. B<A always true for any A≥7. So all 6 assignments valid? Need check E color not white (white6, ok), D odd (7/9 ok), tD<12 (P2 time7=11,9=10 ok), clue1 A<green10 yes. Cor=10. So 6 solutions for P2c without 9/10. Wait clue5: yellow length8 time9, Cor length10 time8, yes. All good. But need check clue6 D length odd: if D=8? We restricted D {7,9}; yes. E can be 7,8,9. If D=7,E=7 conflict; permutations distinct. So 6.
+Let's list maybe: D,E,A permutations of 7,8,9. B=6, K=10. Colors: 10 green,8 yellow,9 red,7 blue,6 white. E not white ok. If E=7 blue, ok; E=8 yellow, ok; E=9 red, ok. D=7/9. All valid? Check clue1: A length maybe 7,8,9; B6; green10>A. yes. So 6.
+
+P2d: P2 colors: 8B,10R,6W,9G,7Y. g9,y7. t_y=t7=11 -> Cor time10 => Cor length9 (green). Clue1 g9 -> A<9 >B. A can 7 or8? Lengths below9:6,7,8. A cannot6. So A∈{7,8}. B<A.
+Cor=9. Remaining lengths {6,7,8,10} for A,B,D,E. D length 7 or9; 9 Cor, so D=7. t_D=11 ok. E length 7,8,9; 7 D,9 Cor -> E=8. Remaining for A,B {6,10}. A must <9, so A cannot10; A=6, but need B<6 impossible. Thus 0. Same as earlier P2b. So P2d 0.
+
+P3a: we counted 3. Need re-evaluate with P3a colors: 6B,8R,7W,10G,9Y. Cor length10, g10,y9. t_y=9 -> Cor time8 => c=10. Count: available {6,7,8,9}. D∈{7,9}; E∈{7,8,9} not white => E≠7, so E∈{8,9}; A∈{7,8,9}; B<A. We enumerated 3? Let's enumerate all permutations D,E,A from {6,7,8,9} with constraints.
+D=7 or9.
+E=8 or9.
+A=7,8,9; B remaining.
+Case D=7:
+ E=8: remaining for A,B {6,9}; A=9,B=6 valid. (A=6 invalid) ->1
+ E=9: remaining {6,8}; A=8,B=6 valid ->1
+Case D=9:
+ E=8: remaining {6,7}; A=7,B=6 valid ->1
+ E=9 conflict. Total3. ok.
+
+P4a: P4 times: 10:8,9:9,8:10,6:11,7:12. Colors: 6B,8R,7W,9G,10Y. g9,y10. t_y=8 -> Cor time7 impossible. 0.
+
+Thus without 9 and 10 total = P2c 6 + P3a 3 = 9. Is that correct? Need check if P2c solutions satisfy clue4 exactly one inversion? P2 is [10,8,9,7,6] has one ascent 8<9. Yes.
+Need check clue7 for P2c: red length9 time10, green length10 time8 sum18; white length6 +12=18. ok.
+Clue2 red9 blue7 difference2. ok.
+Clue5 yellow length8 time9 after Cor length10 time8. ok.
+Clue6 D length 7 or9; in P2c if D=7 or9 times 11 or10 <12. ok.
+Clue8 B not first: B=6 time12 in all P2c? Since A,D,E use 7,8,9, B=6 time12, ok.
+Clue3 E not white: white6, E 7/8/9 ok.
+Clue1: green10 > A, A>B=6. ok.
+So 6 valid.
+Thus without 9/10 count maybe 9. But need consider condition 10? For "only without condition 9" (keep 10), we need count among all solutions satisfying 1-8 and 10 (A length not necessarily even). We found total without 9/10 = 9. Need filter by clue10: yellow length > Anna length.
+For P2c: yellow length8. Anna A ∈ {7,8,9} (permutations). Clue10 requires 8 > A. So A must be7. If A=8 or9 invalid. In P2c, B=6, Cor=10, D/E/A permutations of 7,8,9. Count with A=7: D,E are 8,9 in any order (2). But D must be 7 or9; if A=7, D cannot7, so D=9, E=8. Only 1? Let's check permutations with A=7: remaining D,E {8,9}; D must 7 or9 -> D=9, E=8. So 1 solution. Wait if D=8 invalid. So P2c contributes 1 with clue10.
+For P3a: yellow length9. Clue10 requires 9 > A. A in solutions: (A9,B6,D7,E8) invalid (equal); (A8,B6,D7,E9) valid; (A7,B6,D9,E8) valid. So 2 solutions.
+Total with 10 but no 9 = 3. But earlier we thought unique with both 9 and10 is one; without 9 keep10 maybe 3. Need verify if any other assignments with clue10 from P2c etc. P2c A=7 solution: lengths: A7, B6, D9, E8, K10. Colors P2c: 7 blue,8 yellow,9 red,6 white,10 green. Times P2: K10 t8, E8 t9, A7 t11? Wait P2 times: 10 t8,8 t9,9 t10,7 t11,6 t12. So A7 t11, B6 t12, D9 t10, E8 t9, K10 t8. Check clue5 yellow E8 time9 after Cor K10 time8. Clue10 yellow8 > Anna7 yes. Clue6 D9 odd t10. Clue3 E8 yellow not white. Clue1 A7>B6, green10>7. Clue7 red9 t10 + green10 t8 =18, white6+12=18. Valid. So yes.
+P3a two solutions: unique (A8) and A7 with D9/E8/K10? Wait P3a A7 solution: lengths A7 white, B6 blue, D9 yellow, E8 red, K10 green. Times P3: K10 t8, D9 t9, E8 t11? Wait P3 times: 10 t8,9 t9,7 t10,8 t11,6 t12. If A7 t10, D9 t9, E8 t11, B6 t12. Yellow D9 time9 after Cor K10 time8. Clue10 yellow9 > A7 yes. Valid. Unique A8: K10 t8, E9 t9, D7 t10, A8 t11, B6 t12.
+What about P3a A9 solution invalid due yellow not > A. So total 3 with clue10 only.
+
+But wait "А только без условия 9?" Could mean without condition 9 but also without condition 10? The phrasing: "Сколько решений было бы без условий 9 и 10? А только без условия 9?" It asks: How many solutions would be without conditions 9 and 10? And only without condition 9? Usually means compare: omit both 9 and 10; omit only 9 (i.e., 10 remains). So counts: 9 and 3. Need be certain. Could also mean "without condition 9 only" (but condition 10 omitted? no, only without 9 = remove 9 from original, keep 10). We'll output "9; 3". Need maybe explain.
+
+Need ensure no other solutions with clue10 not considered due clue9? We filtered total 9. Let's maybe independently verify total 9 with a more systematic enumeration to avoid missing due color assignments. Could there be p with green=8 and A=7,B=6 and D/E possibilities we dismissed because D length odd conflict, but maybe D could be Cor? Names distinct, D length 7 or9. In P1c: A7,B6,Cor9, remaining 8,10; D cannot 7/9, yes no. P4? P4a yellow early no. P2c green10 gave 6. P3a gave 3. What about P2a/P4a yellow at time8 impossible; P1a yellow time8 impossible. P2d/P1c no. So 9.
+
+But let's consider clue5: "Жёлтая лодка выходит ровно через час после Кора." Could be interpreted as yellow boat leaves exactly one hour after Cor's boat, i.e., if Cor leaves at 11, yellow at 12. We used t_Y = t_C +1. Good. If Cor leaves at 12 impossible. If yellow at 8 impossible. Good.
+
+Potential ambiguity: "Лодки выходят почти строго от самой длинной к самой короткой: если взять любые две лодки, то более длинная выходит раньше, кроме ровно одной пары, где более короткая выходит раньше более длинной." We interpreted exactly one pair with shorter earlier. Could there be exactly one pair where longer leaves later, but other pairs not comparable? Times distinct so comparable. Good. Permutation with exactly one ascent. We assumed adjacent swap. Need prove exactly one pair -> sequence of lengths in departure order has exactly one ascent. For permutations, exactly one ascent implies adjacent swap of descending? Let's prove. If sequence p of 5 distinct has exactly one pair i<j with p_i < p_j. If there is an ascent at positions i,j not adjacent, then all positions between? Need show adjacent. Suppose p_i < p_j with i<j. If j>i+1, then consider k between. To avoid additional ascents with i or j, p_i > p_k and p_k > p_j? Let's analyze. If p_i < p_j. For any k between, to not have ascent i,k: need p_i > p_k (since i<k). But p_i < p_j and p_i > p_k => p_k < p_i < p_j, then k<j gives ascent k,j (p_k < p_j). Contradiction. Thus no k between; ascent adjacent. Also if adjacent swap not in descending? If sequence has exactly one ascent at adjacent positions, all other pairs are descents. That implies sequence is descending except that adjacent pair swapped. Yes.
+
+Need maybe in final proof for uniqueness: With 9 and10, derive as earlier. Could present concise but thorough.
+
+Need also verify final unique solution against all conditions:
+Anna: length8 red time11.
+Bram: length6 blue time12.
+Cor: length10 green time8.
+Dirk: length7 white time10.
+Eva: length9 yellow time9.
+Check:
+1 A8 > B6, A8 < green10 yes.
+2 red8 = blue6+2 yes.
+3 E9 not shortest6 not longest10, not white (yellow) yes.
+4 Departure order lengths: 10,9,7,8,6 (times 8,9,10,11,12). Descending would 10,9,8,7,6. Exactly one shorter earlier: length7 at t10 earlier than length8 at t11; all other longer earlier? Check pairs: 10 earlier than all; 9 earlier than 7,8,6; 7 earlier than 6 but shorter than 8 (violation); 8 earlier than6. Only pair (7,8) shorter earlier. yes.
+5 Yellow (Eva t9) one hour after Cor (t8). yes.
+6 Dirk t10 before noon, length7 odd. yes.
+7 red t11 + green t8 =19; white length7 +12=19. yes.
+8 Bram t12 not first. yes.
+9 A length8 even. yes.
+10 yellow length9 > A8. yes.
+
+Need output final lines strictly format:
+ИТОГ: Имя; длина; цвет; час
+(по одной строке на каждого из пяти) and строку
+ИТОГ-В: <число без условий 9 и 10>; <число без условия 9>
+
+Need decide order of ИТОГ lines? Probably each person. Could output in order Anna, Bram, Cor, Dirk, Eva. Use Russian names: Анна; 8; красный; 11 etc. Color names in Russian. Need ensure format exactly: "ИТОГ: Имя; длина; цвет; час". So lines:
+ИТОГ: Анна; 8; красный; 11
+ИТОГ: Брам; 6; синий; 12
+ИТОГ: Кор; 10; зелёный; 8
+ИТОГ: Дирк; 7; белый; 10
+ИТОГ: Эва; 9; жёлтый; 9
+ИТОГ-В: 9; 3
+
+Need maybe include proof and counts before final. User asks reason step by step and check final answer by each condition. Need provide detailed reasoning. Also part b proof uniqueness. Part c counts. Need ensure final output exactly at end. They say "В самом конце выведи строки строго в формате: ..." So final answer can include reasoning, but last lines must be exactly those. Need not add extra after. Ensure no trailing spaces? ok.
+
+Need be cautious about counting part c: Let's maybe perform a more rigorous enumeration for counts to be certain. Could there be solutions where clue4's exactly one pair is not adjacent swap due ties? No ties. Good.
+
+Let's maybe attempt a full enumeration with tables for part c to present convincingly. Need not list all 9? Could present method and table of surviving cases. Need be clear how counts derived.
+
+Let's formalize counting:
+- Condition 4 => four possible length-time orders (A-D maybe). We can label T1-T4.
+- Conditions 2 and 7 restrict color-length assignments. We can present table of possible color assignments after 1? Maybe for counting, present table of cases that survive all except 9/10. To avoid overwhelming, can show reduced table: For each departure order, after applying 2,7,1 (green length > A > B), 5,6,8,3, we get cases.
+
+Maybe create table for count without 9/10:
+Departure order (by lengths at 8-12) | possible color pattern (length: color) | forced Cor | possible (A,B,D,E) count
+Need ensure table includes only viable. Let's derive table:
+Order P1 [9,10,8,7,6]: viable color patterns after 1/5? P1a g10 y9 fails 5; P1c g8 y10 forces A7,B6,K9 but D impossible. So count 0.
+Order P2 [10,8,9,7,6]: viable:
+- P2a g9 y10 fails 5 (yellow at 8)
+- P2c g10 y8: K10, A/D/E permutations of 7,8,9, B6 -> 6
+- P2d g9 y7: K9, D7,E8 leaves A/B impossible ->0
+(P2b g6 impossible clue1)
+Order P3 [10,9,7,8,6]: P3a g10 y9: K10; D∈{7,9}, E∈{8,9}, A remaining >B -> 3. Others g7 impossible.
+Order P4 [10,9,8,6,7]: P4a g9 y10 fails 5; others g6/7 impossible. count0.
+Total 9.
+Need maybe mention we first eliminated color assignments with green length 6 or7 because clue1; and yellow at 8 impossible because Cor would need leave at 7.
+
+But to be rigorous, we need show how color patterns derived from 2 and7. Could present a table of all color patterns that survive clue1? Or all satisfying 2&7. Since final answer desired oververbosity 9, we can include detailed table.
+
+Let's refine color pattern enumeration for counting. Maybe present as:
+For each order, condition 7 leaves these color-length assignments (where colors are abbreviated by lengths):
+P1: (6B,8R,7W,10G,9Y), (6B,8R,9W,7G,10Y), (7B,9R,6W,8G,10Y), (7B,9R,8W,6G,10Y), (8B,10R,9W,6G,7Y).
+P2: (6B,8R,7W,9G,10Y), (7B,9R,10W,6G,8Y), (7B,9R,6W,10G,8Y), (8B,10R,6W,9G,7Y).
+P3: (6B,8R,7W,10G,9Y), (6B,8R,9W,7G,10Y), (8B,10R,6W,7G,9Y).
+P4: (6B,8R,7W,9G,10Y), (6B,8R,10W,7G,9Y), (7B,9R,8W,6G,10Y), (8B,10R,7W,6G,9Y).
+Then clue1 eliminates green length 6/7, leaving:
+P1: 10G,8G; P2: 9G,10G,9G; P3:10G; P4:9G.
+Then clue5 eliminates those with yellow at 8 (P1 10G? Wait P1a yellow9 at8? P1a yellow9 time8, yes; P2a yellow10 time8; P4a yellow10 time8). Also P1c yellow10 time9, okay; P2c yellow8 time9, okay; P2d yellow7 time11, okay; P3a yellow9 time9, okay.
+Then apply names. We can present table of remaining after 5:
+P1c: K9, A7,B6, D impossible ->0.
+P2c: K10, B6, A,D,E are 7,8,9 with D=7/9, E≠white(6) ->6.
+P2d: K9, D7,E8, leaves A/B impossible ->0.
+P3a: K10, D7/9, E8/9, A remaining ->3.
+P4a eliminated. Total 9.
+But wait P1a eliminated by yellow at8; P2a/P4a eliminated; P2b/P1b/P3b/c/P4b/c/d eliminated by green length <=7. Good.
+
+Need ensure P1c: P1c colors: 7B,9R,6W,8G,10Y. Yellow time? P1 times: length10 at9, yes Cor time8 -> Cor length9. Clue1 green8 -> A7,B6. D length odd 7/9, but 7=A,9=K. Could D be length? No. So 0.
+
+P2d: P2d colors: 8B,10R,6W,9G,7Y. Yellow time length7=11, Cor time10 -> Cor length9. Green9 -> A<9. D must7 (since 9 K). E length 7-9 not white (white6) -> E=8. Remaining A/B 6/10; A<9 so A=6 impossible. 0.
+
+P2c: P2c colors: 7B,9R,6W,10G,8Y. Yellow time length8=9, Cor time8 -> Cor length10. Green10 -> A<10. D 7/9. E 7/8/9 (not white6). B not first: time8 length10 K, so B not first automatically. Since A,D,E must be 7,8,9? Could A=6? A must >B, if A=6 no B; so A∈7,8,9. D∈7,9; E∈7,8,9. With K=10, remaining 6,7,8,9. B will be the one left. Is B necessarily6? If A,D,E use three of 7,8,9, yes B=6. All permutations of D,E,A over 7,8,9 with D≠8? Actually D cannot8, so not all 6 permutations? Let's recalc: We said D choices 7 or9; E and A fill. Number =? Choose D: 2 choices. For each D, assign E and A to remaining two of {7,8,9}: 2! =2. Total 4? Wait earlier I said D,E,A permutations of {7,8,9} all 6, but D cannot8! I made a mistake! Let's recalc P2c count! Important. D length must be 7 or9. E can 7,8,9. A can 7,8,9. Available {7,8,9} for A,D,E. D cannot8. Number of assignments: D=7: E,A are 8,9 in either order ->2. D=9: E,A are 7,8 in either order ->2. Total 4, not 6. I earlier incorrectly allowed D=8. But I then said all 6 because D choices? Let's check: I wrote D choices 7 or9, E choices... then "all 6 permutations" wrong. Need correct count. This affects totals! Let's recalc carefully.
+
+P2c without 9/10: K=10, B=6? Need ensure B=6. A,D,E use {7,8,9}. D∈{7,9}. E∈{7,8,9} not white (white6) so any. A∈{7,8,9} (cannot6). Count: D=7: remaining for A,E {8,9}: 2 assignments. D=9: remaining {7,8}: 2 assignments. Total 4. Check each:
+D=7,E=8,A=9; D=7,E=9,A=8; D=9,E=7,A=8; D=9,E=8,A=7. All valid? E=7 color blue not white ok. A=7 with B6 ok. So 4.
+P3a count: K=10, available {6,7,8,9}. D∈{7,9}; E∈{8,9} (not white7); A∈{7,8,9}; B remaining. We counted 3. Let's verify count formula: D=7: remaining {6,8,9}; E=8 or9. If E=8, A/B {6,9} -> A=9,B=6 valid. If E=9, A/B {6,8}-> A=8,B=6 valid. D=9: remaining {6,7,8}; E=8 (E=7 invalid, E=9 conflict) -> A/B {6,7}-> A=7,B=6 valid. Total3. ok.
+Total without 9/10 = 4+3=7, not 9. Need re-evaluate all counts! Very important.
+
+Let's re-check P2c D cannot8 due clue6 length odd. Yes. I earlier erroneously allowed D=8. So total without 9/10 likely 7. Need recalc with clue10: P2c with clue10 yellow length8 > A. In P2c A can be9,8,8,7 from four assignments. Valid A=7 only one? Let's list P2c assignments:
+1 D7,E8,A9 (A=9 invalid for 10)
+2 D7,E9,A8 (A=8 invalid yellow8 >8? no)
+3 D9,E7,A8 (A=8 invalid)
+4 D9,E8,A7 (A=7 valid) ->1. So P2c contributes 1. P3a contributes 2. Total with 10 only =3 still? 1+2=3. Good. But without 9/10 changes from 9 to 7. Need verify no other P2c assignments with A=6? A cannot6 because B< A impossible. So 4. Thus answer likely 7;3. Need be absolutely sure.
+
+Let's maybe enumerate all 7 solutions without 9/10:
+P2c (4):
+P2 times: 10 t8,8 t9,9 t10,7 t11,6 t12. Colors: 10G,8Y,9R,7B,6W. K=10. B=6.
+1) A9,B6,D7,E8,K10. Times: K8,E9,D11,A10,B12? Wait P2 length9 time10, length7 time11. A9 t10, D7 t11. Clue1 A9>6, green10>9. D7 odd t11. E8 yellow t9. Yellow after Cor? Cor K10 t8, yellow E8 t9 yes. Clue7 red9 t10 + green10 t8=18, white6+12=18. Valid. Without 9/10 yes. With10? yellow8 > A9 no; with9 A9 odd no.
+2) A8,B6,D7,E9,K10. Times: K8,E10,D11,A9,B12. A8 even, yellow8 > A8? no (equal) so without10? Actually condition10 absent; valid. With10 invalid equal. With9 valid? A even yes but 10 absent; but for only without9 keep10 invalid.
+3) A8,B6,D9,E7,K10. Times: K8,E11,D10,A9,B12. D9 odd, E7 blue not white, A8. Valid without10. With10 yellow8 >8? no. With9 yes if 10 absent? Not relevant.
+4) A7,B6,D9,E8,K10. Times: K8,E9,D10,A11,B12. A7 odd, yellow8 >7 yes; with10 valid, with9 no.
+P3a (3):
+P3 times: 10 t8,9 t9,7 t10,8 t11,6 t12. Colors: 10G,9Y,8R,7W,6B. K=10. B=6.
+5) A9,B6,D7,E8,K10. Times: K8,D9,A10,E11,B12. A9 odd, yellow9 >9 no; without9/10 valid.
+6) A8,B6,D7,E9,K10. Unique with 9&10. Times K8,E9,D10,A11,B12.
+7) A7,B6,D9,E8,K10. Times K8,D9,A10,E11,B12? Wait P3 length7 time10, length8 time11, length9 time9. A7 t10, D9 t9, E8 t11. Yellow D9 t9 after Cor K10 t8. Valid with10 (9>7), without9.
+So 7 total. Need check P2c solution 3: D9,E7,A8. E length7 color blue (not white), ok. D9 time10. Clue5 yellow E? Wait yellow length8 is A in this solution? Colors P2c: length8 yellow. If A8, then Anna's boat yellow. Clue10 absent; if present yellow length8 > Anna8 false. Clue5 yellow boat (Anna) leaves at t9 after Cor t8. ok. Clue1 Anna length8 > Bram6, green10 >8. ok.
+
+But wait in P2c solution 3, D=9, E=7, A=8. D length9 odd, t_D=10; E length7 not white (blue); B6 white. Clue7 red length9 is D t10, green K10 t8, white B6+12=18. ok.
+
+Now, could there be P2c with D=7,E=8,A=9 etc. All valid. Good.
+
+Need re-evaluate P1c maybe count? P1c: P1 times: 9 t8,10 t9,8 t10,7 t11,6 t12. Colors: 9R,10Y,8G,7B,6W. Cor=9. Green8 -> A7,B6. D must7/9, both taken. 0. ok.
+
+What about color assignment P2b green6 impossible. But clue1: green length 6, A shorter than green impossible. yes.
+
+Need re-evaluate color assignments enumeration for P2: Did we miss any with green=8 or9 or10? Let's list P2 all 4: 2a g9, 2b g6, 2c g10, 2d g9. ok.
+P4 all 4: 4a g9, 4b g7, 4c g6, 4d g6. Only 4a but yellow10 time8 impossible. ok.
+P1 all 5: 1a g10 yellow9 time8 impossible; 1c g8 yellow10 time9 but D conflict; others g<=7. ok.
+P3: 3a only. ok.
+
+Thus total without 9/10 = 7. Need maybe part c answer: 7;3. But let's not settle yet; let's consider if condition 6 "Дирк выходит до полудня" could mean at or before 12? In Russian "до полудня" generally before noon, not including 12. If inclusive (≤12), then P4 D length7 at12 might be allowed? But phrase "до полудня" usually before 12:00. The departure times include 12 (полдень). "выходит до полудня" means before noon, so t_D ∈ {8,9,10,11}. We used strict. If inclusive, additional solutions? Need assess maybe puzzle expects strict. It says "выходит до полудня" and times 8,9,10,11,12. 12 is noon, so before noon excludes 12. Good. But for counts, if inclusive, P4 might yield solutions? Need maybe mention assumption? The final likely expects strict. Let's verify with original maybe Dutch? "before noon" strict. ok.
+
+But if inclusive, unique solution still P3 because P4 D at12? Let's see P4a yellow at8 impossible; P4c/d green low; no. P4 not matter. P4 D at12 only if D length7; but no viable P4 color with green high and yellow after? P4a yellow10 time8 impossible. So inclusive doesn't add? P4 maybe color with yellow at11 and Cor10? P4b g7 impossible; P4c g6; P4d g6. So no. Thus counts unaffected? P1? D t12 length6 not odd. P2/P3 D t<12 already. So strict vs inclusive no effect except maybe P4 none. Good.
+
+Need consider condition 8: Bram not first. In our counts, B=6 time12 for P2c/P3a. ok. If other cases maybe B first? Could eliminate. We used.
+
+Now, need prove uniqueness with 9 and10. We derived A=8 etc. Let's ensure no alternative if clue9 length Anna even and clue10 yellow longer. We got A=8. Let's formalize elegantly:
+From 1 and 9: A even, A > B, A < green. Lengths even 6,8,10. A cannot 6 (no shorter B) and cannot10 (no longer green), so A=8. Then B ∈ {6,7}; green ∈ {9,10}. From 10, yellow >8 => yellow ∈ {9,10}. Since green and yellow distinct colors, lengths 9 and10 are exactly green/yellow. Then red/blue pair cannot involve 9/10? Wait red/blue pair could be 7/9 or 8/10? But 9/10 already green/yellow, so red/blue must be 6/8. Because red=blue+2; possible pairs (6,8),(7,9),(8,10). Since 9 and10 are not red/blue, only (6,8). Thus A=8 red, B=6 blue, white=7. Then E not white and length 7-9: cannot 7 (white), cannot8 (A), so E=9. D odd length 7/9: 9 E, so D=7. Cor remaining length10. Since Cor's boat length10, yellow cannot be Cor (yellow after Cor), so Cor green, E yellow. Then clue5: yellow (E, length9) after Cor (length10). Check condition4 orders: only P3 has length10 at 8 and length9 at9 while D length7 not 12? Let's see P3/P4 both have 10 t8,9 t9; P4 has D7 t12 invalid. P3 unique. Then times. Good.
+
+Need maybe in uniqueness proof also show condition4 orders and eliminate P4 due D at noon. Good.
+
+For part c, need present counts. Need decide how detailed. Could show table of all possible color-length assignments after clue2&7? Might be long but desired oververbosity 9. We can include a compact table. Need ensure counts in table correct: P2c count 4, P3a count 3. Total 7. With clue10: filter P2c to 1, P3a to 2 =>3.
+
+Let's verify if without 9 but with 10 count maybe also includes P2c solution with A=7 only and P3a A=7, A=8. What about P2c solution with A=7? Yes one. P3a A=7 and A=8. What about P3a A=7 solution has A length7 white; clue3 E length8 red; ok. So 3. If condition9 absent but condition10 present, A could be7 or8 (not9). Good.
+
+Could there be P2c solution with A=7, D=9,E=8. Times P2: K10 t8, E8 t9, D9 t10, A7 t11, B6 t12. Check condition4: lengths by time [10,8,9,7,6]. Exactly one inversion? Sequence 10,8,9,7,6: ascents: 8<9 only. Pair shorter 8 earlier than longer9. ok. Condition1: A7 > B6; green10 >7. Condition10: yellow8 > A7. Good. So yes.
+
+Let's maybe attempt a full independent brute force count by considering all possible A lengths without 9/10 to verify total 7. Could derive from constraints more directly.
+
+Without 9/10: A ∈ {7,8,9}. Condition4 orders. Maybe enumerate by A length and green length. Let's see if total 7 plausible.
+
+Case A=9: Then green=10, B<9. Yellow? no condition. Clue5 etc. In our 7 solutions, A=9 occurs P2c sol1 and P3a sol5: 2 solutions. A=8 occurs P2c sol2,3 and P3a sol6: 3 solutions. A=7 occurs P2c sol4 and P3a sol7: 2 solutions. Total 7. Nice. With clue10 (yellow>A): A=9 none; A=8? yellow length? P2c yellow8 not >8, P3a yellow9 >8 one; A=7: P2c yellow8 >7 one, P3a yellow9 >7 one => total3. Good.
+
+Could there be A=7 with green=8? P1c impossible; P4? none. A=8 with green=9/10? P2c? A8 green10; P3a A8 green10; no green9? P2d green9 impossible due D/E. ok.
+
+Let's maybe verify color assignments for P2c and P3a are the only ones with green10/yellow not early. What about color assignment P1a green10 yellow9 but yellow at8 impossible. P4a green9 yellow10 at8 impossible. P2a green9 yellow10 at8 impossible. So indeed only green10 with yellow8 (P2c) or yellow9 (P3a). Nice.
+
+Need maybe present condition4 orders as table:
+Order I: 9,10,8,7,6
+II: 10,8,9,7,6
+III: 10,9,7,8,6
+IV: 10,9,8,6,7
+Use Roman or numbers. For counting, use P1-P4.
+
+Need be careful with Russian names: Кор maybe "Кор" not "Кор"? Use as given. Дирк, Эва, Анна, Брам. Colors: красный, синий, зелёный, белый, жёлтый. Times as integers.
+
+Potential issue: In final ИТОГ lines, should time include "час"? Format says "час" maybe just number. Example: Имя; длина; цвет; час. So number. Use 8 etc.
+
+Need maybe include verification table at end before final lines. The final lines must be at very end. Could include check list then final lines. Ensure no extra text after ИТОГ-В line.
+
+Let's think about proof of uniqueness in part b: We can show from clues 1,9,10 deterministic. Need also show condition4 orders. Let's write in Russian.
+
+Detailed plan for final response:
+1. Introduce notation: lengths 6-10, times 8-12. From clue4 derive four possible orders of lengths by departure time. Explain exactly one inversion => adjacent swap in descending order. List:
+   O1: 9,10,8,7,6
+   O2: 10,8,9,7,6
+   O3: 10,9,7,8,6
+   O4: 10,9,8,6,7
+   (lengths at 8,9,10,11,12).
+
+2. Solve with all conditions (a,b):
+   - From 9: A even; from 1: A cannot6 or10 => A=8.
+   - B<8, green>8 => B∈{6,7}, green∈{9,10}.
+   - From 10: yellow>8 => yellow∈{9,10}. Green and yellow distinct => {green,yellow} lengths {9,10}.
+   - Red/blue pair: possible (6,8),(7,9),(8,10). Since 9/10 are green/yellow, only (6,8). Thus red=8 (Anna), blue=6, white=7.
+   - E length 7-9, not white => not7; length8 Anna => E=9. D odd 7/9 => D=7. Cor length10.
+
+I have thought about this long enough; time to give my answer.
+
+=== ANSWER ===
+## Шаг 1. Что даёт условие 4
+
+Условие 4 говорит, что порядок длин по времени отправления почти строго убывает, но есть ровно одна пара, где более короткая лодка вышла раньше более длинной.
+
+Поскольку длины 6, 7, 8, 9, 10 все различны, это возможно только если в строго убывающем ряду
+
+\[
+10,9,8,7,6
+\]
+
+поменять местами ровно одну соседнюю пару. Поэтому возможны только 4 порядка длин по часам 8, 9, 10, 11, 12:
+
+| Порядок | 8 ч | 9 ч | 10 ч | 11 ч | 12 ч |
+|---|---:|---:|---:|---:|---:|
+| P1 | 9 | 10 | 8 | 7 | 6 |
+| P2 | 10 | 8 | 9 | 7 | 6 |
+| P3 | 10 | 9 | 7 | 8 | 6 |
+| P4 | 10 | 9 | 8 | 6 | 7 |
+
+---
+
+## Шаг 2. Решение со всеми условиями
+
+### 2.1. Длина лодки Анны
+
+По условию 9 длина Анны чётная: 6, 8 или 10.
+
+По условию 1:
+
+- Анна длиннее Брама, значит Анна не 6 м;
+- Анна короче зелёной лодки, значит Анна не 10 м.
+
+Следовательно:
+
+\[
+A = 8.
+\]
+
+Тогда из условия 1:
+
+- Брам короче Анны: \(B \in \{6,7\}\);
+- зелёная лодка длиннее Анны: зелёная ∈ {9,10}.
+
+По условию 10 жёлтая лодка длиннее Анны, значит жёлтая ∈ {9,10}.
+
+Цвета разные, поэтому длины 9 и 10 — это зелёная и жёлтая лодки в каком-то порядке.
+
+---
+
+### 2.2. Красный и синий цвета
+
+По условию 2 красная лодка ровно на 2 м длиннее синей. Возможные пары:
+
+\[
+(6,8),\ (7,9),\ (8,10).
+\]
+
+Но длины 9 и 10 уже заняты зелёным и жёлтым цветами. Значит красная и синяя могут быть только 6 и 8:
+
+\[
+\text{синий}=6,\quad \text{красный}=8.
+\]
+
+Так как Анна имеет длину 8, то:
+
+\[
+\text{Анна — красная}.
+\]
+
+Оставшаяся длина 7 — белая:
+
+\[
+\text{белый}=7.
+\]
+
+---
+
+### 2.3. Эва и Дирк
+
+По условию 3 лодка Эвы не самая короткая и не самая длинная, то есть её длина 7, 8 или 9. Также она не белая.
+
+- 7 м — белая, значит Эва не 7 м;
+- 8 м — у Анны, значит Эва не 8 м.
+
+Следовательно:
+
+\[
+E = 9.
+\]
+
+По условию 6 длина лодки Дирка нечётная: 7 или 9.
+
+Но 9 м уже у Эвы, значит:
+
+\[
+D = 7.
+\]
+
+Тогда оставшаяся длина 10 м — у Кора:
+
+\[
+K = 10.
+\]
+
+Итак длины:
+
+\[
+A=8,\quad B=6,\quad K=10,\quad D=7,\quad E=9.
+\]
+
+---
+
+### 2.4. Цвета зелёный и жёлтый
+
+Зелёная и жёлтая лодки — это 9 и 10 м.
+
+По условию 5 жёлтая лодка выходит ровно через час после Кора.
+
+Кор имеет длину 10. Если бы лодка Кора была жёлтой, то жёлтая лодка выходила бы в тот же час, что и Кор, что невозможно. Значит:
+
+\[
+\text{Кор — зелёный},\quad \text{Эва — жёлтый}.
+\]
+
+То есть:
+
+\[
+K=10\text{ — зелёная},\quad E=9\text{ — жёлтая}.
+\]
+
+---
+
+### 2.5. Время отправления
+
+Нужно выбрать один из четырёх порядков P1–P4 так, чтобы жёлтая лодка Эвы, длина 9, выходила ровно через час после Кора, длина 10.
+
+Проверим порядки:
+
+| Порядок | Кор 10 | Эва 9 | Жёлтая через час после Кора? |
+|---|---:|---:|---|
+| P1 | 9 ч | 8 ч | нет |
+| P2 | 8 ч | 10 ч | нет, через 2 часа |
+| P3 | 8 ч | 9 ч | да |
+| P4 | 8 ч | 9 ч | да |
+
+Остаются P3 и P4.
+
+Но по условию 6 Дирк выходит до полудня, то есть не в 12 часов.
+
+- В P3 длина 7 у Дирка выходит в 10 ч — подходит.
+- В P4 длина 7 у Дирка выходит в 12 ч — не подходит.
+
+Значит единственный порядок — P3:
+
+\[
+10,9,7,8,6
+\]
+
+по часам 8, 9, 10, 11, 12.
+
+Отсюда:
+
+- Кор, 10 м — 8 ч;
+- Эва, 9 м — 9 ч;
+- Дирк, 7 м — 10 ч;
+- Анна, 8 м — 11 ч;
+- Брам, 6 м — 12 ч.
+
+---
+
+## Шаг 3. Итоговое решение со всеми условиями
+
+| Имя | Длина | Цвет | Время |
+|---|---:|---|---:|
+| Анна | 8 | красный | 11 |
+| Брам | 6 | синий | 12 |
+| Кор | 10 | зелёный | 8 |
+| Дирк | 7 | белый | 10 |
+| Эва | 9 | жёлтый | 9 |
+
+---
+
+## Шаг 4. Проверка по всем условиям
+
+1. **Анна длиннее Брама, но короче зелёной лодки.**  
+   Анна 8, Брам 6, зелёная лодка Кора 10.  
+   \(8>6\), \(8<10\). Подходит.
+
+2. **Красная лодка ровно на 2 м длиннее синей.**  
+   Красная Анна 8, синяя Брам 6.  
+   \(8=6+2\). Подходит.
+
+3. **Лодка Эвы не самая короткая и не самая длинная, и она не белая.**  
+   Эва 9; самая короткая 6, самая длинная 10. Цвет жёлтый, не белый. Подходит.
+
+4. **Почти строго от самой длинной к самой короткой, ровно одна пара наоборот.**  
+   Порядок длин по часам: 10, 9, 7, 8, 6.  
+   Единственная ошибка относительно убывания: 7 м выходит раньше 8 м.  
+   Подходит.
+
+5. **Жёлтая лодка выходит ровно через час после Кора.**  
+   Жёлтая Эва в 9, Кор в 8.  
+   Подходит.
+
+6. **Дирк выходит до полудня, и длина его лодки нечётная.**  
+   Дирк в 10, длина 7.  
+   Подходит.
+
+7. **Сумма часов отправления красной и зелёной лодок равна длине белой лодки плюс 12.**  
+   Красная Анна в 11, зелёная Кор в 8. Сумма \(11+8=19\).  
+   Белая лодка Дирка длиной 7: \(7+12=19\).  
+   Подходит.
+
+8. **Брам выходит не первым.**  
+   Брам в 12. Подходит.
+
+9. **Длина лодки Анны чётная.**  
+   Анна 8. Подходит.
+
+10. **Жёлтая лодка длиннее лодки Анны.**  
+   Жёлтая Эва 9, Анна 8.  
+   \(9>8\). Подходит.
+
+Все условия выполнены.
+
+---
+
+## Шаг 5. Доказательство единственности
+
+Мы уже показали, что условия 1, 9 и 10 жёстко фиксируют длину Анны:
+
+\[
+A=8.
+\]
+
+Затем:
+
+- зелёная и жёлтая лодки должны иметь длины 9 и 10;
+- красная и синяя лодки должны быть 8 и 6;
+- белая лодка должна быть 7;
+- Эва не может быть 7 или 8, значит Эва 9;
+- Дирк нечётный и не может быть 9, значит Дирк 7;
+- Кор остаётся 10;
+- Кор не может быть жёлтым, потому что жёлтая лодка выходит позже Кора, значит Кор зелёный, а Эва жёлтая.
+
+Дальше условие 5 оставляет только порядки P3 и P4, а условие 6 исключает P4, так как там Дирк выходит в 12 часов.
+
+Следовательно решение единственное.
+
+---
+
+## Шаг 6. Сколько решений без условий 9 и 10?
+
+Без условий 9 и 10 Анна может иметь длину 7, 8 или 9.
+
+Перебор возможных цветовых раскладок, совместимых с условиями 2 и 7, а также с условиями 1, 3, 5, 6 и 8, даёт следующие выживающие случаи.
+
+### Порядок P2: 10, 8, 9, 7, 6
+
+Единственная подходящая цветовая схема:
+
+\[
+10\text{ — зелёная},\quad 8\text{ — жёлтая},\quad 9\text{ — красная},\quad 7\text{ — синяя},\quad 6\text{ — белая}.
+\]
+
+Кор должен быть 10, потому что жёлтая 8 выходит в 9, а Кор — в 8.
+
+Тогда Брам — 6, а Анна, Дирк и Эва получают длины 7, 8, 9.
+
+Условия:
+
+- Дирк нечётный: 7 или 9;
+- Эва не белая: белая 6, поэтому Эва может быть 7, 8 или 9;
+- Анна должна быть длиннее Брама, то есть не 6.
+
+Возможные распределения:
+
+1. \(A=9,\ D=7,\ E=8\);
+2. \(A=8,\ D=7,\ E=9\);
+3. \(A=8,\ D=9,\ E=7\);
+4. \(A=7,\ D=9,\ E=8\).
+
+Итого: 4 решения.
+
+---
+
+### Порядок P3: 10, 9, 7, 8, 6
+
+Единственная подходящая цветовая схема:
+
+\[
+10\text{ — зелёная},\quad 9\text{ — жёлтая},\quad 8\text{ — красная},\quad 7\text{ — белая},\quad 6\text{ — синяя}.
+\]
+
+Кор — 10, жёлтая Эва 9 выходит в 9, Кор в 8.
+
+Брам — 6. Анна, Дирк и Эва получают 7, 8, 9.
+
+Условия:
+
+- Дирк нечётный: 7 или 9;
+- Эва не белая: белая 7, поэтому Эва не 7;
+- Анна должна быть длиннее Брама.
+
+Возможные распределения:
+
+1. \(A=9,\ D=7,\ E=8\);
+2. \(A=8,\ D=7,\ E=9\);
+3. \(A=7,\ D=9,\ E=8\).
+
+Итого: 3 решения.
+
+---
+
+### Всего без условий 9 и 10
+
+\[
+4+3=7.
+\]
+
+---
+
+## Шаг 7. Сколько решений только без условия 9?
+
+Теперь условие 10 остаётся: жёлтая лодка длиннее лодки Анны.
+
+Проверим найденные 7 решений.
+
+### Из P2
+
+Жёлтая лодка имеет длину 8.
+
+Нужно:
+
+\[
+8 > A.
+\]
+
+Из четырёх решений P2 подходит только одно, где \(A=7\):
+
+\[
+A=7,\ D=9,\ E=8.
+\]
+
+Итого из P2: 1 решение.
+
+### Из P3
+
+Жёлтая лодка имеет длину 9.
+
+Нужно:
+
+\[
+9 > A.
+\]
+
+Из трёх решений P3 подходят два, где \(A=8\) и \(A=7\):
+
+1. \(A=8,\ D=7,\ E=9\);
+2. \(A=7,\ D=9,\ E=8\).
+
+Итого из P3: 2 решения.
+
+### Всего только без условия 9
+
+\[
+1+2=3.
+\]
+
+ИТОГ: Анна; 8; красный; 11
+ИТОГ: Брам; 6; синий; 12
+ИТОГ: Кор; 10; зелёный; 8
+ИТОГ: Дирк; 7; белый; 10
+ИТОГ: Эва; 9; жёлтый; 9
+ИТОГ-В: 7; 3

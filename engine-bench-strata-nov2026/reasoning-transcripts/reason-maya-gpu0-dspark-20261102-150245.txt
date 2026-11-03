@@ -1,0 +1,952 @@
+=== THINKING ===
+We need solve puzzle. Need answer in Russian likely. Need reason step-by-step and final strict format. Need be careful. We can solve by exhaustive logical enumeration perhaps manually with code mentally? Need produce unique and counts for variants. Since no tool execution, but can simulate systematically. Need ensure correctness.
+
+Let's restate.
+
+Five sailors: Anna (A), Bram (B), Cor (C), Dirk (D), Eva (E). Depart times 8,9,10,11,12 each unique. Boat lengths 6,7,8,9,10 each unique. Colors red, blue, green, white, yellow each unique.
+
+Conditions:
+1. A length > B length, but A length < green boat length. So len(A) between B and green; green not A? "зелёной лодки" A's boat shorter than green, so A not green. B shorter than A.
+2. Red length = blue length + 2. Since lengths 6-10 distinct, possible (red,blue) = (8,6), (9,7), (10,8). Red and blue different boats.
+3. Eva length not shortest (6) nor longest (10), and not white.
+4. "Boats leave almost strictly from longest to shortest: if take any two boats, longer leaves earlier, except exactly one pair where shorter leaves earlier than longer." Need parse. If no exception, longer earlier than shorter for every pair, i.e., departure times strictly decreasing with length (longest at 8, shortest at 12). Exactly one pair where shorter leaves earlier than longer. For any pair of boats, compare length and time. Normally longer earlier. One pair violates. This is like ordering by length descending vs departure times ascending has exactly one inversion? Need define. Times 8..12. For any two boats, more long leaves earlier, except exactly one pair where shorter leaves earlier than longer. So among 10 pairs, exactly one pair has shorter earlier. Thus departure order is almost sorted by length descending, with one adjacent? Let's analyze. Since times unique and lengths unique. Let rank length L (1 shortest 6 to 5 longest 10), departure time rank T (1 earliest 8 to 5 latest 12). Condition: for any pair, if length greater then time earlier (T smaller) except exactly one pair where shorter earlier (T smaller). Equivalent sequence of lengths in departure order from 8 to12 is descending except one pair inversion? If order by time increasing, normally lengths should be nonincreasing (longest to shortest). Exactly one pair violates: shorter appears before longer. In a permutation of 5 distinct lengths, number of inversions relative to descending order? Let's formalize. For pair i,j in departure order (i earlier), normally length_i > length_j. Violation if length_i < length_j (earlier shorter than later longer). Number of such pairs exactly one. A permutation with exactly one inversion relative to descending. That means departure lengths sequence is descending except one adjacent swap? For distinct 5, permutations with inversion number 1: [5,4,3,2,1] with one adjacent swap? Actually inversion count relative to descending. Exactly one pair out of order means sequence is mostly descending with one adjacent pair swapped, e.g. 5,4,2,3,1? Let's list. A permutation with exactly one inversion (ascending pair) relative to descending. It must be obtained from descending by swapping two adjacent elements? Yes one inversion: e.g. 5,4,3,1,2 (last two swapped), 5,4,2,3,1, etc. Need identify.
+
+5. Yellow boat departs exactly one hour after Cor. So time(yellow)=time(Cor)+1. Cor cannot be yellow? If yellow boat is Cor's? "after Cor" means after Cor's departure, likely different boat, so Cor not yellow. Time Cor 8-11.
+6. Dirk departs before noon (before 12), and length odd. So D time in {8,9,10,11}, length in {7,9}. (not 12)
+7. Sum of departure hours of red and green boats equals length of white boat + 12. Times are 8..12. Red and green distinct colors, so two distinct boats times. Sum hours red+green = len(white)+12. White length in 6..10 => sum =18..22. Possible two distinct times from 8..12. Need.
+8. Bram not first (not time 8).
+9. Anna length even: len A in {6,8,10}.
+10. Yellow length > Anna length.
+
+Questions:
+a solve.
+b prove unique.
+c How many solutions without conditions 9 and 10? Only without condition 9? Need count. Need interpret: "Сколько решений было бы без условий 9 и 10? А только без условия 9?" Means if remove conditions 9 and 10 simultaneously, how many solutions? And if remove only condition 9 (keeping 10)? Need count all assignments satisfying other conditions. Need provide counts. Need solve variants too.
+
+We need compute exact. Let's solve systematically.
+
+I can model manually using constraints. Since small, enumerate length-color-time assignments and names. Need also counts for variants.
+
+Let's set up.
+
+Let lengths 6,7,8,9,10. Colors R(red), B(blue), G(green), W(white), Y(yellow). Names A,Bram(Br maybe N), C,D,E.
+
+Times 8,9,10,11,12.
+
+Condition 4 imposes departure order by length with exactly one inversion. Let's enumerate possible length sequences in departure order (time 8 to12). Let lengths descending ideal: 10,9,8,7,6. Exactly one inversion (pair where earlier shorter than later longer). Permutations with exactly one inversion relative to descending. Let's represent values high to low. All permutations of 5 with exactly one "ascent" pair? Let's list by adjacent swap only? For permutation p in departure order. Number of pairs i<j with p_i < p_j =1. Need count.
+
+Permutations with exactly one increasing pair. Since p is permutation of {6..10}. Let's use ranks 5,4,3,2,1 descending. Need exactly one pair i<j with rank_i < rank_j (i.e., earlier smaller). This is inversion number of p relative to ascending? Let's enumerate.
+
+If exactly one violation, sequence must be descending except one adjacent pair swapped? Let's verify with n=3. Descending 3,2,1. Permutations with one ascent pair:
+3,1,2: pairs (3,1 ok), (3,2 ok), (1,2 violation) exactly one. This is adjacent swap of 2 and1 at end.
+2,3,1: pairs (2,3 violation), (2,1 ok), (3,1 ok) exactly one. Adjacent swap 3,2 at start.
+2,1,3: pairs (2,1 ok),(2,3 violation),(1,3 violation) two. Not.
+1,3,2: pairs (1,3 violation),(1,2 violation),(3,2 ok) two.
+1,2,3 three.
+So exactly adjacent swap in descending. For n=5, yes exactly one adjacent swap of neighboring values in descending sequence. Because one inversion in permutation relative to descending corresponds to a permutation with inversion number 1; those are adjacent transposition from sorted descending. So possible departure length sequences:
+Swap positions (1,2): 9,10,8,7,6
+(2,3): 10,8,9,7,6
+(3,4): 10,9,7,8,6
+(4,5): 10,9,8,6,7
+Wait adjacent swap of values in descending sequence: original [10,9,8,7,6]. Swap adjacent positions:
+[9,10,8,7,6]
+[10,8,9,7,6]
+[10,9,7,8,6]
+[10,9,8,6,7].
+Are there any with swapping non-adjacent values producing exactly one inversion? Swapping positions distance 2 gives 3 inversions? e.g [10,7,8,9,6]? More. So only four.
+
+Let's denote departure time by length. For each possible sequence S1..S4 mapping time 8,9,10,11,12 to lengths.
+
+S1: 8:9, 9:10, 10:8, 11:7, 12:6. (swap 10,9)
+S2: 8:10, 9:8, 10:9, 11:7, 12:6.
+S3: 8:10, 9:9, 10:7, 11:8, 12:6.
+S4: 8:10, 9:9, 10:8, 11:6, 12:7.
+
+Check condition 4 wording: "if take any two boats, more long leaves earlier, except exactly one pair, where shorter leaves earlier than more long." Yes.
+
+Now names assigned to times, lengths determined by time sequence. Colors assigned to lengths/boats with constraints. Need solve.
+
+Let's use variables. Since length by time fixed for each S. Names with times.
+
+Condition 1: len(A)>len(Bram) and len(A)<len(green). A not green. Green length greater than A. This imposes A not longest? Green can be longer. A > Bram.
+
+Condition 3: E length not 6 or10; E not white. So E length in {7,8,9}. But in S sequences, times with those lengths. Also E time accordingly.
+
+Condition 6: D time before 12, length odd (7 or9). D not at 12. (If D at 12 would fail). length odd.
+
+Condition 8: Bram not time8.
+
+Condition 5: Yellow time = time(C)+1. C not at 12, yellow not C. Time(C) in {8,9,10,11}. Yellow boat is at next time. Since times unique, yellow color assigned to boat at t+1.
+
+Condition 7: red time + green time = white length +12. Red and green colors at distinct times. White length is length of white boat. Need colors.
+
+Condition 2: red length = blue length +2. Lengths distinct.
+
+Condition 9: A even {6,8,10}. Condition 10: yellow length > A length.
+
+Let's first solve main with all conditions. Then variants.
+
+Approach: Enumerate S (4). For each, assign names to times satisfying name constraints and A/Bram length relation, E, D, Bram not first. Then assign colors satisfying color/length/time constraints. Could do manually but many. Need counts variants. Need systematic. Since small, I can create tables and use logical filtering. Might simulate by hand carefully. Could perhaps write pseudo-code mentally. Need avoid errors. Let's organize.
+
+Let's label times t=8,9,10,11,12. Length L(t) per S.
+
+S1:
+t8 L9
+t9 L10
+t10 L8
+t11 L7
+t12 L6
+Order lengths: [9,10,8,7,6].
+
+S2:
+t8 L10
+t9 L8
+t10 L9
+t11 L7
+t12 L6.
+
+S3:
+t8 L10
+t9 L9
+t10 L7
+t11 L8
+t12 L6.
+
+S4:
+t8 L10
+t9 L9
+t10 L8
+t11 L6
+t12 L7.
+
+Condition D: length odd (7 or9) and time<12. In each S, possible D times:
+S1: L9 at8, L7 at11. (L? 9,7). D can be t8 or t11.
+S2: L9 at10, L7 at11. D t10 or t11.
+S3: L9 at9, L7 at10. D t9 or t10.
+S4: L9 at9, L7 at12 but D before noon so t12 invalid; L? 9 at9 only. Wait L7 at t12, D cannot. Also any other odd? L? S4 lengths: 10,9,8,6,7. Odd 9 at t9, 7 at t12. D must before noon, so only t9. Thus S4 D= t9. Good.
+
+E: length 7,8,9. Time accordingly:
+S1: L8 t10, L7 t11, L9 t8. E t8,t10,t11.
+S2: L8 t9, L9 t10, L7 t11. E t9,t10,t11.
+S3: L9 t9, L7 t10, L8 t11. E t9,t10,t11.
+S4: L9 t9, L8 t10, L7 t12. E t9,t10,t12 (but E not shortest? length7 allowed, yes t12 length7 not shortest? shortest is 6 at t11, so length7 okay. E not longest 10. E can t12.)
+
+A length even {6,8,10} main. A > Bram. A < green. Since green length > A. A cannot length10 (no longer green). A cannot length9? even only. A possible 6 or8. If A=8, green length 9 or10. If A=6, green length 7/8/9/10 but A>Bram means Bram length <6 impossible (min6). Wait A>Bram, if A=6 no length less than6. So A cannot 6. Thus A length=8. Then Bram length <8: possible 6 or7. Green length >8: 9 or10. Great. Main condition 9+1 implies A=8. Condition 10 yellow length > A=8, so yellow length 9 or10. Also A not green.
+
+This greatly simplifies main. Let's solve main first.
+
+Main: A length 8. Time of length8 in each S:
+S1 L8 at t10.
+S2 L8 at t9.
+S3 L8 at t11.
+S4 L8 at t10.
+A at that time.
+
+Bram length <8: 6 or7. Bram not t8. Also A > Bram.
+
+Green length >8: 9 or10. Green boat not A (A length8 anyway).
+
+Yellow length >8 and time(Y)=time(C)+1. Yellow length 9 or10. Also yellow not A? A length8, so yes.
+
+D odd length 7 or9 and before noon.
+
+E length 7/8/9, not white.
+
+Let's solve each S.
+
+But also color constraints 2,7. Need assign colors to lengths/boats. Since colors tied to boats, and times/lengths. We can treat color assignment to the five boats (times) with known lengths. Constraints depend on lengths and times.
+
+Let's denote for each S, after names, we know which boat has length8 (A), which length6/7 (Bram), etc. Need colors.
+
+Maybe solve color assignment independent of names except A not green, E not white, yellow time relation with Cor, red/blue lengths, red/green times/white length. Names matter for Cor time and yellow relation, A/E color exclusions. Need integrate.
+
+Could enumerate S and name assignments. There are 5! but constraints reduce. Let's do for main.
+
+First list S possibilities with A time and possible Bram lengths/times, D, E, C.
+
+I'll create for each S.
+
+S1 lengths by time:
+t8:9
+t9:10
+t10:8
+t11:7
+t12:6
+
+A length8 => A at t10.
+Bram length <8: length7 at t11 or length6 at t12. Bram not t8 irrelevant. So Brm at t11 (L7) or t12 (L6).
+D odd before noon: length9 t8 or length7 t11. But if Bram at t11 L7, D cannot t11 if same? D distinct from Bram. Need consider.
+E length 7/8/9 not white. A at t10 L8, so E not t10 (A). E can t8 L9 or t11 L7. (t12 L6 not allowed; t10 taken). 
+C remaining.
+Times: t8 L9, t9 L10, t10 A L8, t11 L7, t12 L6.
+Bram either t11 or t12.
+D either t8 or t11.
+E either t8 or t11.
+Need names all distinct. Let's enumerate name assignments.
+
+Case S1-Br=t11 (L7). Then D cannot t11, so D=t8 (L9). E cannot t10, t11 (Bram), t8 (D) => E? E can only t? length7/8/9: t8 D, t10 A, t11 Bram. None. So Br=t11 impossible. Wait E could be t? L? t12 L6 not allowed, t9 L10 not allowed. Yes impossible.
+
+Thus Bram=t12 L6. Then D can t8 or t11. E can t8 or t11. A t10. C remaining t9? Let's see names: A t10, Br t12. Remaining C,D,E at t8,t9,t11. D odd: t8 L9 or t11 L7. E allowed: t8 L9 or t11 L7 (not t9 L10). Thus D and E occupy t8,t11 in some order. Then C must be t9 L10. So S1 names:
+A=t10 L8
+Bram=t12 L6
+C=t9 L10
+D/E = t8 L9 and t11 L7 in either order.
+D must odd yes both. E not white; both possible lengths 9/7. We'll keep two name variants:
+S1a: D=t8 L9, E=t11 L7, C=t9 L10.
+S1b: E=t8 L9, D=t11 L7, C=t9 L10.
+Check Bram not first yes.
+
+Now colors. For S1, times/lengths:
+t8 L9
+t9 L10 (C)
+t10 L8 (A)
+t11 L7
+t12 L6 (Bram)
+A length8 not green -> t10 not green.
+E not white (depending t8 or t11).
+Yellow time = C time +1. C=t9, so yellow at t10. But t10 is A length8. Condition 10 yellow length > A length? Wait main condition 10 says yellow length > Anna length. A length8, yellow at t10 length8, not >. Contradiction. Ah indeed for S1 C=t9 => yellow at t10, length8, not > A. Thus S1 impossible under condition10. If we later variant without 10, may be possible. For main S1 no.
+
+S2 lengths:
+t8 L10
+t9 L8
+t10 L9
+t11 L7
+t12 L6
+
+A L8 => A at t9.
+Bram length <8: L7 at t11 or L6 at t12. Bram not t8 okay.
+D odd before noon: L9 t10 or L7 t11.
+E length 7,8,9: L8 t9 (A), L9 t10, L7 t11. E not t9; can t10 or t11.
+Times: t8 L10, t9 A L8, t10 L9, t11 L7, t12 L6.
+Names remaining for Br,C,D,E at t8,t10,t11,t12 (since A t9).
+Bram t11 or t12.
+D t10 or t11.
+E t10 or t11.
+Need distinct. Let's enumerate.
+
+If Bram=t11 (L7), then D cannot t11 -> D=t10 L9. E cannot t10 (D), cannot t11 (Bram) -> E none? E allowed t10 or t11 only (t9 A). So Bram=t11 impossible.
+
+Thus Bram=t12 L6. Then D t10 or t11; E t10 or t11. They must occupy t10,t11 in some order. Then C remaining t8 L10. So C at t8. Names:
+A=t9 L8
+Bram=t12 L6
+C=t8 L10
+D/E = t10 L9 and t11 L7 either.
+Check D odd both. E not white.
+Now yellow time = C+1 = t9. C at t8, yellow at t9. t9 is A length8. Condition 10 yellow length > A length: yellow length=8 > A length8? No, equal, not >. Contradiction. Thus S2 impossible main. (Also A's boat yellow? A length8, yellow at t9 same A; condition 10 false). So S2 no.
+
+S3 lengths:
+t8 L10
+t9 L9
+t10 L7
+t11 L8
+t12 L6
+
+A L8 => A at t11.
+Bram length <8: L7 t10 or L6 t12. Bram not t8 okay.
+D odd before noon: L9 t9 or L7 t10.
+E length 7,8,9: L9 t9, L7 t10, L8 t11(A). E can t9 or t10.
+Times: t8 L10, t9 L9, t10 L7, t11 A L8, t12 L6.
+Remaining names Br,C,D,E at t8,t9,t10,t12.
+Bram t10 or t12.
+D t9 or t10.
+E t9 or t10.
+Need distinct. Enumerate.
+
+If Bram=t10 L7, then D cannot t10 -> D=t9 L9. E cannot t9(D), cannot t10(Bram) -> E none (t11 A). So Bram=t10 impossible.
+
+Thus Bram=t12 L6. Then D t9 or t10; E t9 or t10. They occupy t9,t10 in some order. C remaining t8 L10. So C=t8 L10. Yellow time = C+1 = t9. Yellow boat at t9 length9. A length8. Condition10: yellow length9 > A8 yes. Good. Need colors.
+
+S3 names:
+A=t11 L8
+Bram=t12 L6
+C=t8 L10
+D/E = t9 L9 and t10 L7 in either order.
+Variants:
+S3a: D=t9 L9, E=t10 L7.
+S3b: E=t9 L9, D=t10 L7.
+Both D odd yes. E not white.
+
+Now colors for S3. Times/lengths:
+t8 L10 (C)
+t9 L9
+t10 L7
+t11 L8 (A)
+t12 L6 (Bram)
+C at t8, yellow at t9 (length9). Therefore t9 color Yellow. (And t9 is either D or E depending variant; if E=t9, E would be yellow, not white okay; if D=t9.)
+A t11 length8 not green. E not white.
+
+Color constraints:
+- Red length = Blue length +2. Possible pairs (Rlen, Blen): (8,6), (9,7), (10,8). Since lengths present all.
+- Red and green times sum = white length +12.
+- Yellow at t9 length9. Thus Y color assigned to length9. Red/blue/green/white remaining colors on lengths 10,8,7,6.
+Condition 2: red length and blue length. Since yellow length9, red cannot be length9? Colors unique; red not yellow, so red length not9. Possible red-blue pairs:
+(8,6) with red len8, blue len6.
+(10,8) with red len10, blue len8.
+(9,7) would red length9 but length9 is yellow, impossible. So only two possibilities for red/blue:
+Option C2a: Red len8 (t11 A), Blue len6 (t12 Bram).
+Option C2b: Red len10 (t8 C), Blue len8 (t11 A).
+Note A's boat length8. In option a, A red (allowed A not green). In option b, A blue.
+
+Green length > A? Condition1 A length8 < green length. Green must be length10 or9. But length9 is yellow, so green length10. Thus green boat is t8 length10. But t8 is C. So green at t8. This is important. Then red cannot length10? Wait green length10, colors unique. If green at t8 length10, red cannot be length10. Therefore option C2b (red len10) impossible. Thus red len8, blue len6, green len10. Great.
+
+So colors determined partly:
+t8 L10 = Green (C)
+t9 L9 = Yellow
+t11 L8 = Red (A)
+t12 L6 = Blue (Bram)
+Remaining color White must be t10 L7. So t10 = White.
+Thus for S3, color assignment unique:
+t8 Green L10 C
+t9 Yellow L9
+t10 White L7
+t11 Red L8 A
+t12 Blue L6 Bram.
+
+Check E not white: E cannot be t10 (White). Thus E cannot be t10. In S3 variants, E at t10 in S3a (D t9, E t10) invalid. So only S3b: E=t9 L9 Yellow, D=t10 L7 White. D is white allowed. E not white yes. So main unique candidate:
+S3b:
+t8 Cor L10 Green
+t9 Eva L9 Yellow
+t10 Dirk L7 White
+t11 Anna L8 Red
+t12 Bram L6 Blue.
+
+Need verify condition7: red time t11 + green time t8 = 19. White length t10 L7 +12 =19. Yes. Condition5 yellow t9 = Cor t8 +1 yes. Condition6 Dirk t10 before noon length7 odd yes. Condition1 A len8 > Bram6 and < green10 yes. Condition2 red8 = blue6+2 yes. Condition3 Eva len9 not shortest/longest, not white (yellow) yes. Condition4 S3 sequence [10,9,7,8,6]? Wait S3 was [10,9,7,8,6] with one inversion? Let's check departure order lengths: t8 10, t9 9, t10 7, t11 8, t12 6. Pairs: 10>all earlier ok; 9>7,8,6 ok; 7 vs8 at t10 earlier than t11: shorter (7) leaves earlier than longer (8) violation exactly one; 7>6 ok; 8>6 ok. Yes. Good.
+
+S4 lengths:
+t8 L10
+t9 L9
+t10 L8
+t11 L6
+t12 L7
+
+A L8 => A at t10.
+Bram length <8: L6 t11 or L7 t12. Bram not t8 okay.
+D odd before noon: only L9 t9 (as found).
+E length 7,8,9: L9 t9, L8 t10(A), L7 t12. E can t9 or t12 (not t10).
+Times: t8 L10, t9 D L9, t10 A L8, t11 L6, t12 L7.
+Remaining names Br,C,E at t8,t11,t12 plus D t9, A t10.
+Bram t11 L6 or t12 L7.
+E t9 (D) no, so E must t12 L7? Wait E allowed t9 or t12, t9 D, so E=t12 L7. Then Bram cannot t12, so Bram=t11 L6. Then C remaining t8 L10. Names:
+A=t10 L8
+D=t9 L9
+E=t12 L7
+Bram=t11 L6
+C=t8 L10.
+Check E length7 not shortest? Shortest length6 at t11, so E length7 okay; not longest; not white constraint later.
+Now yellow time = C+1 = t9. C at t8, yellow at t9. t9 is D length9. A length8. Condition10 yellow length9 >8 yes. Good.
+Colors for S4:
+Times/lengths:
+t8 L10 C
+t9 L9 D
+t10 L8 A
+t11 L6 Bram
+t12 L7 E
+Yellow at t9 length9 (D).
+A length8 not green.
+E length7 not white.
+Need assign colors with red/blue pair, green > A? Condition1 A len8 < green length. Green length >8: 9 or10. But length9 is yellow, so green length10 at t8. Thus t8 Green. Then red/blue possibilities: red-blue (8,6) or (10,8) but red cannot length10 because t8 green. (9,7) red length9 yellow impossible. So only (8,6): red len8 at t10 A, blue len6 at t11 Bram. Then remaining color white for length7 at t12 E. But condition3 E not white. Contradiction. Wait check if green could be length? Green length > A=8, length9 or10. Length9 yellow, yes only10. Then red len? Red-blue could be (10,8) but red length10 conflict green. (9,7) red length9 conflict yellow. (8,6) works. Remaining white t12 length7 = E. E not white invalid. Thus S4 impossible main. Therefore main unique as found.
+
+Great. Need prove uniqueness. We can present logical steps as above.
+
+Now need counts for variants:
+- Without conditions 9 and 10 (remove both). Count all full assignments satisfying conditions 1-8. Need number of solutions. (Names, lengths, colors, times determined by S and assignments).
+- Only without condition 9 (i.e., remove condition 9 but keep condition 10). Count solutions satisfying 1-8 and 10. Need number. Need compute exact.
+
+We need be very careful. We already solved with both 9&10. Now need variants. Need enumerate all solutions under conditions 1-8, with maybe condition10. Since small, can do systematic by S and name/color assignments. Need count. We can use constraints and perhaps derive all possibilities. Need avoid missing.
+
+Let's denote base conditions 1-8. Condition9: A even. Condition10: Yellow length > A length.
+We need:
+N_none = count satisfying 1-8 (no 9, no10).
+N_no9 = count satisfying 1-8 + condition10 (without 9). (Question "только без условия 9" means remove only 9, keep 10 and all others including 9 absent; yes N_no9 with 10.)
+
+Need count each complete assignment. Since condition4 gives 4 S sequences. For each S, assign names satisfying 1,3,6,8; then colors satisfying 1,2,3,5,7 etc. We need count all.
+
+We need be systematic. Let's solve base conditions 1-8 without 9/10. Then apply 10 for N_no9. We can enumerate per S. We already partially enumerated names for main under A=8 due 9. Now without 9, A can be even? Wait no 9 removed, A length can be any? Condition1 A > Bram and A < green. A could be 7,8,9? Not 10 (needs green longer). Not 6? A>Bram, min length6, so A cannot6. A can 7,8,9. With condition9, A even meant 8 (since 6 impossible,10 impossible). Without 9, A can 7,8,9. Condition10 yellow length > A length further restricts. For N_none, A can 7,8,9. Need enumerate.
+
+Let's build comprehensive enumeration for base conditions 1-8. We can do per S. Since S small, enumerate names assignments satisfying:
+- A length > Bram length.
+- A length < green length (color later).
+- E length in {7,8,9} and not white.
+- D time<12 length odd (7 or9).
+- Bram not time8.
+- Yellow time = Cor time +1.
+- Color constraints.
+
+Maybe integrate colors. We can enumerate possible name assignments per S under base (without A even/10). Then for each, enumerate color assignments satisfying color constraints and E not white, A not green, green length > A, yellow relation. Count. This is manageable but need careful.
+
+Let's define each S with lengths by time. We'll enumerate all name assignments satisfying name constraints (A>Bram, E length allowed, D odd before noon, Bram not t8). Then for each name assignment, determine C time (since yellow depends on C) and A/E exclusions, then count color assignments. We can perhaps derive color assignments generally for each S independent of names except C time, A length, E time. Need handle.
+
+Let's list S tables again:
+
+S1: t8 L9, t9 L10, t10 L8, t11 L7, t12 L6.
+S2: t8 L10, t9 L8, t10 L9, t11 L7, t12 L6.
+S3: t8 L10, t9 L9, t10 L7, t11 L8, t12 L6.
+S4: t8 L10, t9 L9, t10 L8, t11 L6, t12 L7.
+
+Condition D: odd length 7 or9, time<12. Let's list possible D times per S:
+S1: L9 t8, L7 t11. (t? 9 at8,7 at11)
+S2: L9 t10, L7 t11.
+S3: L9 t9, L7 t10.
+S4: L9 t9, L7 at t12 invalid (D before noon), so D=t9 only. (L? no other odd; L? t? length? S4 has L? t11=6, t12=7; yes only t9)
+
+E allowed length 7,8,9 and not shortest/longest. Time possibilities per S:
+S1: L9 t8, L8 t10, L7 t11. (not L10 t9, L6 t12)
+S2: L8 t9, L9 t10, L7 t11.
+S3: L9 t9, L7 t10, L8 t11.
+S4: L9 t9, L8 t10, L7 t12. (L6 t11 shortest no, L10 t8 longest no)
+
+A must have length > Bram and < green. A cannot length6 or10. A possible lengths 7,8,9. Also Bram length < A. A time in S where L in {7,8,9}. Bram time cannot t8.
+
+Let's enumerate names per S. We can use combinatorial assignment. There are only 5. We'll list possible A positions, Bram positions, then D,E,C fill.
+
+We'll need C time for yellow. Let's do each S separately.
+
+### S1
+Lengths:
+t8 L9
+t9 L10
+t10 L8
+t11 L7
+t12 L6
+
+D possible: t8(L9) or t11(L7).
+E possible: t8(L9), t10(L8), t11(L7).
+A possible lengths 7,8,9: t11 L7, t10 L8, t8 L9. But A>Bram. If A=t11 L7, Bram length <7: only L6 at t12. possible (Bram t12). If A=t10 L8, Bram length <8: L7 t11 or L6 t12. If A=t8 L9, Bram length <9: L8 t10, L7 t11, L6 t12 (not t8). Also A<green later; if A=9, green length >9 only L10 t9, possible. If A=7, green length >7 (8,9,10) possible. If A=8, green >8 (9,10) possible. We'll check color.
+
+Bram not t8. D/E constraints.
+
+Let's enumerate name assignments by A cases.
+
+S1 A=t11 L7. Then Bram must t12 L6 (only <7). D possible t8 or t11, but t11 A, so D=t8 L9. E possible t8,t10,t11; t8 D, t11 A, so E=t10 L8. Then remaining C=t9 L10. Names:
+A t11, Bram t12, D t8, E t10, C t9. Unique. Check E length8 allowed yes. C time t9. Yellow time=C+1=t10. Yellow boat at t10 L8. Condition10 if applied: yellow length8 > A length7 yes. Base okay. A length7 < green? Need green >7. We'll handle colors.
+
+S1 A=t10 L8. Bram can t11 L7 or t12 L6.
+D possible t8 or t11.
+E possible t8,t10,t11; t10 A, so E t8 or t11.
+
+Subcase A=t10, Bram=t11 L7. Then D cannot t11, so D=t8 L9. E cannot t8(D), t10 A, t11 Bram => E none? E allowed t8,t10,t11; all occupied. So impossible.
+
+Subcase A=t10, Bram=t12 L6. Then D t8 or t11. E t8 or t11. Remaining C at t9? Let's see names: A t10, Bram t12. t8,t9,t11 for C,D,E. D∈{t8,t11}; E∈{t8,t11}; they occupy t8,t11 in some order, C=t9 L10. So two assignments:
+S1-A8a: D=t8, E=t11, C=t9.
+S1-A8b: E=t8, D=t11, C=t9.
+Both E lengths: t11 L7 or t8 L9 allowed. D odd. C=t9 L10. Yellow at t10 (C+1) = A's boat L8. Condition10: yellow L8 > A L8? No (equal), so these fail if condition10 applied. Base okay.
+
+S1 A=t8 L9. Bram can t10 L8, t11 L7, t12 L6 (not t8). D possible t8 or t11, but t8 A, so D=t11 L7. E possible t8,t10,t11; t8 A, t11 D, so E=t10 L8. Then Bram cannot t10 if E there? Wait E=t10, so Bram cannot t10. Bram can t11 or t12, but t11 D, so Bram=t12 L6. Then remaining C=t9 L10. Check A length9 > Bram6 yes. Names:
+A t8, D t11, E t10, Bram t12, C t9. Unique.
+But condition A<green: A length9, green must be length10 at t9. C at t9 L10 would be green. possible. Condition10: C=t9 => yellow at t10 L8. Yellow length8 > A length9? No, fails condition10. Base okay.
+
+Wait if A=t8 L9, Bram could t10? We set E=t10 because D=t11 and A=t8, E allowed t10 yes. Since E must be t10 (only remaining allowed among t8,t10,t11 excluding A,D). So Bram cannot t10. Bram could t12 only. yes.
+
+Thus S1 base name assignments total: A7 unique, A8 two, A9 unique = 4 name assignments. Let's label:
+S1N1: A t11 L7, Brm t12 L6, D t8 L9, E t10 L8, C t9 L10. (C=t9, A=7)
+S1N2: A t10 L8, Brm t12 L6, D t8 L9, E t11 L7, C=t9 L10. (C=t9, A=8)
+S1N3: A t10 L8, Brm t12 L6, E t8 L9, D t11 L7, C=t9 L10. (C=t9, A=8)
+S1N4: A t8 L9, Brm t12 L6, D t11 L7, E t10 L8, C=t9 L10. (C=t9, A=9)
+Notice in all S1 C=t9 L10! Because A/Bram/D/E occupy other? Yes. Thus yellow time = C+1 = t10 L8 for all S1. Yellow boat at t10. But in N1 A t11, E t10; N2 A t10; N3 D t11 E t8, t10? Wait N3 A=t10, so t10 A. N4 E=t10. Yellow at t10 always. Condition10 yellow length8 > A length. For A=7 yes true; for A=8 false; A=9 false. So only S1N1 satisfies condition10 among S1. Base all 4 possible subject colors.
+
+Now color assignments for S1. Need count for each name assignment considering A length, E time (not white), C time fixed t9 => yellow at t10. Also A not green, green length > A. Red/blue and condition7.
+
+Let's analyze S1 colors generally. Times/lengths:
+t8 L9
+t9 L10 (C)
+t10 L8 (yellow, because C t9 -> t10)
+t11 L7
+t12 L6
+So color at t10 = Yellow. Length8 yellow. (A may be t10 in N2/N3, then A's boat yellow; allowed unless A not green, yes. E maybe t10 in N1/N4, E yellow not white allowed.)
+Remaining colors Red, Blue, Green, White assigned to lengths 9,10,7,6 at t8,t9,t11,t12.
+Condition 2: red length = blue length +2. Possible pairs among lengths excluding yellow length8? Colors red/blue cannot use length8 because yellow. Available lengths {6,7,9,10}. Possible red-blue pairs from original (8,6),(9,7),(10,8). Red cannot length8 (yellow) in first; blue cannot length8 in third (yellow). So only possible pair (9,7): Red length9, Blue length7. Thus red boat at t8 L9, blue boat at t11 L7. Great. Then remaining colors Green and White for lengths10 (t9) and6 (t12). Green must be > A length. White other.
+Condition7: red time t8 + green time = white length +12.
+Red time =8. Let green time be either t9 L10 or t12 L6? Wait remaining colors Green/White on t9 L10 and t12 L6. If green at t9, white at t12 L6: sum red+green=8+9=17; white length6+12=18 -> no. If green at t12 L6, white at t9 L10: sum=8+12=20; white length10+12=22 -> no. None? Did I make mistake: Red length9 at t8 yes. Remaining colors green/white on t9 L10 and t12 L6. Condition7 seems impossible for S1? Let's check red/blue pair maybe other if yellow length8 but colors red/blue could include length8? No t10 is yellow, cannot. Red-blue pair (10,8) requires blue length8 but length8 yellow, impossible. (8,6) red length8 yellow impossible. So only (9,7). Then condition7 impossible as computed. Thus S1 has zero color assignments! Wait but main S1 we found contradiction due condition10, but base maybe also none due condition7. Let's double-check condition7: sum of hours of red and green = length white +12. Red time t8. If green at t9, sum17, white length6 ->18 no. If green at t12, sum20, white length10 ->22 no. Yes none. So S1 contributes 0 solutions base. Interesting. Need note.
+
+But wait could red length9 at t8 and blue length7 at t11, remaining colors green/white at t9 L10 and t12 L6. Yes no. Thus S1 impossible under base. Let's verify if C always t9? We found all name assignments C=t9. Yes. If C not t9 maybe yellow different, but C fixed. So S1 no solutions. Good.
+
+### S2
+Lengths:
+t8 L10
+t9 L8
+t10 L9
+t11 L7
+t12 L6
+
+D possible: t10 L9 or t11 L7.
+E possible: t9 L8, t10 L9, t11 L7.
+A possible lengths 7,8,9: t11 L7, t9 L8, t10 L9. (A cannot t8 L10). Need A>Bram. Bram not t8.
+
+Enumerate A cases.
+
+S2 A=t11 L7. Then Bram length <7: only L6 t12. D possible t10 or t11, but t11 A, so D=t10 L9. E possible t9,t10,t11; t10 D, t11 A, so E=t9 L8. Remaining C=t8 L10. Names:
+A t11 L7, Bram t12 L6, D t10 L9, E t9 L8, C t8 L10.
+C time t8 => yellow at t9 L8. Condition10: yellow L8 > A L7 true. Base.
+
+S2 A=t9 L8. Bram length <8: L7 t11 or L6 t12.
+D possible t10 or t11.
+E possible t9(A), t10, t11 -> E t10 or t11.
+Subcase Bram=t11 L7. Then D cannot t11 -> D=t10 L9. E cannot t10(D), t11(Bram), t9 A -> E none? E allowed t10/t11 only (t9 A). So impossible.
+Subcase Bram=t12 L6. Then D t10 or t11; E t10 or t11. They occupy t10,t11 in some order. Remaining C? Names: A t9, Bram t12, D/E t10/t11, so C=t8 L10. Two assignments:
+S2N2: D=t10 L9, E=t11 L7, C=t8.
+S2N3: E=t10 L9, D=t11 L7, C=t8.
+C=t8 => yellow at t9 L8 (A's boat). Condition10: yellow L8 > A L8? No equal, fails condition10. Base okay.
+
+S2 A=t10 L9. Bram length <9: L8 t9, L7 t11, L6 t12 (not t8). D possible t10 or t11, but t10 A, so D=t11 L7. E possible t9 L8, t10(A), t11(D) -> E=t9 L8. Then Bram cannot t9 if E there? E=t9, so Bram can t11? D t11, t12 L6. Bram cannot t11 (D), so Bram=t12 L6. Remaining C=t8 L10. Check A len9 > Bram6. Names:
+A t10 L9, D t11 L7, E t9 L8, Bram t12 L6, C=t8 L10.
+C=t8 => yellow at t9 L8 (E). Condition10: yellow L8 > A L9? false. Base.
+
+Thus S2 base name assignments: A7 one, A8 two, A9 one = 4. C always t8 L10. Yellow at t9 L8 for all. Condition10 only A7 case true (8>7); A8 false, A9 false. So N_no9 S2 contributes only S2N1 if colors possible.
+
+Now color assignments for S2. Times/lengths:
+t8 L10 (C)
+t9 L8 (yellow, because C t8 -> t9)
+t10 L9
+t11 L7
+t12 L6
+Yellow at t9 length8. Remaining colors Red,Blue,Green,White on lengths 10(t8),9(t10),7(t11),6(t12). Available lengths {6,7,9,10}. Red-blue pairs possible:
+(8,6) red length8 yellow impossible.
+(9,7): red L9, blue L7 possible.
+(10,8): blue L8 yellow impossible.
+Thus only Red length9 (t10), Blue length7 (t11). Remaining Green/White on lengths10(t8) and6(t12).
+Condition7: red time t10 + green time = white length +12.
+If green at t8 L10, white at t12 L6: sum=10+8=18; white len6+12=18. Works! (red time10 + green time8 =18)
+If green at t12 L6, white at t8 L10: sum=10+12=22; white len10+12=22. Works! Wait both? Let's check: green at t12 L6, white at t8 L10: sum red10 + green12 =22, white length10+12=22 yes. Both satisfy! So two color assignments for S2, subject to A not green, E not white, and green length > A (condition1).
+
+We need evaluate per name assignment.
+
+S2 color possibilities:
+Option X: Green at t8 L10; White at t12 L6. Red t10 L9; Blue t11 L7; Yellow t9 L8.
+Option Y: Green at t12 L6; White at t8 L10. Red t10 L9; Blue t11 L7; Yellow t9 L8.
+
+But condition1 A length < green length. Green length in X=10, in Y=6. Since A length >? A can 7,8,9. A<green. Option Y green length6 cannot be > A (A≥7). So Option Y invalid for all because A length at least7. Thus only Option X. Good. Then Green length10 at t8 (C). White length6 at t12 (Bram in all? Bram t12 in all S2 assignments yes). E not white: E lengths t9/t10/t11; white t12, so E not white automatically (unless E t12? E allowed not t12; Bram t12). A not green: A not t8 (C), so A not green automatically. Thus all 4 name assignments valid with color Option X. Need check condition1 A<green: green10 > A (7/8/9) yes. A>Bram already. So S2 base solutions = 4 (one per name assignment) with unique colors:
+t8 C L10 Green
+t9 L8 Yellow
+t10 L9 Red
+t11 L7 Blue
+t12 Bram L6 White
+Wait Red length9 at t10, Blue length7 at t11. Yes.
+Check condition7: red t10 + green t8 =18; white len6+12=18. Good.
+
+For condition10 (without 9), only S2N1 A=t11 L7 qualifies (yellow L8 > A7). The other A8/A9 fail. So S2 contributes 1 to N_no9 (if colors valid yes). Note in S2N1 names: A t11 L7, Bram t12 L6, D t10 L9, E t9 L8, C t8 L10. But color table has t10 Red, t9 Yellow, t11 Blue. A at t11 length7 Blue. E at t9 Yellow. D t10 Red. C t8 Green. Bram t12 White. Check E not white yes. A not green yes. Condition1 A len7 > Bram6 and < green10 yes. Good.
+
+### S3
+Lengths:
+t8 L10
+t9 L9
+t10 L7
+t11 L8
+t12 L6
+
+D possible: t9 L9 or t10 L7.
+E possible: t9 L9, t10 L7, t11 L8.
+A possible lengths 7,8,9: t10 L7, t11 L8, t9 L9. (A cannot t8 L10). Need A>Bram, Bram not t8.
+
+Enumerate A cases.
+
+S3 A=t10 L7. Then Bram length <7: only L6 t12. D possible t9 or t10, t10 A, so D=t9 L9. E possible t9,t10,t11; t9 D, t10 A, so E=t11 L8. Remaining C=t8 L10. Names:
+A t10 L7, Bram t12 L6, D t9 L9, E t11 L8, C t8 L10.
+C=t8 => yellow at t9 L9. Condition10: yellow L9 > A L7 true. Base.
+
+S3 A=t11 L8. Bram length <8: L7 t10 or L6 t12.
+D possible t9 or t10.
+E possible t9,t10,t11(A) -> E t9 or t10.
+Subcase Bram=t10 L7. Then D cannot t10 -> D=t9 L9. E cannot t9(D), t10(Bram), t11 A -> E none? E allowed t9/t10 only. Impossible.
+Subcase Bram=t12 L6. Then D t9 or t10; E t9 or t10. They occupy t9,t10 in some order. Remaining C=t8 L10. Two assignments:
+S3N2: D=t9 L9, E=t10 L7, C=t8.
+S3N3: E=t9 L9, D=t10 L7, C=t8.
+C=t8 => yellow at t9 L9. Condition10: yellow L9 > A L8 true for both! (Unlike main condition9 A=8 but 10 true). Base.
+
+S3 A=t9 L9. Bram length <9: L7 t10, L8 t11, L6 t12 (not t8). D possible t9 or t10, t9 A, so D=t10 L7. E possible t9(A), t10(D), t11 L8 -> E=t11 L8. Then Bram cannot t10 (D), cannot t11 (E), so Bram=t12 L6. Remaining C=t8 L10. Check A len9 > Bram6. Names:
+A t9 L9, D t10 L7, E t11 L8, Bram t12 L6, C=t8 L10.
+C=t8 => yellow at t9 L9 (A's boat). Condition10: yellow L9 > A L9? No equal, fails condition10. Base.
+
+Thus S3 base name assignments: A7 one, A8 two, A9 one = 4. C always t8 L10. Yellow at t9 L9 for all. Condition10 true for A7 and A8 (9>7, 9>8); false for A9. So N_no9 S3 contributes S3N1 + two A8 = 3 name assignments if colors valid.
+
+Now color assignments for S3. Times/lengths:
+t8 L10 (C)
+t9 L9 (yellow)
+t10 L7
+t11 L8
+t12 L6
+Yellow at t9 length9. Remaining colors Red,Blue,Green,White on lengths 10(t8),7(t10),8(t11),6(t12). Available lengths {6,7,8,10}. Red-blue pairs possible:
+(8,6): Red L8, Blue L6 possible.
+(9,7): red L9 yellow impossible.
+(10,8): Red L10, Blue L8 possible (since red length10, blue8).
+So two red/blue possibilities:
+Option A: Red L8 (t11), Blue L6 (t12). Remaining Green/White on L10(t8) and L7(t10).
+Option B: Red L10 (t8), Blue L8 (t11). Remaining Green/White on L7(t10) and L6(t12)? Wait remaining lengths after red10, blue8, yellow9 are 7 and6. Yes Green/White on t10 L7 and t12 L6.
+Need condition7 and A<green, A not green, E not white.
+
+Let's analyze each red/blue option and green/white placement.
+
+S3 Option A: Red t11 L8; Blue t12 L6. Remaining colors Green/White on t8 L10 and t10 L7.
+Suboption A1: Green t8 L10, White t10 L7.
+Check condition7: red time t11 + green time t8 =19. White length L7 +12 =19. Works.
+Suboption A2: Green t10 L7, White t8 L10.
+Sum red11 + green10 =21. White length10+12=22. Fails. So only A1 for condition7. Thus colors: t8 Green L10, t10 White L7, t11 Red L8, t12 Blue L6, t9 Yellow L9.
+Need condition1: A length < green length10. A can 7,8,9 all <10 yes. A not green: A not t8? In S3 names, A at t10,t11,t9, never t8 (C), so yes. E not white: White at t10 L7. E time varies; need E not t10. In name assignments, E can be t11 (A7), t10 or t9 (A8), t11 (A9). We must exclude those with E=t10. Let's list later.
+
+S3 Option B: Red t8 L10; Blue t11 L8. Remaining Green/White on t10 L7 and t12 L6.
+Suboption B1: Green t10 L7, White t12 L6.
+Condition7: red time8 + green time10 =18. White length6+12=18. Works.
+Suboption B2: Green t12 L6, White t10 L7.
+Sum red8 + green12 =20. White length7+12=19. Fails. So only B1.
+Colors: t8 Red L10, t10 Green L7, t11 Blue L8, t12 White L6, t9 Yellow L9.
+Need condition1: A length < green length. Green length7. But A must be >? A possible 7,8,9. Need A <7. Impossible (A at least7). So Option B invalid due condition1 (A < green). Unless A length6? A cannot6 because A>Bram min6. So no. Thus only Option A1 valid.
+
+Therefore S3 has unique color assignment:
+t8 Green L10 (C)
+t9 Yellow L9
+t10 White L7
+t11 Red L8
+t12 Blue L6.
+This matches main colors. Need E not white: E cannot t10. Check each name assignment:
+S3N1: A t10 L7, Bram t12, D t9, E t11. E t11 not white (Red) ok. A t10 is White? Wait A at t10 L7, color White. Condition A not green yes (white). E not white yes. Condition1 A len7 < green10 yes. Valid.
+S3N2: A t11 L8, Bram t12, D t9, E t10 L7. E at t10 White -> invalid (condition3 E not white). So S3N2 invalid.
+S3N3: A t11 L8, Bram t12, E t9 L9, D t10 L7. E t9 Yellow ok. A t11 Red. Valid.
+S3N4 (A=t9 L9): A t9 L9, D t10 L7, E t11 L8, Bram t12. E t11 Red ok. A t9 Yellow. Condition A not green yes. Valid for base. Condition10 fails (yellow9 > A9 false). So base valid name assignments: N1, N3, N4. N2 invalid due E white. Thus S3 base solutions = 3. (Earlier name assignments 4, one invalid.)
+
+For condition10 without 9: valid among base with yellow L9 > A length. N1 A7 true, N3 A8 true, N4 A9 false. N2 invalid anyway. So S3 contributes 2 to N_no9 (N1,N3). Need verify N2 not condition10? A8 true but invalid E white. So 2.
+
+Let's list S3 solutions base:
+N1: t8 C Green L10; t9 D Yellow L9; t10 A White L7; t11 E Red L8; t12 Bram Blue L6.
+N3: t8 C Green L10; t9 E Yellow L9; t10 D White L7; t11 A Red L8; t12 Bram Blue L6.
+N4: t8 C Green L10; t9 A Yellow L9; t10 D White L7; t11 E Red L8; t12 Bram Blue L6.
+Wait N4 D=t10, E=t11 yes. Condition D odd before noon: D t10 L7 yes. Good.
+For N1: D t9 L9, A t10 L7, E t11 L8. D odd yes. E not white (red). A not green (white). Good.
+
+### S4
+Lengths:
+t8 L10
+t9 L9
+t10 L8
+t11 L6
+t12 L7
+
+D possible: only t9 L9 (since L7 t12 invalid before noon). So D=t9 always.
+E possible: t9 L9, t10 L8, t12 L7. But t9 D, so E cannot t9 (names distinct). Thus E=t10 L8 or t12 L7.
+A possible lengths 7,8,9: t12 L7, t10 L8, t9 L9. But t9 D, so A cannot t9. A=t12 L7 or A=t10 L8.
+Bram not t8, length < A.
+
+Enumerate.
+
+S4 A=t12 L7. Then Bram length <7: only L6 t11. But Bram not t8 okay. D=t9 L9. E possible t10 L8 or t12 L7, but t12 A, so E=t10 L8. Remaining C=t8 L10. Names:
+A t12 L7, Bram t11 L6, D t9 L9, E t10 L8, C t8 L10.
+Check A len7 > Bram6. C=t8 => yellow at t9 L9. Condition10: yellow L9 > A L7 true. Base.
+
+S4 A=t10 L8. Bram length <8: L6 t11 or L7 t12. D=t9 L9.
+E possible t10(A) or t12 L7, so E must t12 L7. Then Bram cannot t12, so Bram=t11 L6. Remaining C=t8 L10. Names:
+A t10 L8, Bram t11 L6, D t9 L9, E t12 L7, C t8 L10.
+C=t8 => yellow at t9 L9. Condition10: yellow L9 > A L8 true. Base.
+
+Could A=t9 L9? D occupies t9, impossible. So S4 base name assignments total 2. C always t8 L10. Yellow at t9 L9 for both. Condition10 true for both (A7, A8). So N_no9 S4 contributes both if colors valid.
+
+Now color assignments for S4. Times/lengths:
+t8 L10 (C)
+t9 L9 (yellow)
+t10 L8
+t11 L6
+t12 L7
+Yellow at t9 length9. Remaining lengths {10,8,6,7} for Red,Blue,Green,White. Red-blue pairs possible:
+(8,6): Red L8, Blue L6 possible.
+(9,7): red L9 yellow impossible.
+(10,8): Red L10, Blue L8 possible.
+So two options:
+
+Option A: Red L8 (t10), Blue L6 (t11). Remaining Green/White on L10(t8) and L7(t12).
+Suboption A1: Green t8 L10, White t12 L7.
+Condition7: red time t10 + green time t8 =18. White length7+12=19. Fails.
+Suboption A2: Green t12 L7, White t8 L10.
+Sum red10 + green12 =22. White len10+12=22. Works.
+So A2 valid condition7. Colors: t8 White L10, t9 Yellow L9, t10 Red L8, t11 Blue L6, t12 Green L7.
+Need condition1 A<green length. Green length7. A possible in S4: A=7 or8. Need A<7? If A=7, 7<7 false. If A=8 false. Thus A2 invalid due A<green. Wait condition1 says A shorter than green. Green length7, A must <7, impossible (A>Bram min6 so A≥7). So Option A invalid entirely.
+
+Option B: Red L10 (t8), Blue L8 (t10). Remaining Green/White on L6(t11) and L7(t12).
+Suboption B1: Green t11 L6, White t12 L7.
+Condition7: red time8 + green time11 =19. White length7+12=19. Works.
+Suboption B2: Green t12 L7, White t11 L6.
+Sum red8 + green12=20. White len6+12=18. Fails.
+So only B1 valid condition7. Colors:
+t8 Red L10
+t9 Yellow L9
+t10 Blue L8
+t11 Green L6
+t12 White L7
+Need condition1 A < green length. Green length6. A possible 7 or8. A<6 impossible. So B1 invalid! Wait then S4 has no solutions base? Let's re-evaluate. It seems green length is either 7 or6 in valid condition7, both too short for A (A≥7). Could there be Red-blue pair (9,7) if red length9 yellow impossible. Yes. So S4 no base solutions. But earlier main with A=8 we found S4 had colors green10? Wait main had condition9 A=8 and condition10, we found green length10 at t8 due A<green, but in S4 t8 L10. Let's check our color analysis for S4: Yellow at t9 L9. Remaining lengths include L10. Red-blue pairs: (10,8) means Red L10, Blue L8. Then remaining Green/White on L6 and L7. Condition1 A<green forced green > A. If A=8, green must be 9 or10. But 9 yellow, 10 red in option B, so no. In main we incorrectly assumed green length10 at t8, but then red-blue pair (8,6) and condition7? Let's revisit main S4: We had A=t10 L8, D=t9 L9, E=t12 L7, Bram=t11 L6, C=t8 L10. Yellow t9. We said green >A=8 so green length10 at t8. But t8 length10. Then red-blue pair (8,6) red len8, blue6. Then remaining white length7 at E, E not white contradiction. But condition7? If green t8, red len8 t10, blue len6 t11, white len7 t12. Red time t10 + green time t8 =18; white length7+12=19, fails condition7. So indeed main S4 impossible also due condition7, not just E white. Our earlier main reasoning missed condition7? We said colors: green10, red8, blue6, remaining white7, then E not white contradiction. But condition7 would also fail. Wait if white7, red10+green8=18, white7+12=19, so condition7 not satisfied. Thus S4 impossible. Our color analysis shows no valid condition7+condition1. Good. So S4 contributes 0 base and 0 N_no9.
+
+Let's double-check S4 color possibilities carefully. Maybe red-blue pair (8,6) with green t12 L7, white t8 L10 satisfied condition7 but A<green false if A? If A=7, A<green7 false; if A=8 false. Yes. Red-blue pair (10,8) with green t11 L6, white t12 L7 satisfies condition7 but A<green false. Thus no.
+
+So base solutions only from S2 (4) and S3 (3) = 7 total? S1 0, S4 0. Need verify S1 no base due color condition7. S2 4, S3 3. Total N_none = 7. But wait S1 maybe color assignment with red/blue pair different if yellow at t10 length8, yes only red9 blue7. Condition7 no. Correct.
+
+N_no9 (keep condition10) = S2 1 + S3 2 + S1? S1 base 0; S4 0. Total 3. Need check S1 condition10 only N1 but base color none. So N_no9=3. Let's verify by enumerating condition10 with no 9 maybe there are solutions in S1 if color condition7? We found none. S2 one, S3 two. Total 3.
+
+But wait question c: "Сколько решений было бы без условий 9 и 10? А только без условия 9?" Need be sure "без условий 9 и 10" means removing both 9 and 10, count base =7. "А только без условия 9?" means removing only condition9, keeping condition10, count =3. Yes.
+
+However, need consider if condition4 interpretation could be different? Let's ensure exactly one pair where shorter leaves earlier than longer. We assumed departure lengths sequence has exactly one inversion relative to descending. Are there exactly four sequences? Let's re-evaluate. For n=5, permutations with exactly one pair (i<j) such that L_i < L_j. This is exactly one "ascent" in sequence, not inversion count? Let's define sequence by time increasing. Condition: For any two boats, longer leaves earlier, except exactly one pair where shorter leaves earlier than longer. For pair of boats at times i<j, normally longer should be earlier: L_i > L_j. Violation if L_i < L_j. So number of pairs i<j with L_i < L_j equals 1. Yes exactly one increasing pair in the sequence. For distinct values, permutations with exactly one increasing pair. We said only adjacent swap in descending. Let's verify n=4 maybe there are permutations with one increasing pair not adjacent swap? Let's list n=4 descending [4,3,2,1]. Need exactly one pair i<j with p_i < p_j. Adjacent swaps:
+swap first two: [3,4,2,1]. Increasing pairs: (3,4) only? Check 3<2 no,3<1 no;4<2 no;4<1 no;2<1 no. yes one.
+swap 2,3: [4,2,3,1]. Pairs: 4>all; 2<3 one; 2>1;3>1. yes one.
+swap 3,4: [4,3,1,2]. 4>...;3>1,2;1<2 one. yes.
+Could there be [4,1,3,2]? pairs: 4>; 1<3, 1<2 two. [2,4,3,1]: 2<4 one;2<3? 2<3 yes second. So no. Thus four sequences correct. Need map S sequences: Original descending lengths [10,9,8,7,6].
+Swap positions 1,2 -> [9,10,8,7,6] S1 yes.
+Swap 2,3 -> [10,8,9,7,6] S2 yes.
+Swap 3,4 -> [10,9,7,8,6] S3 yes.
+Swap 4,5 -> [10,9,8,6,7] S4 yes.
+Good.
+
+Need also check condition5 "Yellow boat departs exactly one hour after Cor." Could it mean Cor's boat is yellow? No, "after Cor" means after Cor (person) departs, different boat. We assumed C not yellow because yellow time = C+1, so cannot same time. Good.
+
+Need check condition6 "Dirk departs before noon" = before 12:00, so times 8,9,10,11. We used. "length odd" = 7 or9. Good.
+
+Condition7 "sum of hours of departure of red and green boats equals length of white boat plus 12." We used red time + green time = white length +12. Hours are clock hours 8 etc. Good.
+
+Condition3 "Eva's boat is neither shortest nor longest, and it is not white." We used length not6/10 and E not white. Good.
+
+Condition1 "Anna's boat is longer than Bram's, but shorter than green boat." We used A length > Bram length and A length < green length. Also implies A not green (strict). Good.
+
+Main solution unique. Need present proof. We can give concise step-by-step. Need final output strict format:
+ИТОГ: Имя; длина; цвет; час
+(one line per each of five)
+and line
+ИТОГ-В: <число без условий 9 и 10>; <число без условия 9>
+
+Need decide order of names. Probably Anna, Bram, Cor, Dirk, Eva? User lists (Анна, Брам, Кор, Дирк и Эва). Use that order. Length numeric, color in Russian, hour maybe "8" etc. Format exactly: "ИТОГ: Анна; 8; красный; 11" etc. Need include "м"? The format says "длина; цвет; час". Could use "8 м" maybe but strict? "длина" maybe number. To be safe use "8" or "8 м"? The example format "ИТОГ: Имя; длина; цвет; час". I'd output "8" as length. But maybe "8 м" clearer. The final line "ИТОГ-В: 7; 3". Need ensure no extra after.
+
+Let's verify main solution:
+From S3b:
+t8 Cor L10 Green
+t9 Eva L9 Yellow
+t10 Dirk L7 White
+t11 Anna L8 Red
+t12 Bram L6 Blue.
+Thus:
+Anna: length8, red, hour11.
+Bram: length6, blue, hour12.
+Cor: length10, green, hour8.
+Dirk: length7, white, hour10.
+Eva: length9, yellow, hour9.
+
+Check all conditions:
+1 Anna 8 > Bram6, < green10 yes.
+2 Red8 = Blue6+2 yes.
+3 Eva length9 neither shortest6 nor longest10, not white (yellow) yes.
+4 Departure lengths by time: Cor10 (8), Eva9 (9), Dirk7 (10), Anna8 (11), Bram6 (12). Compare pairs: 10>9>7<8>6? More precisely sequence 10,9,7,8,6. Only violation pair Dirk(7 at10) and Anna(8 at11): shorter leaves earlier than longer. All other pairs longer earlier? Check Cor10 vs all later: 10>9,7,8,6 yes. Eva9 vs later: 9>7,8,6 yes. Dirk7 vs Anna8 violation; Dirk7 vs Bram6: longer Dirk earlier yes. Anna8 vs Bram6: longer Anna earlier yes. Exactly one. Good.
+5 Yellow Eva at9, Cor at8, exactly one hour after Cor yes.
+6 Dirk at10 before noon, length7 odd yes.
+7 Red Anna hour11 + green Cor hour8 =19; white Dirk length7 +12=19 yes.
+8 Bram at12 not first yes.
+9 Anna length8 even yes.
+10 Yellow length9 > Anna8 yes.
+
+Now need prove uniqueness. We can present reasoning:
+- From condition4, departure length sequences only four possibilities S1-S4.
+- Use conditions 9/10 to derive A=8? Wait main proof with 9&10: condition9 A even, condition1 A>Bram and A<green. A cannot6 because >Bram min6; cannot10 because <green; so A=8. Condition10 yellow>A=8, so yellow length9 or10.
+- Then for each S, use names constraints to show possible C times and yellow. We can present table for each S with possible A time, C time, yellow time, and eliminate.
+
+Let's build a clean proof table for main. Need not overdo but enough to prove uniqueness. We can state:
+For S1: A at10. Bram must be at12 (if at11 then D/E conflict). Then C at9, so yellow at10 length8, contradicting condition10 (yellow>8). Thus S1 impossible.
+For S2: A at9. Bram must be at12; C at8; yellow at9 length8, contradicting condition10 (needs >8). S2 impossible.
+For S3: A at11. Bram must be at12; C at8; yellow at9 length9, satisfying 10. Remaining D/E at9/10. Color constraints: yellow at9. Red-blue pair possible? Need derive colors. Since A length8 < green, green length>8; length9 is yellow, so green length10 at t8. Red-blue pair: red=blue+2. With yellow9, green10, remaining lengths 8,7,6 for red/blue/white. Possible red-blue only (8,6) (since (9,7) red9 yellow, (10,8) red10 green). So red8, blue6, white7. Condition7: red time? A at t11 length8 so red at t11. Green at t8. Sum=19. White length7 => 7+12=19 works automatically. Then colors: t8 green, t9 yellow, t11 red, t12 blue, t10 white. E not white forces E at t9, so D at t10. This yields unique S3 solution. Wait need consider red-blue pair (10,8)? We said green10 at t8, so red cannot10. (9,7) red9 yellow, impossible. yes.
+For S4: A at10. D forced t9. Names: E must t12, Bram t11, C t8. Yellow at t9 length9. A=8 < green => green length10 at t8. Then red-blue must be (8,6) (as above? Actually green10, yellow9, remaining lengths8,7,6; red-blue only (8,6)), red at t10, blue at t11, white at t12 length7. Condition7: red time10 + green time8 =18, white length7+12=19 contradiction. Or E white contradiction. So S4 impossible. Need be precise: In S4 with A=8, D=t9, E? Let's re-evaluate names under main A=8: S4 A=t10; D=t9; E possible t12 (since t9 D, t10 A), so E=t12 L7; Bram<t? Bram length<8 and not first; t11 L6 or t12 L7, but E t12, so Bram t11 L6; C t8. Then yellow at t9. A<green => green length10 at t8. Red-blue pair? Remaining lengths after green10, yellow9: 8(A),7(E),6(Bram). Red-blue possible (8,6) => red A at t10, blue Bram t11, white E t12. Condition7 red time10+green time8=18, white length7+12=19 contradiction. So S4 impossible. Good.
+
+Need also for S1/S2 under main, we used C time. Let's verify main S1: A at t10. Bram must t12? We earlier found if Bram t11 impossible due E/D. Let's detail: S1 A t10. If Bram t11 L7, then D must t8 (since D t8 or t11 and t11 Bram), E can only? E allowed t8 or t11 (t10 A); both occupied -> impossible. So Bram t12. Then D/E occupy t8,t11, C=t9. Yellow at t10 length8, contradict 10. Good.
+S2 main: A t9. If Bram t11, D t10, E none. So Bram t12. D/E occupy t10,t11, C=t8. Yellow at t9 length8, contradict 10. Good.
+S3 main: A t11. If Bram t10, D t9, E none; so Bram t12. D/E t9,t10, C=t8. Yellow t9 length9. Good.
+S4 main: A t10. D forced t9. E t12, Bram t11, C t8. Yellow t9 length9. Then color contradiction as above.
+
+For uniqueness, after S3 derive colors and E not white. Let's detail S3 colors:
+S3 lengths by time: t8 10, t9 9, t10 7, t11 8(A), t12 6(Bram). C=t8 -> yellow t9 length9. Condition1 A8<green, green length >8; length9 yellow, so green length10 at t8. Red-blue: red=blue+2. Available non-yellow/non-green lengths 8,7,6. Only pair (8,6) (since red9? no; red10? green). Thus red length8 at t11 (A), blue length6 at t12 (Bram), white length7 at t10. Condition7: red time11 + green time8 =19; white length7+12=19, consistent. E not white => E not t10. D/E occupy t9 and t10; so E=t9, D=t10. Unique. Great.
+
+Now for part c counts. Need present counts and maybe brief enumeration table to justify. We can include a table of solutions under removed conditions. Need be concise but enough. The user asks "Рассуждай по шагам и проверь итоговый ответ по каждому условию." We should provide reasoning and final. Desired oververbosity 5, so moderate. Need include counts derivation.
+
+We need show how counts 7 and 3 obtained. We can present a table per S of valid name/color solutions under base (without 9&10) and under only remove 9 (keep10). Since final answer needs counts. We can list the 7 base solutions? Maybe not all, but enough to prove counts. To be robust, include table with counts per S and note invalid name assignments due E white etc. Let's construct accurate enumeration table.
+
+Base conditions 1-8 (no 9, no10):
+We found:
+S1: 0
+S2: 4 solutions
+S3: 3 solutions
+S4: 0
+Total 7.
+
+Need list S2 4 and S3 3 solutions maybe to substantiate. Let's list them fully to verify and for counts.
+
+S2 color assignment fixed:
+t8 L10 Green (C)
+t9 L8 Yellow
+t10 L9 Red
+t11 L7 Blue
+t12 L6 White (Bram)
+Name assignments S2N1-N4:
+N1: A=t11 L7, Bram=t12 L6, D=t10 L9, E=t9 L8, C=t8 L10.
+N2: A=t9 L8, Bram=t12 L6, D=t10 L9, E=t11 L7, C=t8 L10.
+N3: A=t9 L8, Bram=t12 L6, E=t10 L9, D=t11 L7, C=t8 L10.
+N4: A=t10 L9, Bram=t12 L6, D=t11 L7, E=t9 L8, C=t8 L10.
+Wait check N2/N3 from earlier: For A=t9 L8, Bram=t12, D/E occupy t10,t11. We labeled S2N2: D=t10 L9, E=t11 L7. S2N3: E=t10 L9, D=t11 L7. Yes.
+N4: A=t10 L9, D=t11 L7, E=t9 L8, Bram=t12, C=t8. Yes.
+All satisfy E not white? White at t12 Bram, so yes. A not green? Green t8 C, A not t8 yes. Condition1 A>Bram: N1 A7>Bram6 yes; N2/N3 A8>6; N4 A9>6. A<green10 yes. Good.
+
+S3 color assignment fixed:
+t8 L10 Green (C)
+t9 L9 Yellow
+t10 L7 White
+t11 L8 Red
+t12 L6 Blue (Bram)
+Name assignments valid:
+N1: A=t10 L7, Bram=t12 L6, D=t9 L9, E=t11 L8, C=t8 L10.
+N3: A=t11 L8, Bram=t12 L6, E=t9 L9, D=t10 L7, C=t8 L10.
+N4: A=t9 L9, Bram=t12 L6, D=t10 L7, E=t11 L8, C=t8 L10.
+Wait N2 invalid E=t10 white. Let's check N3: earlier S3N3: A=t11, Bram=t12, E=t9 L9, D=t10 L7. Yes.
+N1: A=t10 L7, D=t9 L9, E=t11 L8. Yes.
+N4: A=t9 L9, D=t10 L7, E=t11 L8. Yes.
+All satisfy E not white: N1 E t11 red; N3 E t9 yellow; N4 E t11 red. A not green: A t10 white, t11 red, t9 yellow. Condition1: N1 A7<green10; N3 A8<10; N4 A9<10. A>Bram: N1 7>6; N3 8>6; N4 9>6. Good.
+
+Thus 7 base solutions.
+
+For N_no9 (remove only 9, keep 10): Need count among base solutions satisfying yellow length > A length. Yellow length:
+S2 yellow t9 L8. S2 solutions:
+N1 A length7 => 8>7 true.
+N2 A8 => 8>8 false.
+N3 A8 false.
+N4 A9 => 8>9 false.
+So S2 contributes 1 (N1).
+
+S3 yellow t9 L9. S3 solutions:
+N1 A7 => 9>7 true.
+N3 A8 => 9>8 true.
+N4 A9 => 9>9 false.
+So S3 contributes 2 (N1,N3). Total 3.
+
+Thus counts confirmed.
+
+Need perhaps mention S1/S4 no base solutions due color condition7. In count table, we can show per S:
+S1: 0 (yellow at t10 L8 forces red9/blue7; condition7 impossible)
+S2: 4 (fixed color, 4 name assignments)
+S3: 3 (fixed color, 4 name assignments but one has E white)
+S4: 0 (condition7 and A<green incompatible)
+Then condition10 filters as above.
+
+Need be careful: In S1 base, we said C always t9, yellow t10 L8. Then red-blue only (9,7). Condition7 impossible. But could there be name assignment where C not t9 under base? We enumerated A possible 7,8,9 and found C=t9 in all. Let's double-check S1 base enumeration to ensure no missed name assignment with A maybe t8 L9 and Bram t10 L8? We earlier found E forced t10 due D t11, but let's re-evaluate S1 base without A even. Lengths S1: t8 9, t9 10, t10 8, t11 7, t12 6. D possible t8 or t11. E possible t8,t10,t11. A possible t8(9), t10(8), t11(7). Bram not t8, length < A.
+
+Let's systematically re-enumerate S1 to ensure no missed:
+A=t11 L7 -> Bram must t12 L6. D cannot t11, so D=t8 L9. E allowed t8,t10,t11; t8 D, t11 A, so E=t10 L8. C=t9 L10. Unique. yes C t9.
+A=t10 L8 -> Bram can t11 L7 or t12 L6.
+- Bram t11: D cannot t11, so D=t8 L9. E allowed t8,t10,t11; t8 D, t10 A, t11 Bram -> none. impossible.
+- Bram t12: D t8 or t11; E t8 or t11 (t10 A). They occupy t8,t11. C=t9. Two assignments. yes.
+A=t8 L9 -> D cannot t8? D possible t8 or t11, but t8 A, so D=t11 L7. E allowed t8,t10,t11; t8 A, t11 D, so E=t10 L8. Bram length <9 and not t8; available t9 L10 (not <9), t10 E, t11 D, t12 L6. So Bram=t12 L6. C=t9 L10. Unique. yes. C always t9. Good.
+
+S4 base re-enumeration to ensure no missed with A maybe t9? D forced t9, so A cannot t9. A=t12 L7 or t10 L8.
+A=t12 L7: Bram length<7 only t11 L6. D=t9. E possible t9,t10,t12; t9 D, t12 A, so E=t10 L8. C=t8. Unique.
+A=t10 L8: Bram length<8: t11 L6 or t12 L7. D=t9. E possible t10 A or t12 L7; so E=t12 L7. Then Bram cannot t12, so Bram=t11 L6. C=t8. Unique. yes. C always t8, yellow t9 L9. Good.
+
+S2/S3 enumeration checked.
+
+Now color analysis for S1/S4 no solutions. Need ensure S1 condition7 impossible for all possible colors. Let's re-derive S1 colors more generally:
+S1 C=t9 L10 -> yellow t10 L8. Remaining lengths {9(t8),10(t9),7(t11),6(t12)} for R,B,G,W. Red-blue possible only (9,7) because red=blue+2; (10,8) blue8 yellow; (8,6) red8 yellow. So red t8 L9, blue t11 L7. Remaining green/white on t9 L10 and t12 L6. Condition7: red time8 + green time = white length +12.
+If green t9 L10, white t12 L6: 8+9=17 vs 6+12=18 no.
+If green t12 L6, white t9 L10: 8+12=20 vs 10+12=22 no. No. So 0. Good.
+
+S4 colors general:
+S4 C=t8 L10 -> yellow t9 L9. Remaining lengths {10(t8),8(t10),6(t11),7(t12)} for R,B,G,W. Red-blue possible (8,6) or (10,8). Need condition1 A<green and condition7.
+Case R8/B6: remaining G/W on L10(t8) and L7(t12).
+- G t8 L10, W t12 L7: red time t10 + green t8 =18; white len7+12=19 no.
+- G t12 L7, W t8 L10: sum t10+12=22; white len10+12=22 yes. But green length7; A possible? In S4 A=t12 L7 or t10 L8. Need A<green7. A=7 or8, neither <7. invalid.
+Case R10/B8: remaining G/W on L6(t11) and L7(t12).
+- G t11 L6, W t12 L7: red time t8 + green11=19; white7+12=19 yes. Green length6, A≥7, invalid A<green.
+- G t12 L7, W t11 L6: sum8+12=20; white6+12=18 no.
+Thus no. Good.
+
+Now final response. Need include final strict lines at end. The final answer should be in Russian. Need ensure final lines exactly:
+ИТОГ: Анна; 8; красный; 11
+ИТОГ: Брам; 6; синий; 12
+ИТОГ: Кор; 10; зелёный; 8
+ИТОГ: Дирк; 7; белый; 10
+ИТОГ: Эва; 9; жёлтый; 9
+ИТОГ-В: 7; 3
+
+Check spelling: "жёлтый" with ё. "Кор" not "Кора". Use semicolon and spaces as specified. They said "строго в формате:
+ИТОГ: Имя; длина; цвет; час
+(по одной строке на каждого из пяти) и строку
+ИТОГ-В: <число без условий 9 и 10>; <число без условия 9>"
+So each line starts "ИТОГ:". Good.
+
+Need decide if include length with "м". Format says длина; maybe just number. Use number. Color in Russian. Hour number.
+
+Let's craft reasoning before final. Keep moderate. Include table for S possibilities and counts. Need not overly long but enough. Since final answer desired oververbosity 5. We'll present step-by-step.
+
+Let's outline final response:
+
+1. From condition4 possible departure length sequences by hours 8-12:
+S1 9,10,8,7,6
+S2 10,8,9,7,6
+S3 10,9,7,8,6
+S4 10,9,8,6,7
+Explain exactly one adjacent swap.
+
+2. Main solution:
+Condition9: A even. Condition1: A>Bram and A<green. A cannot6 (no shorter Bram) or10 (no longer green), so A=8. Condition10: yellow length>8 => yellow length9 or10.
+Check each S:
+- S1: A at10. Bram must t12; C at t9; yellow at t10 length8, violates 10.
+- S2: A at t9. Bram t12; C t8; yellow t9 length8, violates 10.
+- S3: A t11. Bram t12; C t8; yellow t9 length9. D/E at t9/t10. Colors: green>8 and length9 yellow => green length10 at t8. Red=blue+2 with remaining lengths 8,7,6 => red8, blue6, white7. Condition7 holds (11+8=7+12). E not white => E t9, D t10. Gives solution.
+- S4: A t10; D t9; E t12; Bram t11; C t8; yellow t9 length9. A<green => green length10 at t8. Red-blue then red8/blue6, white7 at t12. Condition7: red t10 + green t8 =18, but white7+12=19, contradiction. Or E white? Actually in this derived colors, white t12 E, so also violates E not white. Let's check: S4 names: A t10, D t9, E t12, Bram t11, C t8. Colors: green t8, yellow t9, red t10, blue t11, white t12. E t12 white, violates condition3. Condition7 also fails? red t10 + green t8 =18; white length7+12=19. Yes both. So impossible. Good.
+Thus unique main.
+
+Need be careful in S4 main: A=8, D=t9, E? We derived E=t12, Bram=t11, C=t8. Colors: yellow t9, green t8, red t10 (A), blue t11, white t12 (E). Condition7 fails and E white. Good.
+
+3. Counts:
+Under base (remove 9,10):
+Use same S sequences. Enumerate valid name assignments and colors. Present table:
+S | valid name assignments | valid colors? | solutions | with condition10
+S1: C=t9 -> yellow t10 L8; red-blue forced 9/7; condition7 impossible ->0.
+S2: C=t8 -> yellow t9 L8. 4 valid names. Colors forced: t8 green10, t9 yellow8, t10 red9, t11 blue7, t12 white6. All 4 valid. Condition10 only A=7 one ->1.
+S3: C=t8 -> yellow t9 L9. 4 name assignments, but one has E white; 3 valid. Colors forced: t8 green10, t9 yellow9, t10 white7, t11 red8, t12 blue6. Condition10 true for A=7 and A=8, not A=9 ->2.
+S4: C=t8 -> yellow t9 L9. 2 name assignments, but color+condition1/7 no valid ->0.
+Total base 4+3=7. With condition10 (only remove9) 1+2=3.
+Need mention S1/S4 zero. Good.
+
+Then final.
+
+Let's ensure table doesn't confuse "with condition10" counts. We'll state.
+
+Now final answer. Use final only.
+=== ANSWER ===
+Условие 4 означает, что в порядке отправления длины лодок идут по убыванию, кроме ровно одной перестановки соседних длин. Поэтому возможны только 4 последовательности длин по часам 8–12:
+
+1) \(9,10,8,7,6\)  
+2) \(10,8,9,7,6\)  
+3) \(10,9,7,8,6\)  
+4) \(10,9,8,6,7\)
+
+С учётом условий 9 и 10: Анна имеет чётную длину, длиннее Брама и короче зелёной лодки, значит длина Анны не 6 и не 10, то есть \(8\). Жёлтая лодка длиннее лодки Анны, значит её длина 9 или 10.
+
+Последовательно проверяем 4 варианта:
+- В 1-м варианте Анна в 10:00, Кор в 9:00, тогда жёлтая в 10:00 длины 8, что противоречит условию 10.
+- Во 2-м варианте Анна в 9:00, Кор в 8:00, тогда жёлтая в 9:00 длины 8, снова противоречит условию 10.
+- В 3-м варианте Анна в 11:00, Кор в 8:00, жёлтая в 9:00 длины 9. Тогда зелёная длиннее 8 и не может быть жёлтой, значит зелёная длины 10. Из условия 2 остаются красная длины 8 и синяя длины 6; белая — длины 7. Условие 7 выполняется: \(11+8=7+12\). Эва не белая, значит Эва в 9:00, Дирк в 10:00. Получаем единственное решение.
+- В 4-м варианте получается противоречие: Эва оказывается на белой лодке, а также не выполняется условие 7.
+
+Итоговое решение:
+Анна — 8 м, красная, 11:00;  
+Брам — 6 м, синяя, 12:00;  
+Кор — 10 м, зелёная, 8:00;  
+Дирк — 7 м, белая, 10:00;  
+Эва — 9 м, жёлтая, 9:00.
+
+Проверка по условиям:
+1. \(8>6\) и \(8<10\) — верно.  
+2. \(8=6+2\) — верно.  
+3. Эва: длина 9, не самая короткая и не самая длинная, не белая — верно.  
+4. Порядок длин: \(10,9,7,8,6\); единственная инверсия — \(7\) раньше \(8\).  
+5. Жёлтая в 9:00, Кор в 8:00 — ровно через час.  
+6. Дирк в 10:00 до полудня, длина 7 нечётная.  
+7. Красная в 11:00, зелёная в 8:00: \(11+8=19\); белая длина 7: \(7+12=19\).  
+8. Брам в 12:00, не первый.  
+9. Длина Анны 8 чётная.  
+10. Жёлтая длина 9 больше длины Анны 8.
+
+Для пункта в:
+- без условий 9 и 10 получается 7 решений;
+- если убрать только условие 9, оставив условие 10, получается 3 решения.
+
+ИТОГ: Анна; 8; красный; 11
+ИТОГ: Брам; 6; синий; 12
+ИТОГ: Кор; 10; зелёный; 8
+ИТОГ: Дирк; 7; белый; 10
+ИТОГ: Эва; 9; жёлтый; 9
+ИТОГ-В: 7; 3

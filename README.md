@@ -35,6 +35,9 @@ local-llm-bench/
 - [`engine-bench-maya/`](engine-bench-maya/): Project Maya's built-in benchmark for
   DeepSeek-V4.1-Flash and GLM-5.3-Flash on one or two GPUs, at several context sizes and RAM
   speeds, plus the PCIe finding.
+- [`engine-bench-strata-nov2026/`](engine-bench-strata-nov2026/): the same speed and reasoning test on
+  Strata and Maya for DeepSeek-V4.1-Flash (5090, 5070 Ti, both), and Qwen3.8-Flash-Next quants in Strata
+  (NVFP4 GPTQ, NVFP4-NVIDIA, IQ3_S), with Strata's standard benchmark reports.
 - `HARDWARE.md` also has estimates for the planned Lenovo P620 (Threadripper PRO 3995WX,
   8-channel DDR4).
 
