@@ -118,3 +118,9 @@ time,label,model,kind,prompt_tokens,completion_tokens,ttft_s,tok_s
 2026-11-03 01:11:53,qwen-iq3s-gpu01,qwen3.8-flash-next-iq3_s,prefill2048,1976,16,1.14,1734.0
 2026-11-03 01:11:53,qwen-iq3s-gpu01,qwen3.8-flash-next-iq3_s,prefill8192,7813,16,1.73,4526.0
 2026-11-03 01:11:53,qwen-iq3s-gpu01,qwen3.8-flash-next-iq3_s,prefill32768,31159,16,4.71,6609.0
+2026-11-18 16:43:06,p620-strata-5070ti,deepseek-v4.1-flash,decode,28,256,0.4,37.5
+2026-11-18 16:43:06,p620-strata-5070ti,deepseek-v4.1-flash,decode,19,256,0.31,36.7
+2026-11-18 16:43:06,p620-strata-5070ti,deepseek-v4.1-flash,decode,21,256,0.33,35.3
+2026-11-18 16:43:06,p620-strata-5070ti,deepseek-v4.1-flash,prefill2048,1964,16,7.17,274.0
+2026-11-18 16:43:06,p620-strata-5070ti,deepseek-v4.1-flash,prefill8192,7803,16,9.26,842.0
+2026-11-18 16:43:06,p620-strata-5070ti,deepseek-v4.1-flash,prefill32768,31147,16,23.75,1311.0
