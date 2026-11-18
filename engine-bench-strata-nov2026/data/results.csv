@@ -243,3 +243,15 @@ time,label,model,kind,prompt_tokens,completion_tokens,ttft_s,tok_s
 2026-11-18 22:06:06,qwen-q8-p620-ctx32k-p1-nomtp,qwen3.8-flash-next-unsloth-q8_0,prefill2048,1977,16,2.11,935.0
 2026-11-18 22:06:06,qwen-q8-p620-ctx32k-p1-nomtp,qwen3.8-flash-next-unsloth-q8_0,prefill8192,7814,16,4.85,1610.0
 2026-11-18 22:06:06,qwen-q8-p620-ctx32k-p1-nomtp,qwen3.8-flash-next-unsloth-q8_0,prefill32768,31158,16,9.75,3195.0
+2026-11-18 22:32:11,fedora-qwen36-q8-5090-ctx32k-p1,qwen3.6-35b-a3b-q8_0,decode,35,218,0.13,134.3
+2026-11-18 22:32:11,fedora-qwen36-q8-5090-ctx32k-p1,qwen3.6-35b-a3b-q8_0,decode,29,256,0.15,139.5
+2026-11-18 22:32:11,fedora-qwen36-q8-5090-ctx32k-p1,qwen3.6-35b-a3b-q8_0,decode,29,256,0.11,129.0
+2026-11-18 22:32:11,fedora-qwen36-q8-5090-ctx32k-p1,qwen3.6-35b-a3b-q8_0,prefill2048,1977,16,0.41,4819.0
+2026-11-18 22:32:11,fedora-qwen36-q8-5090-ctx32k-p1,qwen3.6-35b-a3b-q8_0,prefill8192,7815,16,1.37,5708.0
+2026-11-18 22:32:11,fedora-qwen36-q8-5090-ctx32k-p1,qwen3.6-35b-a3b-q8_0,prefill32768,31161,16,5.82,5354.0
+2026-11-18 22:59:04,fedora-qwen-udq4kxl-5090-ctx32k-p1,qwen3.8-flash-next-unsloth-ud-q4_k_xl,decode,35,233,0.27,97.7
+2026-11-18 22:59:04,fedora-qwen-udq4kxl-5090-ctx32k-p1,qwen3.8-flash-next-unsloth-ud-q4_k_xl,decode,29,256,0.23,109.5
+2026-11-18 22:59:04,fedora-qwen-udq4kxl-5090-ctx32k-p1,qwen3.8-flash-next-unsloth-ud-q4_k_xl,decode,29,256,0.22,99.1
+2026-11-18 22:59:04,fedora-qwen-udq4kxl-5090-ctx32k-p1,qwen3.8-flash-next-unsloth-ud-q4_k_xl,prefill2048,1977,16,1.54,1283.0
+2026-11-18 22:59:04,fedora-qwen-udq4kxl-5090-ctx32k-p1,qwen3.8-flash-next-unsloth-ud-q4_k_xl,prefill8192,7814,16,1.33,5895.0
+2026-11-18 22:59:04,fedora-qwen-udq4kxl-5090-ctx32k-p1,qwen3.8-flash-next-unsloth-ud-q4_k_xl,prefill32768,31161,16,3.58,8715.0
