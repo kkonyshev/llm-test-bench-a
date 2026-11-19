@@ -1,0 +1,617 @@
+=== THINKING ===
+We need solve puzzle in Russian. Need provide reasoning and final strict format. Need be careful. Need solve and counts. We can brute force mentally or write reasoning manually. Need ensure uniqueness and counts variants.
+
+Let's restate.
+
+Five sailors names: Anna (A), Bram (B), Cor (C), Dirk (D), Eva (E). Departure hours 8,9,10,11,12 each distinct. Lengths 6,7,8,9,10 distinct. Colors red, blue, green, white, yellow distinct.
+
+Constraints:
+1. Anna length > Bram length, but < green boat length. "lодка Анны длиннее лодки Брама, но короче зелёной лодки." Means A_len > B_len and A_len < green_len. Green could be A? If A is green, then A_len < A_len impossible. So A not green. Green length > A.
+2. Red length exactly 2 m longer than blue.
+3. Eva length not shortest (6) and not longest (10), and not white.
+4. Departures almost strictly from longest to shortest: if take any two boats, longer departs earlier, except exactly one pair where shorter departs earlier than longer. Need interpret: For all pairs of boats, compare lengths and times. Normally "more long leaves earlier" except exactly one pair where "more short leaves earlier than more long". Since times distinct and lengths distinct. This means if order by departure time (earlier to later), the lengths sequence is descending except one inversion pair? Need parse. "если взять любые две лодки, то более длинная выходит раньше, кроме ровно одной пары, где более короткая выходит раньше более длинной." For every pair, if longer, it departs earlier, except exactly one pair where shorter departs earlier. This is exactly one inversion in the permutation of lengths ordered by time. Since total pairs =10. If lengths sorted descending by time, zero inversions. Exactly one pair inversion means departure order lengths is descending with one adjacent? Wait in a permutation, number of pairs whose order violates total descending equals inversion count relative to descending. Exactly one inversion means permutation has inversion count 1. That implies permutation is descending sorted except one adjacent swap? Let's examine. If order by time from earliest to latest, let lengths. Desired "longer earlier" for all pairs except exactly one where shorter earlier. Let rank lengths descending: 10,9,8,7,6. A permutation with exactly one inversion relative to this order. Permutations with inversion count 1 are adjacent swap of two elements in sorted order? Yes for distinct elements: e.g. 10,9,8,7,6 has 0; swap adjacent 9,8 gives 10,8,9,7,6: inversions? relative descending: 8 before 9 is one inversion; other pairs okay. Could also swap 10 and9: 9,10,8,7,6: 10 after9 inversion one. So exactly one adjacent inversion in descending sequence. But wait "more long leaves earlier except exactly one pair where more short leaves earlier" means all pairs except one satisfy longer earlier. If one inversion, indeed adjacent in sorted order? Inversion count 1 implies the inverted pair must be adjacent in value order? Let's prove: permutation of 5 with one inversion relative to descending; yes inversion pair values consecutive? Example 10,9,7,8,6: inversion 7 before8 only; values consecutive 7/8. So departure order lengths is descending list with one adjacent pair swapped. Thus lengths by time are one of:
+10,9,8,7,6 (0)
+swap 10/9: 9,10,8,7,6
+swap 9/8: 10,8,9,7,6
+swap 8/7: 10,9,7,8,6
+swap 7/6: 10,9,8,6,7
+assuming descending base 10,9,8,7,6.
+But note time slots 8,9,10,11,12. So length sequence at hours 8-12 is one of these five. Good.
+
+5. Yellow departs exactly one hour after Cor. So time(yellow)=time(C)+1. Cor not yellow? If Cor yellow then time same impossible, so C color not yellow. Yellow hour one of 9,10,11,12, Cor at previous.
+6. Dirk departs before noon (hour <12: 8,9,10,11) and his length odd (7 or9).
+7. Sum of departure hours of red and green boats equals length of white boat + 12. Hours are 8..12. Sum red+green between 17 and23? Actually distinct colors, red and green different boats/colors, hours distinct, so sum min 8+9=17 max 11+12=23. White length 6..10, plus 12 =18..22. So possible sums 18-22. Need red/green hours distinct.
+8. Bram not first (not hour 8).
+9. Anna length even: 6,8,10 (but A<green and >B; A not 10 perhaps because green > A impossible if A=10. So A even not 10? Green length must > A, lengths max10. Thus A cannot10. A can 6 or8. A > B, so if A=6, B<6 impossible (min6? B length <6 none). Thus A=8. Nice. Wait A length even and >B, green>A. If A=8, B length <8 (6 or7), green length >8 (9 or10). If A=6 impossible. If A=10 impossible. So condition 9 plus 1 implies A=8. Great.
+10. Yellow length > Anna length. Since A=8, yellow length 9 or10.
+
+We need solve.
+
+Let's denote by hour positions h=8,9,10,11,12. Length sequence L(h) one of five patterns.
+
+Names assigned to hours, colors assigned to length/name/hour.
+
+From condition 1 with A=8: B length <8, green length >8. B can6 or7. Green can9 or10. A not green. Yellow length >8 (9 or10). Eva length not 6 or10, not white -> Eva length 7,8,9. But A length8, so Eva length 7 or9 (if not A? Eva distinct person, length unique; cannot 8 because A has 8. So Eva length 7 or9). Eva not white.
+
+Dirk length odd: 7 or9. Since A=8. Dirk length 7 or9. Eva also 7 or9. Since lengths unique, Dirk and Eva occupy 7 and9 in some order. Thus remaining lengths for B,C plus? Let's list lengths: A=8. Dirk/Eva =7,9. Remaining lengths for B and C are 6 and10? Wait B must <8, so B can6 or7. But 7 occupied by one of D/E. B cannot 7 if occupied? B could be 7 if D/E other 9? But Eva/Dirk both need 7/9; one has7. B length <8 could be6 or7, but 7 already assigned to Eva or Dirk. Since unique lengths, B cannot7. Thus B=6. Then remaining lengths: A=8, B=6, D/E=7&9, C=10. Nice. Green length > A=8, so green length 9 or10. Yellow length >8, so yellow length 9 or10. C has length10, one of D/E length9.
+
+Need assign which of D/E is 7/9. Eva length not shortest/longest: 7 or9 okay. Eva not white. Dirk length odd: both 7/9 okay. Condition 6 Dirk before noon.
+
+Length sequence by hour must be one of five inversion patterns. We know names and lengths: A=8, B=6, C=10, D/E =7/9. Need assign hours satisfying Dirk before noon and Bram not first, plus inversion pattern.
+
+Let's enumerate inversion patterns for lengths at hours 8-12:
+P0: [10,9,8,7,6] (0 inversions)
+P1: [9,10,8,7,6] (swap 10/9)
+P2: [10,8,9,7,6] (swap 9/8)
+P3: [10,9,7,8,6] (swap 8/7)
+P4: [10,9,8,6,7] (swap 7/6)
+
+But wait condition says exactly one pair where shorter leaves earlier than longer. Does "almost strictly from longest to shortest" maybe means sorted descending except exactly one pair; yes these five. Need verify if no inversion possible? It says "кроме ровно одной пары" exactly one pair, so not P0. Thus exclude P0. But puzzle likely exactly one inversion. We'll consider P1-P4.
+
+We have length multiset {10(C),9(D/E),8(A),7(D/E),6(B)}. Need map to pattern positions. Since pattern is permutation of 10,9,8,7,6 with one adjacent swap. Names at lengths:
+- length10 = C (Cor)
+- length8 = A (Anna)
+- length6 = B (Bram)
+- length7 and9 = D/E in some order.
+
+So hours of C,A,B fixed by pattern positions of lengths 10,8,6. D/E positions for 7/9.
+
+Condition Bram not first: B hour !=8. Since B length6. In patterns P1-P4, length6 positions:
+P1 [9,10,8,7,6] -> hour12
+P2 [10,8,9,7,6] -> hour12
+P3 [10,9,7,8,6] -> hour12
+P4 [10,9,8,6,7] -> hour11
+So Bram not first automatically (6 never at 8). Fine.
+
+Dirk before noon: if Dirk length7 or9, hour <12 (not 12). Eva other. So whichever D/E length cannot be at hour12. In patterns, hour12 length:
+P1:6 (B) -> D/E not at12 okay.
+P2:6 -> okay.
+P3:6 -> okay.
+P4:7 at hour12. If Dirk length7 then violation; if Dirk length9 at hour? P4 length9 hour9, length7 hour12. Eva length7 at12. Dirk=9 before noon possible. So P4 possible with D length9, E length7. Need Eva not white etc.
+
+Need colors.
+
+Let's derive colors constraints.
+
+Lengths:
+A=8 (color unknown, not green, maybe? condition A < green so A not green)
+B=6
+C=10
+D/E =7 and9.
+
+Colors red, blue, green, white, yellow.
+Red length = blue length +2. Possible pairs among lengths {6,7,8,9,10}: (red,blue) = (8,6), (9,7), (10,8). Since red length 2 more than blue. Cannot red length? (7,5 no), (6,4). So possible:
+R=8, Blue=6
+R=9, Blue=7
+R=10, Blue=8.
+A length8 could be red or blue depending. Green length > A=8 => green is length9 or10. Yellow length >8 => yellow length9 or10. Green and yellow distinct colors, could both be 9/10? Need distinct lengths? Colors can be on different boats; lengths unique, so green and yellow occupy length9 and10 in some order (since both >8 and only 9,10). Thus green/yellow are exactly lengths 9 and10. Therefore C length10 is either green or yellow. The length9 boat (D or E) is the other of green/yellow. A length8 not green/yellow. B length6 not green/yellow. Remaining colors red, blue, white for lengths 6,8,7? Wait length7 is the other D/E. Let's list: lengths 9 and10 = green/yellow. Lengths 6,7,8 = red/blue/white.
+
+Red-blue relation. Since red length = blue+2. Among remaining {6,7,8} plus maybe if red/green? Wait green/yellow fixed, red and blue must be among lengths 6,7,8. Possible red-blue pairs among these: (8,6) only? (9,7) impossible because 9 is green/yellow not red/blue. (10,8) impossible because 10 green/yellow. Thus red length=8, blue length=6. Therefore A length8 is red. B length6 is blue. Length7 is white. Great. This uses colors distinct and green/yellow >8. So:
+A=8 red.
+B=6 blue.
+Length7 = white.
+Length9 and10 = green/yellow in some order.
+
+Eva not white. Eva length 7 or9. If Eva length7 then color white, forbidden. Therefore Eva length9. So Eva=9. Dirk length7 (white). Nice. Then length10 C. Colors: length9 Eva and length10 Cor are green/yellow. Condition 7 sum hours red(A) + green = white length +12 =7+12=19. Red hour = A hour. Green is either Eva length9 or Cor length10. Need red hour + green hour =19. Hours distinct. A hour from pattern. Green hour = Eva hour if Eva green, or Cor hour if Cor green. Need solve.
+
+Also condition 5: Yellow departs exactly one hour after Cor. Cor length10. Yellow is either Eva (length9) if Cor green, or Cor itself? Wait Cor length10 can be yellow or green. If Cor is yellow, condition says yellow boat (Cor) departs one hour after Cor (same person) impossible. Since yellow boat's departure = Cor's departure +1 and Cor is boat? If Cor's boat yellow, then yellow departure = Cor departure, not +1. Thus Cor cannot be yellow. Therefore Cor is green, Eva is yellow. Great. Then condition 5: Eva (yellow) departs exactly one hour after Cor. So hour(E)=hour(C)+1. Condition 7: red hour A + green hour C = white length7 +12=19. Thus h_A + h_C =19. Hours distinct 8-12. Also h_E = h_C +1. Need h_C in 8..11, h_E in9..12. h_A =19 - h_C. Since h_A in8..12 distinct. Possible h_C:
+h_C=8 -> h_A=11, h_E=9.
+h_C=9 -> h_A=10, h_E=10 (E same as A? h_E=10 and h_A=10 impossible distinct hours; also E and A different)
+h_C=10 -> h_A=9, h_E=11.
+h_C=11 -> h_A=8, h_E=12.
+h_C=12 -> h_A=7 invalid and E13.
+So possible triples (C,A,E):
+(8,11,9), (10,9,11), (11,8,12). Need align with length patterns and Dirk before noon.
+
+Dirk length7 white. Eva length9 yellow. Cor length10 green. Anna length8 red. Bram length6 blue.
+
+Now use length patterns P1-P4 and names by length. Let's map each pattern positions for lengths to names:
+Length10 C, 9 E, 8 A, 7 D, 6 B. (Since Eva=9, Dirk=7). Great. So each pattern gives hours:
+P1 [9,10,8,7,6] at h8-12:
+h8 length9=E
+h9 length10=C
+h10 length8=A
+h11 length7=D
+h12 length6=B.
+Thus C hour9, A10, E8, D11, B12. Check h_E = h_C+1? 8=9+1 no.
+Condition h_A+h_C=19? 10+9=19 yes. But yellow after Cor fails. So P1 no.
+
+P2 [10,8,9,7,6]:
+h8 C(10)
+h9 A(8)
+h10 E(9)
+h11 D(7)
+h12 B(6)
+C hour8, A9, E10. h_E = h_C+1? 10=8+1 no. h_A+h_C=17 not19. no.
+
+P3 [10,9,7,8,6]:
+h8 C
+h9 E
+h10 D
+h11 A
+h12 B
+C8, E9, D10, A11. h_E=9 = C8+1 yes. h_A+h_C=11+8=19 yes. D hour10 before noon yes. This works. Pattern P3.
+
+P4 [10,9,8,6,7]:
+h8 C
+h9 E
+h10 A
+h11 B
+h12 D
+C8, E9, A10, B11, D12. h_E=9=C8+1 yes. h_A+h_C=10+8=18 not19. D hour12 not before noon (violates). no.
+
+Thus unique solution P3:
+Hours:
+8 Cor, length10, green.
+9 Eva, length9, yellow.
+10 Dirk, length7, white.
+11 Anna, length8, red.
+12 Bram, length6, blue.
+
+Check all:
+1 Anna len8 > Bram6, < green10 yes.
+2 Red A len8 exactly blue B len6 +2 yes.
+3 Eva len9 not shortest/longest, not white (yellow) yes.
+4 Departure order lengths by hour: 10,9,7,8,6. Compare descending base 10,9,8,7,6 with swap 8/7 at hours10/11. Exactly one pair: Dirk length7 departs before Anna length8, shorter before longer. All other longer before shorter? Need check e.g. length7 vs6: 7 at10 earlier than6 at12 yes longer earlier. length8 vs7: shorter 7 at10 earlier than8 at11, inversion. length9 vs7 etc yes. Exactly one.
+5 Yellow Eva hour9 exactly one hour after Cor hour8 yes.
+6 Dirk hour10 before noon, length7 odd yes.
+7 Red hour11 + green hour8 =19; white length7 +12=19 yes.
+8 Bram hour12 not first yes.
+9 Anna length8 even yes.
+10 Yellow length9 > Anna8 yes.
+
+Need answer b proof uniqueness. Need c counts without conditions 9 and 10; and only without condition 9. Need compute number of solutions under modified constraints. Need be precise: "Сколько решений было бы без условий 9 и 10? А только без условия 9?" Means count solutions if remove both constraints 9 and 10, and count if remove only condition 9 (keeping 10). Need count. Need solve variants. We can brute force systematically by reasoning or enumerate manually. Need ensure interpretation. We need count full assignments satisfying all other conditions (1-8 plus maybe 10). Need count unique solutions.
+
+We need compute. Let's do exhaustive logical enumeration. Could simulate mentally with structured cases. We have 5 names, hours, lengths, colors. Need count solutions for:
+Case X: constraints 1-8 only (no 9, no 10). Count.
+Case Y: constraints 1-8 plus 10 (no 9). Count.
+
+Need be careful: Without condition 9, Anna length not necessarily even. Condition 1: A_len > B_len and A_len < green_len. Condition 10 if included: yellow_len > A_len. Condition 3 Eva length not 6/10 and not white. Condition 6 Dirk <12 and odd length. Condition 4 exactly one inversion. Condition 5 yellow after Cor. Condition 7 etc. Need enumerate all solutions. Could write a manual exhaustive search using constraints. We have enough token. Let's solve carefully. Need final counts.
+
+We can use combinatorial reasoning. Since no actual code, but can simulate. Could perhaps derive by enumerating all permutations of lengths/colors/hours. Need count. Let's set up robust enumeration.
+
+Variables:
+Names A,B,C,D,E assigned distinct hours 8..12.
+Lengths 6..10 assigned distinct to names.
+Colors red, blue, green, white, yellow assigned distinct to names.
+
+Constraints:
+1 A_len > B_len; A_len < green_len. Note green is a color assigned to some boat; green_len > A_len.
+2 red_len = blue_len + 2.
+3 E_len ∈ {7,8,9} (not6,10) and E not white.
+4 Departure order by hour from 8 to12 has length sequence with exactly one inversion relative to descending. Thus length sequence is one of P1-P4 (since exactly one). We can enumerate patterns P1-P4. (If condition "almost strictly" could allow P0? It says exactly one pair, so no P0.) We'll use P1-P4.
+5 yellow hour = Cor hour +1 (Cor not yellow automatically).
+6 D hour <12 and D_len odd (7 or9).
+7 red_hour + green_hour = white_len +12.
+8 B hour ≠8.
+No 9/10.
+
+We need count assignments satisfying. Since colors tied to lengths via red/blue relation and green/yellow >? Without 9/10, green length not necessarily >8? Constraint 1 A<green. Yellow length condition only if 10 included. Need enumerate.
+
+Approach: Enumerate length patterns P1-P4 and assign names to lengths consistent with constraints, then colors, then hours from pattern. Because pattern determines hour for each length. Names assigned to lengths; hours follow length positions. Need count name-length assignments and color assignments satisfying.
+
+Let's denote length values. For each pattern P, positions by hour. But constraints involving hours and names: C hour etc, B hour not first, D hour<12. We can assign names to lengths and check hours.
+
+Let's list patterns P1-P4 with length at hours 8..12 and also hour for each length:
+
+P1: [9,10,8,7,6] (swap 10/9)
+hour by length:
+6->12, 7->11, 8->10, 9->8, 10->9.
+P2: [10,8,9,7,6]
+6->12, 7->11, 8->9, 9->10, 10->8.
+P3: [10,9,7,8,6]
+6->12, 7->10, 8->11, 9->9, 10->8.
+P4: [10,9,8,6,7]
+6->11, 7->12, 8->10, 9->9, 10->8.
+
+Need exactly one inversion yes.
+
+Names assigned to lengths. Constraint A_len > B_len and A_len < green_len. Also B hour !=8. D hour<12 and D_len odd. E length not6/10 and not white. C hour for yellow relation.
+
+Colors: red length = blue length+2. Possible pairs among lengths 6-10: (red,blue) = (8,6), (9,7), (10,8). Let's call RB options O1: R=8,B=6; O2:R=9,B=7; O3:R=10,B=8. Since red and blue colors distinct, lengths distinct. Other colors green, white, yellow on remaining lengths.
+
+Constraint 1 A<green. Since A_len > B_len (where B is Bram name, not blue color; careful). Let's use name Bram = Br. A length > Br length. Green length > A length. Thus green length must be greater than A. This restricts A not too high. Also A length must have some greater length for green. A can 6,7,8,9? A>Br and green>A. If A=9, green=10 possible, Br<9. If A=10 impossible. A=6 impossible because Br<6 none? Length min6, A>Br impossible. So A ∈ {7,8,9}. Br < A.
+
+Condition E length in {7,8,9}. D odd length {7,9}. Names distinct.
+
+We can enumerate name-length assignments for each pattern independent of colors except green>A and E not white, red/blue relation, etc. Let's first enumerate possible name-to-length assignments satisfying:
+- A > Br
+- A < green_len, but green color not assigned yet. This only requires there exists a color green on length > A, and A itself not green. Since colors assign later, need at least one length >A available to be green. If A=9, only length10 >A must be green. If A=8, green length 9 or10. If A=7, green length 8/9/10.
+- E_len ∈ {7,8,9}
+- D_len odd {7,9}
+- D hour<12 (from pattern)
+- Br hour !=8.
+- C? no length restriction.
+- B name Br length < A.
+
+Then colors must satisfy red-blue relation, green length>A, E not white, yellow hour = C hour+1, sum red+green hours = white_len+12. Yellow color assigned to length >? only if cond10. In case X no.
+
+Let's enumerate patterns one by one, considering hours for lengths.
+
+We'll create for each pattern, possible assignment of names to lengths. Since names distinct and lengths unique. We can use constraints on hours for D and Br.
+
+Let's define length values L ∈ {6,7,8,9,10}. For each pattern, hour h(L).
+
+Pattern P1:
+h(6)=12, h(7)=11, h(8)=10, h(9)=8, h(10)=9.
+D must be length odd 7 or9 and h(D)<12. Both h7=11<12, h9=8<12. So D can be 7 or9. Br hour !=8. Br length cannot be 9? Since h9=8. So Br length ≠9. Also Br length < A. A ∈{7,8,9}. E length ∈7,8,9. D occupies one odd.
+
+Let's enumerate name-length assignments for P1 satisfying A>Br, Br≠9, D odd, E∈{7,8,9}, all distinct.
+
+Lengths 6,7,8,9,10. A cannot6,10; A∈7,8,9. Br < A and Br≠9 automatically if <A. Br can 6,7,8 depending. D odd (7 or9). E in7,8,9. C remaining.
+
+Let's list by A.
+
+P1 A=9: Br <9 and Br≠9; Br can6,7,8. Green>A requires green length10 (must be color green on length10). E length in7,8,9 but A=9 occupied, so E ∈7,8. D odd among remaining 7 or9; 9 occupied by A, so D=7. Then length7 is D, so E cannot7? E distinct from D, so E=8. Then remaining lengths: A9, D7, E8. Br <9 must be one of lengths6? Because 7,8 used, 9 used. Br=6. C=10. This is forced. Check Br hour h6=12 not first yes. D h7=11<12. So assignment: A9,D7,E8,Br6,C10. But D and E distinct yes. Good.
+
+P1 A=8: Br<8 -> Br can6 or7. Br≠9 irrelevant. E ∈7,8,9 but A=8 occupied, so E ∈7 or9. D odd ∈7 or9. D and E distinct and both from {7,9}; thus D,E occupy 7 and9 in some order. Then Br<8 can be6 or7, but 7 occupied by D/E, so Br=6. Remaining C=10. So lengths: A8, Br6, C10, D/E =7,9 in either order. D odd both. Need D hour<12: h7=11, h9=8 both <12. E length in7/9 okay. So two assignments (D=7,E=9 or D=9,E=7). Br h6=12 not first. Good.
+
+P1 A=7: Br<7 -> Br=6 only. Green>A requires green length among 8,9,10. E ∈7,8,9 but A=7 occupied, so E ∈8,9. D odd ∈7 or9; 7 occupied by A, so D=9. Then E cannot9 (D), so E=8. Remaining C=10. Lengths: A7, Br6, D9, E8, C10. Check D h9=8<12. Br h6=12. Good. One assignment.
+
+Thus P1 name-length assignments total 1+2+1=4. Need include colors later.
+
+Pattern P2:
+h(6)=12, h(7)=11, h(8)=9, h(9)=10, h(10)=8.
+D odd 7 or9, h<12: h7=11<12, h9=10<12 both. Br hour !=8. h8=9? Wait h(8)=9, h(10)=8. Br length cannot be10 because h10=8. Also Br length <A.
+
+A∈7,8,9. Br<A and Br≠10 (auto if <A except A? if A=9 Br<9 not10). So Br not10.
+
+Enumerate by A.
+
+P2 A=9: Br<9 can6,7,8. E∈7,8,9 but A=9 occupied -> E∈7,8. D odd ∈7 or9; 9 occupied by A, so D=7. Then E cannot7 (D) so E=8. Remaining lengths: A9,D7,E8. Br<9 and not used: available 6? 7,8 used, 9 used. Br=6. C=10. Check Br h6=12 not first; D h7=11<12. One assignment.
+
+P2 A=8: Br<8 can6 or7. E∈7,8,9 but A=8 occupied -> E∈7 or9. D odd ∈7 or9. D,E occupy 7 and9 in some order. Br<8 can be6 or7, but 7 occupied, so Br=6. C=10. Two assignments for D/E (7/9). Check D h: if D=7 h11<12; if D=9 h10<12. Br h6=12. Good. Two.
+
+P2 A=7: Br<7 -> Br=6. Green>A requires length8/9/10. E∈7,8,9 but A=7 occupied -> E∈8,9. D odd ∈7 or9; 7 occupied A, so D=9. Then E cannot9, so E=8. Remaining C=10. Check D h9=10<12. Br h6=12. One assignment.
+
+Total P2 also 4? 1+2+1=4. Note Br length10 not issue. Good.
+
+Pattern P3:
+h(6)=12, h(7)=10, h(8)=11, h(9)=9, h(10)=8.
+D odd 7 or9, h<12: h7=10<12, h9=9<12 both. Br hour !=8. h10=8, so Br length cannot10. But Br<A; A max9 so Br<A≤9, so Br never10 anyway. Good.
+
+A∈7,8,9. Br<A.
+P3 A=9: Br<9 can6,7,8. E∈7,8,9 but A=9 -> E∈7,8. D odd ∈7 or9; 9 occupied A, so D=7. Then E cannot7, so E=8. Remaining Br<9 available: lengths6? 7,8 used, 9 used, so Br=6. C=10. Check D h7=10<12. Br h6=12. One.
+
+P3 A=8: Br<8 can6 or7. E∈7,8,9 but A=8 -> E∈7 or9. D odd ∈7 or9. D,E occupy7 and9. Br<8 can6 or7 but 7 occupied, so Br=6. C=10. Two D/E assignments. Check D h: D7 h10<12; D9 h9<12. Br h6=12. Two.
+
+P3 A=7: Br<7 -> Br=6. E∈7,8,9 but A=7 -> E∈8,9. D odd ∈7 or9; 7 occupied A, so D=9. Then E cannot9, so E=8. Remaining C=10. D h9=9<12. Br h6=12. One.
+
+Total P3 4.
+
+Pattern P4:
+h(6)=11, h(7)=12, h(8)=10, h(9)=9, h(10)=8.
+D odd 7 or9, h<12: h7=12 NOT <12, so D cannot7. D must be length9. h9=9<12. Thus D=9 forced.
+Br hour !=8. h10=8, so Br length cannot10. But Br<A; A∈7,8,9, so Br<A≤9, cannot10 anyway. Good.
+E length ∈7,8,9, but D=9 occupied, so E∈7 or8. A∈7,8,9 but length9 occupied by D, so A∈7 or8 (cannot9). Br<A.
+
+Enumerate P4 with D=9.
+
+A=8: Br<8 can6 or7. E∈7,8 but A=8 occupied, so E=7. Then length7 occupied E. Br<8 can6 or7 but 7 used, so Br=6. Remaining C=10. Check Br h6=11 not first; D h9=9<12. One assignment: A8,E7,Br6,D9,C10.
+
+A=7: Br<7 -> Br=6. E∈7,8 but A=7 occupied, so E=8. D=9. Remaining C=10. Br h6=11 not first. D h9=9. One assignment: A7,E8,Br6,D9,C10.
+
+A=9 impossible because D=9 occupies length9. A cannot? A length9 would conflict D. So total P4 2 assignments.
+
+So name-length assignments total across patterns: P1 4, P2 4, P3 4, P4 2 =14 base assignments satisfying names/hours constraints (1 partially: A>Br and green possible later; E length etc; D; Br). But colors and yellow/red/green/white constraints will filter. Need count for X and Y.
+
+We need for each name-length assignment, determine possible color assignments satisfying:
+- Red length = Blue length +2 (one of O1/O2/O3 depending available lengths).
+- Green length > A (and A not green automatically if >).
+- E not white.
+- Yellow hour = C hour +1. This constrains yellow color must be on a length whose hour = h(C)+1. Since hours unique, there is exactly one boat/length at that hour. So yellow color assigned to that length (if exists; C hour cannot12 because no +1; so C hour must be 8,9,10,11 and yellow length is the length at hour hC+1). Note if that length is C? impossible because hC+1 different. So Cor not yellow automatically. If C hour=12, no solution. Also yellow length maybe E? E not white only, can be yellow.
+- Sum red_hour + green_hour = white_len +12.
+- Colors distinct; green length > A; red/blue lengths relation; white remaining; yellow fixed by hour.
+
+We can enumerate per assignment. Need count solutions for X (no 9/10). Then Y (with condition10 yellow_len > A). Condition10 further restricts yellow length > A. In X no such.
+
+We can use length assignments and hours. Let's list all 14 assignments with pattern, hours by length, A length, C hour, etc. Then compute possible colorings.
+
+Let's label each assignment case. Need be systematic to avoid missing. Since colors can be assigned in multiple ways depending red/blue pair and green selection. We'll enumerate possible red-blue pairs O1 (R8,B6), O2(R9,B7), O3(R10,B8). Note color blue on length; red on length+2. The remaining three lengths get green, white, yellow (with yellow fixed by C+1 and green>A, E not white).
+
+For a given assignment, yellow length is fixed by C hour: L_y = length at hour h_C+1. Need h_C ∈ {8,9,10,11}; if h_C=12 no yellow possible. Also L_y cannot be red/blue/green/white? It will be yellow, so must not conflict with chosen red/blue. Green length must be one of remaining lengths > A, not red/blue/yellow. White is remaining.
+
+Then condition7: h(R_len)+h(G_len) = L_white +12. Here h(L) from pattern. Need check.
+
+We can enumerate by pattern.
+
+Let's write for each pattern the hour mapping and length at hour+1 relation.
+
+P1:
+Lengths/hours:
+L6 h12
+L7 h11
+L8 h10
+L9 h8
+L10 h9.
+For a given C length, C hour. Need h(C)+1 and length at that hour:
+If C length6 h12 -> no +1 (13) no solution.
+C length7 h11 -> h12 length6. yellow L=6.
+C length8 h10 -> h11 length7. yellow L=7.
+C length9 h8 -> h9 length10. yellow L=10.
+C length10 h9 -> h10 length8. yellow L=8.
+So yellow length determined by C length.
+
+P2:
+h: L6=12,L7=11,L8=9,L9=10,L10=8.
+If C L6 h12 no.
+C L7 h11 -> h12 L6 yellow.
+C L8 h9 -> h10 L9 yellow.
+C L9 h10 -> h11 L7 yellow.
+C L10 h8 -> h9 L8 yellow.
+
+P3:
+h: L6=12,L7=10,L8=11,L9=9,L10=8.
+C L6 h12 no.
+C L7 h10 -> h11 L8 yellow.
+C L8 h11 -> h12 L6 yellow.
+C L9 h9 -> h10 L7 yellow.
+C L10 h8 -> h9 L9 yellow.
+
+P4:
+h: L6=11,L7=12,L8=10,L9=9,L10=8.
+C L6 h11 -> h12 L7 yellow.
+C L7 h12 no.
+C L8 h10 -> h11 L6 yellow.
+C L9 h9 -> h10 L8 yellow.
+C L10 h8 -> h9 L9 yellow.
+
+But in our assignments C often length10 except some? Let's list assignments.
+
+From P1:
+P1-1: A9, D7, E8, Br6, C10. (A=9)
+P1-2a: A8, Br6, C10, D7,E9.
+P1-2b: A8, Br6, C10, D9,E7.
+P1-3: A7, Br6, D9,E8,C10.
+All P1 have C=10. C hour h10=9. Yellow length at h10? h(C)+1=10, length at hour10 is L8. So yellow L=8. Yes for P1 all C10 -> yellow length8. Need E not white; if E length8, then E would be yellow? Wait yellow length8 fixed. If E length8, E color yellow, not white okay. But if E length8 and yellow length8, E is yellow. Fine. If E length7 or9, yellow on length8 (some other name). Good.
+
+P2 assignments all C=10? Let's see P2 A9 D7 E8 Br6 C10; A8 D/E7/9 Br6 C10; A7 D9 E8 Br6 C10. Yes C=10. P2 h10=8. C hour8. Yellow at h9 length L8 (since h+1=9). So yellow length8. For P2 all C10 -> yellow L8.
+
+P3 assignments all C=10. P3 h10=8. C hour8. Yellow at h9 length L9. So yellow L9.
+
+P4 assignments:
+P4-1: A8,E7,Br6,D9,C10. C=10. h10=8. Yellow at h9 length L9. So yellow L9.
+P4-2: A7,E8,Br6,D9,C10. C=10. Yellow L9. All C=10 indeed? In all assignments C length10 because remaining. Yes C always length10 due A/Br/E/D constraints? It seems yes. So Cor always length10. Then yellow length depends pattern: P1/P2 yellow L8; P3/P4 yellow L9. Nice.
+
+Need E not white. Need green>A. Need red-blue relation. Need sum.
+
+Let's enumerate for each assignment. Since colors only depend on lengths and A, E length, pattern hours. Many assignments share length sets/name positions. We can group by pattern and A/E/D arrangement. We'll compute possible colorings.
+
+First, note red-blue possible pairs among lengths {6,7,8,9,10}. But yellow length fixed may occupy one of these. Red/blue cannot be yellow. Green cannot be yellow. White remaining.
+
+Let's handle P1 (yellow length8). Lengths: 6,7,8,9,10. Yellow at L8. Thus L8 cannot red/blue/green/white. Red-blue pair options:
+O1 R8/B6 uses L8 as red, impossible because L8 yellow.
+O2 R9/B7 possible (uses 9,7).
+O3 R10/B8 uses L8 blue, impossible.
+Thus only possible red-blue pair in P1 is O2: red length9, blue length7. Then remaining colors: L8 yellow, L6 and L10 are green/white. Green must be > A. White is the other. E not white.
+
+So for P1, colors forced up to green/white between L6 and L10, but green>A and L6 cannot > A (A≥7), so green must be L10, white L6. Thus colors: L9 red, L7 blue, L8 yellow, L10 green, L6 white. Need E not white: E length not6. In P1 assignments E lengths: P1-1 E8, P1-2a E9, P1-2b E7, P1-3 E8. None E=6. So E not white satisfied all. Need green>A: green L10 > A: all A 7,8,9 yes. Condition7: h(red L9)+h(green L10) = h9 + h10 = 8 + 9 =17. White length L6=6, +12=18. 17≠18. So no P1 solutions! Wait check P1 h red L9=8, green L10=9 sum17, white L6 length6 ->18. Fails. Thus P1 contributes 0 for X. Good.
+
+P2: yellow length8. Same red-blue only O2? Let's see P2 yellow L8. O1 R8/B6 impossible (red L8 yellow), O3 R10/B8 impossible (blue L8 yellow). Only O2 R9/B7. Remaining L6,L10 green/white. Green>A. A in assignments P2: A9, A8, A7. Green must >A. L6 cannot, L10 can for A7,8,9? L10>A for A9 yes (10>9), A8 yes, A7 yes. So green L10, white L6. E not white: E lengths in P2 assignments: P2-1 A9 D7 E8 Br6 C10 -> E8 not6. P2-2a A8 D7 E9 -> E9. P2-2b A8 D9 E7 -> E7. P2-3 A7 D9 E8 -> E8. None E6. Condition7: P2 h red L9 =10; h green L10=8; sum18. White L6=6 +12=18. Satisfies! So all P2 assignments with forced colors are solutions (if no condition10). Count P2 assignments =4. Need check E not white: white L6, none E6 yes. Good. So X includes 4 from P2.
+
+P3: yellow length9. Lengths yellow L9. Red-blue options:
+O1 R8/B6 possible (doesn't use9).
+O2 R9/B7 impossible (red L9 yellow).
+O3 R10/B8 possible.
+So two possible red-blue pairs:
+A) O1: red L8, blue L6. Remaining lengths: L7,L10 plus yellow L9; colors green and white among L7,L10. Green>A. White other. E not white.
+B) O3: red L10, blue L8. Remaining L6,L7 plus yellow L9; green/white among L6,L7. Green>A. But A in P3 assignments 9,8,7. Need green length > A. Remaining L6,L7. For A=7, green can? >7 none among6,7. So O3 impossible for A=7. For A=8, >8 none. For A=9 none. So O3 impossible generally because remaining max7 < A (A≥7; for A=7 need >7 no). Thus only O1 possible. Then green/white among L7,L10. Green>A. A can be9,8,7.
+- If A=9: green must >9 -> L10 green, L7 white.
+- If A=8: green can L10 (>8); L7 not. So L10 green, L7 white.
+- If A=7: green can L10 or L7? L7 >7? No, green length must > A=7, so L10 only. Thus always green L10, white L7. (Because L7 not >A for A7? equal no). So colors forced: L8 red, L6 blue, L9 yellow, L10 green, L7 white.
+Need E not white: white L7, so E length cannot7. Check P3 assignments:
+P3-1 A9,D7,E8,Br6,C10 -> E8 not7 yes.
+P3-2a A8,Br6,C10,D7,E9 -> E9 yes.
+P3-2b A8,Br6,C10,D9,E7 -> E7 = white -> invalid.
+P3-3 A7,Br6,D9,E8,C10 -> E8 yes.
+Condition7: P3 h red L8 =11; green L10=8; sum19. White length L7=7 +12=19. Satisfies. So valid P3 assignments: P3-1, P3-2a, P3-3 =3. P3-2b invalid due E white. Count 3 for X.
+
+P4: yellow length9. Same as P3: yellow L9. Red-blue options O1 (R8/B6) or O3(R10/B8). O2 impossible. Let's examine assignments:
+P4-1: A8,E7,Br6,D9,C10.
+P4-2: A7,E8,Br6,D9,C10.
+Yellow L9 (D length9 yellow). Need red-blue.
+
+Option O1: R8, B6. Remaining L7,L10 (plus yellow9) for green/white. Green>A.
+- P4-1 A8: green must >8 -> L10 green, L7 white.
+- P4-2 A7: green >7 -> L10 green (L7 equal? L7 not >7), so L10 green, L7 white.
+So O1 forces green L10, white L7. E not white: P4-1 E7 -> white invalid. P4-2 E8 not white valid.
+Condition7: h red L8 + h green L10. P4 h8=10, h10=8 sum18. White L7 length7 +12=19. Fails. So O1 no solutions due sum anyway.
+
+Option O3: R10, B8. Remaining L6,L7 plus yellow9 for green/white. Green>A.
+P4-1 A8: need green>8, none (L6,L7) -> impossible.
+P4-2 A7: need green>7, none (L6,L7 max7) -> impossible.
+So O3 impossible. Thus P4 contributes 0. Wait maybe red-blue O? Yellow L9, O1 or O3 only. O1 sum fails. So P4 0.
+
+Total X (without 9 and10) = P1 0 + P2 4 + P3 3 + P4 0 =7. Need verify if condition4 exactly one inversion and patterns P1-P4; yes. Count 7. Need be absolutely sure no other color choices? In P2 forced O2 and green L10 white L6; yes. In P3 forced O1 and green L10 white L7; E invalid one. Count 7. But let's double-check P1 no solution due sum; P1 maybe red-blue O2 only yes. Could there be red-blue pair O1 with L8 yellow impossible; O3 L8 blue impossible. yes.
+
+Now Case Y: without condition9 but WITH condition10 (yellow length > Anna length). Count solutions satisfying 1-8 plus 10. We can use above colorings and filter yellow_len > A. In X solutions:
+P2 solutions: yellow length8. Condition10: 8 > A. A in P2 assignments: A=9, A=8, A=7 (two for A8). Need 8>A, so A<8. Only A=7. Among P2 assignments, P2-3 has A=7 (D9,E8,Br6,C10). P2 A=8: 8>8 false; A=9 false. Thus P2 contributes 1 (the A=7 assignment) if color valid. Need check P2-3 E=8. Yellow length8, so E is yellow. E not white yes. Condition10 8>7 yes. So valid.
+
+P3 solutions: yellow length9. Condition10: 9 > A. P3 valid assignments: P3-1 A=9 -> 9>9 false. P3-2a A=8 -> 9>8 true. P3-3 A=7 -> 9>7 true. P3-2b invalid due E white. So P3 contributes 2 (A8 and A7). Need check colors: P3-2a A8, E9 (yellow), D7 white; condition10 yellow9>A8 yes. P3-3 A7,E8,D9 yellow? Wait P3 yellow length9, D length9, so D yellow. Condition10 9>7 yes. E8 not white. Good.
+
+P1 none, P4 none from X. Total Y = 1+2=3. But wait condition10 might create solutions in P1/P4 that were excluded by sum? They were excluded by sum independent. P1/P4 no X solutions, so no.
+
+Thus counts: without 9 and10 =7; without only 9 (keeping 10) =3. Need ensure question c wording: "Сколько решений было бы без условий 9 и 10? А только без условия 9?" Could mean "without conditions 9 and 10" remove both; "only without condition 9" remove 9 but keep 10. Yes.
+
+Need provide proof of uniqueness for main puzzle. We can present step-by-step. Need final strict format:
+ИТОГ: Имя; длина; цвет; час
+one per person. Need order? Probably names maybe Anna, Bram, Cor, Dirk, Eva or by hour? It says "по одной строке на каждого из пяти". Could list in any consistent order. We need use exact names in Russian? The problem uses Анна, Брам, Кор, Дирк, Эва. Use those. Format "ИТОГ: Анна; 8; красный; 11" etc. Need include length with m? The requested format: "ИТОГ: Имя; длина; цвет; час". Likely no "м" maybe just number. We can output "8" etc. For final line:
+ИТОГ-В: <число без условий 9 и 10>; <число без условия 9>
+So "ИТОГ-В: 7; 3".
+
+Need be careful with names: Cor in Russian "Кор" (maybe "Кор" not "Кор"?). Bram "Брам". Dirk "Дирк". Eva "Эва". Anna "Анна".
+
+Let's verify main solution:
+Hour 8 Cor length10 green.
+Hour 9 Eva length9 yellow.
+Hour10 Dirk length7 white.
+Hour11 Anna length8 red.
+Hour12 Bram length6 blue.
+
+List by person:
+Анна; 8; красный; 11
+Брам; 6; синий; 12
+Кор; 10; зелёный; 8
+Дирк; 7; белый; 10
+Эва; 9; жёлтый; 9
+
+Need check condition 4 exactly one inversion: hours order lengths: Cor10 (8), Eva9 (9), Dirk7 (10), Anna8 (11), Bram6 (12): 10,9,7,8,6. Exactly one pair where shorter before longer: Dirk7 before Anna8. All other pairs? Let's verify pair Eva9 and Dirk7: Eva earlier longer yes. Eva9 and Anna8: Eva earlier longer yes. Eva9 and Bram6 yes. Cor10 vs all earlier yes. Anna8 vs Bram6: Anna earlier longer yes. Dirk7 vs Bram6: Dirk earlier longer yes. Only Dirk7 vs Anna8 inverted. Good.
+
+Need perhaps include proof uniqueness in final answer. The user asks "Рассуждай по шагам и проверь итоговый ответ по каждому условию. В самом конце выведи..." We need provide reasoning and final. Desired oververbosity 5. Need include enough proof and counts. Could structure.
+
+Need also mention how we got A=8 using condition9. Let's craft detailed but concise.
+
+Let's plan final response in Russian.
+
+1. Let lengths and hours.
+2. From condition4: length sequence by departure hours is descending 10,9,8,7,6 with exactly one adjacent swap. Patterns P1-P4. But for main solution we used condition9 to derive A=8 etc. Maybe present main proof:
+- Condition9 Anna even. Condition1: A>B_len and A<green. A cannot6 (no shorter B), cannot10 (no longer green), so A=8. Then B_len<8; green >8.
+- Condition10 yellow > A=8, so yellow length 9 or10.
+- Condition3 Eva length not6/10; with A=8, Eva length can7 or9. Condition6 Dirk odd length 7 or9. Since lengths unique, D/E are 7 and9. Then B must be6 (B<8 and 7 used by D/E), and remaining C=10.
+- Colors: green and yellow both >8 => lengths9,10. Red = blue+2 among remaining lengths6,7,8. Only possible red8 blue6. Thus Anna red, Bram blue, length7 white. Eva not white and length7/9 -> Eva=9, Dirk=7. Since Cor length10 cannot be yellow (condition5 would require Cor after itself), Cor green, Eva yellow.
+- Condition5: Eva hour = Cor hour+1.
+- Condition7: red hour (Anna) + green hour (Cor) = white length7+12=19. So h_A + h_C=19.
+- Use condition4 patterns with lengths by hour. We know length assignment: C=10, E=9, A=8, D=7, B=6. Check four patterns (exclude no inversion):
+P1 [9,10,8,7,6] gives hC=9,hA=10,hE=8; hE≠hC+1 and hA+hC=19? Actually hA+hC=19 yes but hE fails.
+P2 [10,8,9,7,6] hC=8,hA=9,hE=10; hE≠9? hC+1=9, hE10 fail; sum17.
+P3 [10,9,7,8,6] hC=8,hE=9,hA=11,hD=10,hB=12; satisfies hE=9, hA+hC=19, D before noon.
+P4 [10,9,8,6,7] hC=8,hE=9,hA=10,hB=11,hD=12; hA+hC=18 and D not before noon fail.
+Thus unique P3.
+
+Need also verify condition4 patterns: exactly one adjacent swap. We can list in proof.
+
+For counts c, we need present maybe table. Need show counts without 9/10 and without9. We can summarize enumeration. Since final answer needs counts. Need not too detailed but enough. Could include table of patterns and valid colorings.
+
+Let's craft count explanation:
+Without conditions9 and10, we enumerated by inversion patterns. Note Cor always length10? Wait in variants without condition9, is Cor always length10? We found from name-length constraints? Let's verify without condition9, C may not always 10? Our enumeration of name-length assignments under constraints 1-8 (no 9/10) found C=10 in all 14 assignments. Is that always? Let's check: We assumed A∈{7,8,9} from A>Br and green>A. Without condition9, A could? A=6 impossible because A>Br and min length6, no Br<6. A=10 impossible because green>A no length >10. So A∈7,8,9. E length ∈7,8,9. D length odd 7/9. Br<A. Did we always get C=10? Let's verify for A=9: Br<9, E∈7,8 (since A9), D odd 7 or9 but 9 occupied A so D=7, E=8, remaining lengths6,10 for Br,C. Br<9 can6 (since 7,8 used), so Br6, C10. Yes.
+A=8: E∈7,9 (not8), D odd 7/9. D,E occupy7,9. Br<8 can6 or7, but7 used, so Br6, remaining C10. yes.
+A=7: Br<7 -> Br6. E∈8,9 (not7), D odd 7/9 but7 A, so D9, E8, remaining C10. yes. Thus C=10 always. Good. Also A cannot6/10. So our enumeration covers.
+
+Need count table for X and Y. Let's present:
+Patterns P1-P4 as above. For each pattern, possible name-length assignments satisfying basic constraints:
+P1: 4 assignments; but color constraints force only red9 blue7, yellow8, green10, white6; condition7 fails (8+9 vs6+12? h red9=8, h green10=9 sum17 vs18), so 0.
+P2: 4 assignments; colors forced red9 blue7 yellow8 green10 white6; condition7 holds (h red9=10 + h green10=8 =18 =6+12); E never white, so 4 solutions without 9/10. With condition10 yellow8>A: only assignment A=7 (one of 4) satisfies 8>A. So 1.
+P3: 4 assignments; colors forced red8 blue6 yellow9 green10 white7; condition7 holds (h red8=11 + h green10=8 =19 =7+12). One assignment has E=7=white invalid, leaving 3. With condition10 yellow9>A: among these 3, A=9 fails, A=8 and A=7 pass -> 2.
+P4: 2 assignments; possible? Let's re-evaluate color constraints. For P4 yellow9. Red-blue O1 possible but condition7 fails; O3 impossible due green>A. Thus 0. We can mention 0.
+Total no9/10 =0+4+3+0=7. With condition10 only =0+1+2+0=3.
+
+Need ensure P3 count: P3 assignments total 4, one invalid E white. Let's list maybe:
+P3-1 A9,D7,E8,B6,C10 valid.
+P3-2a A8,D7,E9,B6,C10 valid.
+P3-2b A8,D9,E7,B6,C10 invalid (E white).
+P3-3 A7,D9,E8,B6,C10 valid.
+With condition10 yellow9>A: A9 false; A8 true; A7 true. P3-2b invalid anyway. So 2.
+
+P2 assignments total 4:
+P2-1 A9,D7,E8,B6,C10
+P2-2a A8,D7,E9,B6,C10
+P2-2b A8,D9,E7,B6,C10
+P2-3 A7,D9,E8,B6,C10
+All valid without 9/10. With yellow8>A: only A7 (P2-3) because A8 not <8; A9 no. 1.
+
+P1 assignments total 4 but condition7 fails for all. Need check if any alternative red-blue pair? We argued only O2. Yes.
+
+P4 total 2; condition7 fails for O1; O3 impossible. 0.
+
+Need perhaps mention condition4 patterns P1-P4. Good.
+
+Let's also include verification per condition for main solution. Could do bullet list:
+1 Anna8 > Bram6 and < green10.
+2 red8 = blue6+2.
+3 Eva9 not6/10 and yellow not white.
+4 order 10,9,7,8,6 has exactly one inversion (7 before8).
+5 Eva yellow hour9 = Cor hour8 +1.
+6 Dirk hour10<12 length7 odd.
+7 red hour11 + green hour8 =19 = white length7+12.
+8 Bram hour12 not first.
+9 Anna8 even.
+10 yellow9 > Anna8.
+
+Need final strict lines. The final answer should include all reasoning then the exact final lines. The "В самом конце выведи строки строго..." means final lines at very end. We can put reasoning before, then final lines at bottom. Ensure no text after final lines. The final lines:
+ИТОГ: Анна; 8; красный; 11
+ИТОГ: Брам; 6; синий; 12
+ИТОГ: Кор; 10; зелёный; 8
+ИТОГ: Дирк; 7; белый; 10
+ИТОГ: Эва; 9; жёлтый; 9
+ИТОГ-В: 7; 3
+
+Need decide if include "м" after lengths? Format says длина; could be "8 м". But strict format maybe "8". It says "длина" not "длина (м)". I can use numbers only to be safe. If include "м", maybe not strict. Use numbers.
+
+Need ensure names order. Could order by person as above. It says "по одной строке на каждого из пяти" no specified order. We can use alphabetical? Russian alphabetical: Анна, Брам, Дирк, Кор, Эва? Actually alphabetical: Анна, Брам, Дирк, Кор, Эва (Д before К). But our list has Кор before Дирк. Does not matter. Maybe use hour order? The format "Имя; длина; цвет; час" could list by hour to be clear: Кор 8, Эва 9, Дирк10, Анна11, Брам12. But "на каждого" no order. Which is safer? If automated checker expects specific order? Usually puzzle answer can be any order, but final strict format may parse by name. Let's list in the order names given in problem: Анна, Брам, Кор, Дирк, Эва. That matches problem statement. Good.
+
+Let's also ensure "Кор" is the name. The problem says "Кор" (could be "Кор" in Dutch? Cor). Use "Кор".
+
+Let's craft final response in Russian with moderate detail.
+
+Potential issue: Main uniqueness proof: condition 4 patterns. We should mention exactly one inversion means length sequence by hours is one of four adjacent swaps of descending 10,9,8,7,6. In main proof we used P3. Good.
+
+Potential issue: In main derivation, "Cor cannot be yellow because condition5 says yellow departs exactly one hour after Cor" But if Cor's boat is yellow, then yellow departs at Cor's hour, not one hour after. Correct.
+
+Potential issue: Condition 7: "Сумма часов отправления красной и зелёной лодок равна длине белой лодки плюс 12." We used red hour + green hour = white length +12. Yes.
+
+Potential issue: When deriving A=8 from condition9: A even; condition1 A>B and A<green. A cannot6 because B<6 impossible. A cannot10 because green>10 impossible. Thus A=8. Good.
+
+Potential issue: Derive B=6: B<8 and lengths 7 and9 occupied by D/E. Need first derive D/E occupy7/9. Condition3 Eva length not shortest/longest, with A=8, E can7 or9? Wait Eva length not shortest (6) and not longest (10). Available lengths excluding A=8 are6,7,9,10. E can7 or9. Condition6 Dirk odd length: 7 or9. Since E and D distinct and both from {7,9}, yes they occupy both. Then B<8 and cannot7 (occupied), so B=6. Then remaining C=10. Good.
+
+Colors: Green>A=8, yellow>A=8 from condition10. Both green and yellow lengths >8, available 9,10. Thus they occupy 9 and10. Red-blue relation: red=blue+2. Remaining lengths for red/blue/white are6,7,8. Possible red/blue pair among these: red8 blue6 only. (red9 blue7 uses length9 but length9 is green/yellow; red10 blue8 uses10; impossible). So A length8 red, B length6 blue, length7 white. Eva not white and E length7/9 => E=9, D=7. Then Cor length10. Cor cannot yellow, so Cor green; Eva yellow. Great.
+
+Then condition5 and7. We can solve hours maybe without listing all patterns? Let's derive P3 uniquely:
+Lengths by names: C10, E9, A8, D7, B6.
+Condition4 patterns P1-P4. We can list possible hour assignments for C,A,E,D,B for each pattern and filter by h_E=h_C+1 and h_A+h_C=19 and D<12. We did. In final proof, list table maybe.
+
+Let's produce a table:
+Pattern (lengths at 8,9,10,11,12) | h_C,h_E,h_A,h_D,h_B | result
+P1 9,10,8,7,6 -> C=9,E=8,A=10,D=11,B=12; h_E≠h_C+1.
+P2 10,8,9,7,6 -> C=8,E=10,A=9,D=11,B=12; h_E≠9.
+P3 10,9,7,8,6 -> C=8,E=9,A=11,D=10,B=12; works.
+P4 10,9,8,6,7 -> C=8,E=9,A=10,D=12,B=11; h_A+h_C=18 and D not <12.
+Need for P1 also h_A+h_C=19 but h_E fails. Good.
+
+Counts table as above.
+
+Let's write final answer elegantly.
+
+Need ensure final lines at very end no extra. Let's draft.
+
+Potential issue: "ИТОГ-В: <число без условий 9 и 10>; <число без условия 9>" We should output "ИТОГ-В: 7; 3". Good.
+
+Let's final.
+=== ANSWER ===
+Ключевые шаги для основного решения:
+
+1. По условию 9 длина Анны чётная. Из условия 1 Анна длиннее Брама, но короче зелёной лодки. Поэтому длина Анны не может быть 6 (нет более короткой лодки для Брама) и не может быть 10 (нет более длинной зелёной). Значит, Анна — 8 м.
+2. Тогда Брам короче 8 м. Из условия 3 Эва имеет длину 7 или 9, а из условия 6 Дирк тоже имеет нечётную длину 7 или 9. Значит, Дирк и Эва занимают 7 и 9 м. Поэтому Брам = 6 м, а Кор = 10 м.
+3. Зелёная и жёлтая лодки длиннее Анны, то есть имеют длины 9 и 10. Красная на 2 м длиннее синей; среди оставшихся длин 6, 7, 8 это возможно только как красная 8 и синяя 6. Значит, Анна — красная, Брам — синяя, а длина 7 — белая.
+4. Эва не белая и имеет длину 7 или 9, значит Эва = 9 м, Дирк = 7 м. Кор = 10 м не может быть жёлтым, иначе жёлтая лодка не выходила бы на час позже Кора. Поэтому Кор — зелёный, Эва — жёлтая.
+5. Условие 5 даёт: час Эвы = час Кора + 1. Условие 7: час Анны + час Кора = 7 + 12 = 19.
+6. Из условия 4 порядок длин по часам получается из 10,9,8,7,6 ровно одной соседней перестановкой. Проверка четырёх возможных вариантов оставляет единственный:
+   \[
+   10,\ 9,\ 7,\ 8,\ 6
+   \]
+   по часам 8, 9, 10, 11, 12. Отсюда:
+   - Кор: 10 м, зелёный, 8 ч;
+   - Эва: 9 м, жёлтый, 9 ч;
+   - Дирк: 7 м, белый, 10 ч;
+   - Анна: 8 м, красный, 11 ч;
+   - Брам: 6 м, синий, 12 ч.
+
+Проверка:
+1. Анна 8 > Брам 6 и 8 < зелёная 10 — да.
+2. Красная 8 = синяя 6 + 2 — да.
+3. Эва 9 не 6 и не 10, не белая — да.
+4. Порядок длин 10,9,7,8,6 имеет ровно одну инверсию: 7 выходит раньше 8 — да.
+5. Жёлтая Эва в 9 ч, Кор в 8 ч — на час позже — да.
+6. Дирк в 10 ч до полудня, длина 7 нечётная — да.
+7. Красная 11 ч + зелёная 8 ч = 19 = белая длина 7 + 12 — да.
+8. Брам в 12 ч, не первый — да.
+9. Анна 8 чётная — да.
+10. Жёлтая 9 > Анна 8 — да.
+
+Для подсчётов без условий 9 и 10 получается 7 решений; если убрать только условие 9, но оставить условие 10, получается 3 решения.
+
+ИТОГ: Анна; 8; красный; 11
+ИТОГ: Брам; 6; синий; 12
+ИТОГ: Кор; 10; зелёный; 8
+ИТОГ: Дирк; 7; белый; 10
+ИТОГ: Эва; 9; жёлтый; 9
+ИТОГ-В: 7; 3

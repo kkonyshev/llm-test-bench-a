@@ -15,3 +15,4 @@ time,label,model,effort,auto_score_of_7,total_s,completion_tokens,tok_s,notes
 2026-11-03 00:50:55,qwen-nvfp4-nvidia-gpu01-131,qwen3.8-flash-next-nvfp4-nvfp4-nvidia,high,7,198,27975,142.3,"b: proof-like text found (3 pts are manual)"
 2026-11-03 01:00:42,qwen-iq3s-gpu0,qwen3.8-flash-next-iq3_s,high,7,165,27949,170.6,"b: proof-like text found (3 pts are manual)"
 2026-11-18 16:52:08,p620-strata-5070ti,deepseek-v4.1-flash,high,7,530,17571,33.5,"b: proof-like text found (3 pts are manual)"
+2026-11-19 07:06:28,p620-strata-5090,deepseek-v4.1-flash,high,7,303,16161,54.4,"b: proof-like text found (3 pts are manual)"
