@@ -1,0 +1,31 @@
+[!] 512K is more than the model was trained on (256K). Setup adds rope scaling for it (experimental); answers may get less reliable.
+    Checking the engine for this computer…
+    Engine 0.1.66 (cuda) is installed.
+    Getting Qwen3.8-Flash-Next (NVFP4) NVFP4 ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+    Checking the engine for this PC
+    Getting the model files: 128.0 of 128.9 GB Finishing the last pieces (908 MB left).
+    Checking the files downloaded so far (128.0 of 128.9 GB); the download goes on after it
+    Downloading the picture reader: 128.1 of 128.9 GB
+    Checking that the model files are complete (a few minutes for a big model; nothing is downloaded): 128.9 of 128.9 GB
+    The model files are on this computer; checking them
+    Preparing the draft layer
+    Saving the model's settings
+    Qwen3.8-Flash-Next (NVFP4) NVFP4 is ready.
+    Writing this launch's settings…
+    Settings are saved.
+    Starting the engine and loading the model. The first start can take a few minutes.
+    Loading the model… 15 s
+    The model is loaded and answering.
+    Ready: http://127.0.0.1:8097
+    Strata is serving.
+
+Strata is serving.
+  This computer  http://127.0.0.1:8097/v1
+  Anthropic apps http://127.0.0.1:8097   (Claude Code: ANTHROPIC_BASE_URL, no /v1 at the end)
+  Engine log     /home/remote-agent/.local/state/strata/launch/nvfp4-512k.engine.log   (follow it: strata logs --follow)
+  Watch it:    strata monitor --url http://127.0.0.1:8097
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.

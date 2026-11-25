@@ -1,0 +1,160 @@
+    Checking the engine for this computer…
+    Engine 0.1.66 (cuda) is installed.
+    Stopping q8_0-128k so the new choices can use port 8097…
+    Getting Qwen3.8-Flash-Next IQ3_S ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+    Checking the engine for this PC
+    The model files are already on this computer (84.5 GB); checking them
+    The model files are on this computer; checking them: 84.5 of 84.5 GB
+    The model files are on this computer; checking them
+    Preparing the model data for the engine (one time)
+    The model files are on this computer; checking them
+    Preparing the draft layer
+    Saving the model's settings
+    Qwen3.8-Flash-Next IQ3_S is ready.
+    Downloading the DFlash2 drafter (1.2 GB, once)…
+    Downloading the DFlash2 drafter… 0.00 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.01 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.02 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.03 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.04 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.05 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.06 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.07 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.08 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.09 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.10 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.11 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.12 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.13 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.14 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.15 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.16 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.17 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.18 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.19 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.20 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.21 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.22 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.23 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.24 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.25 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.26 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.27 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.28 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.29 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.30 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.31 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.32 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.33 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.34 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.35 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.36 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.37 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.38 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.39 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.40 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.41 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.42 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.43 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.44 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.45 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.46 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.47 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.48 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.49 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.50 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.51 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.52 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.53 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.54 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.55 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.56 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.57 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.58 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.59 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.60 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.61 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.62 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.63 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.64 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.65 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.66 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.67 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.68 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.69 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.70 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.71 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.72 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.73 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.74 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.75 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.76 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.77 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.78 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.79 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.80 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.81 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.82 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.83 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.84 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.85 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.86 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.87 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.88 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.89 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.90 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.91 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.92 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.93 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.94 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.95 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.96 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.97 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.98 of 1.21 GB
+    Downloading the DFlash2 drafter… 0.99 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.00 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.01 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.02 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.03 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.04 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.05 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.06 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.07 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.08 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.09 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.10 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.11 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.12 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.13 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.14 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.15 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.16 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.17 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.18 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.19 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.20 of 1.21 GB
+    Downloading the DFlash2 drafter… 1.21 of 1.21 GB
+    Downloading the DFlash2 drafter…
+    Packing the DFlash2 drafter for the engine…
+    Preparing the DFlash2 drafter's smaller selector…
+    The DFlash2 drafter's smaller selector is ready.
+    The DFlash2 drafter is ready.
+    Writing this launch's settings…
+    Settings are saved.
+    Starting the engine and loading the model. The first start can take a few minutes.
+    Loading the model… 15 s
+    The model is loaded and answering.
+    Ready: http://127.0.0.1:8097
+    Strata is serving.
+
+Strata is serving.
+  This computer  http://127.0.0.1:8097/v1
+  Anthropic apps http://127.0.0.1:8097   (Claude Code: ANTHROPIC_BASE_URL, no /v1 at the end)
+  Engine log     /home/remote-agent/.local/state/strata/launch/iq3_s-64k.engine.log   (follow it: strata logs --follow)
+[!] DFlash2 answers one request at a time, so Strata set this model to one request at a time.
+  Watch it:    strata monitor --url http://127.0.0.1:8097
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.

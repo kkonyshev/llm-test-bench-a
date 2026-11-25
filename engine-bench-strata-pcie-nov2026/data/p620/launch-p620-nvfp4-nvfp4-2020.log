@@ -1,0 +1,47 @@
+[!] Qwen3.8-Flash-Next (NVFP4) NVFP4: Not enough disk space: about 136 GB needed, 67 GB free. Pick a bigger drive on the Folder step, or a smaller model. It can still start, but the download is likely to stop; free some space first.
+[!] 512K is more than the model was trained on (256K). Setup adds rope scaling for it (experimental); answers may get less reliable.
+    Checking the engine for this computer…
+    Engine 0.1.66 (cuda) is installed.
+    Getting Qwen3.8-Flash-Next (NVFP4) NVFP4 ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+    Checking the engine for this PC
+    The model files are already on this computer (128.9 GB); checking them
+    The model files are on this computer; checking them: 128.9 of 128.9 GB
+    The model files are on this computer; checking them
+    Preparing the draft layer
+    Saving the model's settings
+    Qwen3.8-Flash-Next (NVFP4) NVFP4 is ready.
+    Writing this launch's settings…
+    Settings are saved.
+    Starting the engine and loading the model. The first start can take a few minutes.
+    Loading the model… 15 s
+    Loading the model… 30 s
+    Loading the model… 45 s
+    Loading the model… 60 s
+    Loading the model… 75 s
+    Loading the model… 90 s
+    Loading the model… 105 s
+    Loading the model… 120 s
+    Loading the model… 135 s
+    Loading the model… 150 s
+    Loading the model… 165 s
+    Loading the model… 180 s
+    Loading the model… 195 s
+    Loading the model… 210 s
+    Loading the model… 225 s
+    Loading the model… 240 s
+    Loading the model… 255 s
+    Loading the model… 270 s
+    The model is loaded and answering.
+    Ready: http://127.0.0.1:8097
+    Strata is serving.
+
+Strata is serving.
+  This computer  http://127.0.0.1:8097/v1
+  Anthropic apps http://127.0.0.1:8097   (Claude Code: ANTHROPIC_BASE_URL, no /v1 at the end)
+  Engine log     /home/konstantin/.local/state/strata/launch/nvfp4-512k.engine.log   (follow it: strata logs --follow)
+  Watch it:    strata monitor --url http://127.0.0.1:8097
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.

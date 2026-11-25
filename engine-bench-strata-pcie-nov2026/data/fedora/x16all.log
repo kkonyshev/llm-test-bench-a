@@ -1,0 +1,98 @@
+start 18:43:43
+5, 16
+=== nvfp4 nvfp4 512k  18:43:43
+launch rc=0
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.
+x16-nvfp4-nvfp4-1843: decode mean 82.3 tok/s; prefill 2048=2096.0, 8192=4231.0, 32768=4281.0, 131072=4008.0
+tctl max 86.1 tccd1 max 87.1 fan2 max 1400.0 gpu_temp max 65.0 gpu_w max 274.96
+=== qwen36 q8_0 128k  18:46:10
+launch rc=0
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.
+x16-qwen36-q8_0-1846: decode mean 53.6 tok/s; prefill 2048=3044.0, 8192=3064.0, 32768=2909.0, 131072=1287.0
+tctl max 86.5 tccd1 max 85.8 fan2 max 1406.0 gpu_temp max 66.0 gpu_w max 276.39
+=== qwen iq3_s 64k  18:49:49
+launch rc=0
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.
+x16-qwen-iq3_s-1849: decode mean 87.6 tok/s; prefill 2048=2381.0, 8192=4063.0, 32768=4318.0
+tctl max 86.5 tccd1 max 88.4 fan2 max 1400.0 gpu_temp max 68.0 gpu_w max 284.56
+=== inkling-2-mini ud-q4_k_xl 32k  18:51:39
+launch rc=0
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.
+x16-inkling-2-mini-ud-q4_k_xl-1851: decode mean 83.9 tok/s; prefill 2048=1722.0, 8192=1820.0
+tctl max 86.1 tccd1 max 86.8 fan2 max 1403.0 gpu_temp max 60.0 gpu_w max 217.0
+=== unsloth ud-q4_k_xl 32k  18:54:42
+launch rc=6
+    Loading the model… 15 s
+strata: The server did not become ready (failed: probe_http_400): native ERR lending the prompt path its slots failed: prefill: relayout: the stream failed. Run it again; if it repeats, report the log
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+probe: <urlopen error [Errno 111] Connection refused>
+SKIPPED: never answered
+=== hy4-flash sq-128 128k  19:05:33
+launch rc=0
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.
+x16-hy4-flash-sq-128-1905: decode mean 12.6 tok/s; prefill 2048=354.0, 8192=397.0, 32768=409.0, 131072=309.0
+tctl max 87.2 tccd1 max 88.4 fan2 max 1404.0 gpu_temp max 60.0 gpu_w max 137.75
+ALL DONE 19:17:31

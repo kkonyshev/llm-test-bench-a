@@ -1,0 +1,75 @@
+    Checking the engine for this computer…
+    Engine 0.1.66 (cuda) is installed.
+    Getting Qwen3.8-Flash-Next IQ3_S ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+    Checking the engine for this PC
+    The model files are already on this computer (84.5 GB); checking them
+    The model files are on this computer; checking them: 84.5 of 84.5 GB
+    The model files are on this computer; checking them
+    Preparing the model data for the engine (one time)
+    The model files are on this computer; checking them
+    Preparing the draft layer
+    Saving the model's settings
+    Qwen3.8-Flash-Next IQ3_S is ready.
+    Downloading the DFlash2 drafter (0.34 GB, once)…
+    Downloading the tuned DFlash2 drafter… 0.00 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.01 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.02 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.03 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.04 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.05 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.06 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.07 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.08 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.09 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.10 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.11 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.12 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.13 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.14 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.15 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.16 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.17 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.18 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.19 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.20 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.21 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.22 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.23 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.24 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.25 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.26 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.27 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.28 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.29 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.30 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.31 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.32 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.33 of 0.34 GB
+    Downloading the tuned DFlash2 drafter… 0.34 of 0.34 GB
+    Downloading the tuned DFlash2 drafter…
+    The tuned DFlash2 drafter is ready.
+    The DFlash2 drafter is ready.
+    Writing this launch's settings…
+    Settings are saved.
+    Starting the engine and loading the model. The first start can take a few minutes.
+    Loading the model… 15 s
+    Loading the model… 30 s
+    Loading the model… 45 s
+    Loading the model… 60 s
+    Loading the model… 75 s
+    Loading the model… 90 s
+    The model is loaded and answering.
+    Ready: http://127.0.0.1:8097
+    Strata is serving.
+
+Strata is serving.
+  This computer  http://127.0.0.1:8097/v1
+  Anthropic apps http://127.0.0.1:8097   (Claude Code: ANTHROPIC_BASE_URL, no /v1 at the end)
+  Engine log     /home/konstantin/.local/state/strata/launch/iq3_s-64k.engine.log   (follow it: strata logs --follow)
+[!] DFlash2 answers one request at a time, so Strata set this model to one request at a time.
+  Watch it:    strata monitor --url http://127.0.0.1:8097
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.

@@ -1,0 +1,28 @@
+    Checking the engine for Tencent Hy4-Flash…
+    Engine for Tencent Hy4-Flash 0.1.67 (cuda) is installed.
+    The model already installed here is somewhere else than the folder you gave, so Strata uses the folder you gave and points this launch at it.
+    Getting Tencent Hy4-Flash SQ-128 ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+    Checking the engine for this PC
+    The model files are already on this computer (182.2 GB); checking them
+    The model files are on this computer; checking them: 182.2 of 182.2 GB
+    The model files are on this computer; checking them
+    Saving the model's settings
+    Tencent Hy4-Flash SQ-128 is ready.
+    Writing this launch's settings…
+    Settings are saved.
+    Starting the engine and loading the model. The first start can take a few minutes.
+    Loading the model… 15 s
+    The model is loaded and answering.
+    Ready: http://127.0.0.1:8097
+    Strata is serving.
+
+Strata is serving.
+  This computer  http://127.0.0.1:8097/v1
+  Anthropic apps http://127.0.0.1:8097   (Claude Code: ANTHROPIC_BASE_URL, no /v1 at the end)
+  Engine log     /home/remote-agent/.local/state/strata/launch/sq-128-128k.engine.log   (follow it: strata logs --follow)
+  Watch it:    strata monitor --url http://127.0.0.1:8097
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.

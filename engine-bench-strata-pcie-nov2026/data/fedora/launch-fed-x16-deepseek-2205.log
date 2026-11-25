@@ -1,0 +1,7 @@
+[!] 1M: Not tested yet. A context this long takes graphics memory from the model and reads long prompts slowly.
+    DeepSeek runs on its own engine package, so the Strata engine is not downloaded for it.
+    Getting deepseek41 IST-DAS-2.25bpw ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+strata: The model could not be installed. This copy of Strata Control lacks numpy, jinja2, tqdm. reinstall the Strata app Details: /home/remote-agent/.local/state/strata/launch/ist-das-2-25bpw-1m.setup.log

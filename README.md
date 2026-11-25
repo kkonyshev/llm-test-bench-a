@@ -38,6 +38,10 @@ local-llm-bench/
 - [`engine-bench-strata-nov2026/`](engine-bench-strata-nov2026/): the same speed and reasoning test on
   Strata and Maya for DeepSeek-V4.1-Flash (5090, 5070 Ti, both), and Qwen3.8-Flash-Next quants in Strata
   (NVFP4 GPTQ, NVFP4-NVIDIA, IQ3_S), with Strata's standard benchmark reports.
+- [`engine-bench-strata-pcie-nov2026/`](engine-bench-strata-pcie-nov2026/): the same Strata engines on the
+  Lenovo P620 (RTX 5090, PCIe 4.0 x16, 8-channel DDR4) and on Fedora's RTX 5070 Ti at Gen5 x8 vs Gen5 x16:
+  Qwen3.8-Flash-Next (NVFP4 GPTQ, IQ3_S), Qwen3.6-35B-A3B, Inkling-2-Mini, Hy4-Flash and DeepSeek-V4.1-Flash,
+  with CPU/GPU temperatures, power, RAM and disk read speed (Russian).
 - `HARDWARE.md` also has estimates for the planned Lenovo P620 (Threadripper PRO 3995WX,
   8-channel DDR4).
 

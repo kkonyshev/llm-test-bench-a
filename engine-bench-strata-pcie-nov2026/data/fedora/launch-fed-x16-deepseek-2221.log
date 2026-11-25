@@ -1,0 +1,27 @@
+[!] 1M: Not tested yet. A context this long takes graphics memory from the model and reads long prompts slowly.
+    DeepSeek runs on its own engine package, so the Strata engine is not downloaded for it.
+    Getting deepseek41 IST-DAS-2.25bpw ready (a download may be large; it continues where it stopped if interrupted)…
+    Getting your model ready
+    Checking your computer
+    Getting the helper packages ready
+    Checking the engine for this PC
+    Getting the model files: 273.8 of 273.8 GB
+    Preparing your model for Strata (one time)
+    Saving the model's settings
+    deepseek41 IST-DAS-2.25bpw is ready.
+    Writing this launch's settings…
+    Settings are saved.
+    Starting the engine and loading the model. The first start can take a few minutes.
+    Loading the model… 15 s
+    The model is loaded and answering.
+    Ready: http://127.0.0.1:8097
+    Strata is serving.
+
+Strata is serving.
+  This computer  http://127.0.0.1:8097/v1
+  Anthropic apps http://127.0.0.1:8097   (Claude Code: ANTHROPIC_BASE_URL, no /v1 at the end)
+  Speed          Faster (default on this PC). Faster uses 5 of 6 experts per word: a small quality change, usually not noticeable.
+  Engine log     /home/remote-agent/.local/state/strata/launch/ist-das-2-25bpw-1m.engine.log   (follow it: strata logs --follow)
+  Watch it:    strata monitor --url http://127.0.0.1:8097
+  Connect an app:  strata connect opencode      Stop:  strata launch --stop
+  To keep these settings for next time, add --save-preset NAME.

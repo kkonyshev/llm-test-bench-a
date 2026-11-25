@@ -142,6 +142,9 @@ active experts.
 
 ## Machine 4 (planned): Lenovo P620
 
+> Measured since November 2026: P620 with the RTX 5090 (450 W limit), 8 x 32 GB DDR4-2666 RDIMM. Results on the
+> current Strata engines: [`engine-bench-strata-pcie-nov2026/`](engine-bench-strata-pcie-nov2026/). The estimates below are kept for reference.
+
 Bought from a refurbisher in October 2026 and not measured yet. **All speeds below are estimates**
 from the Machine 3 logs, which split each token's time into a GPU part and a CPU-expert part.
 Expect ±20%.
